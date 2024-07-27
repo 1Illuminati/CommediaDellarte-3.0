@@ -1,0 +1,333 @@
+config-version: 1.0
+debug: false
+enable-vault: false
+
+
+# 만약 설정 값을 변경하고 싶다면 서버를 껏다 켜야합니다.
+area-event:
+  # Player event
+  AsyncPlayerChatEvent:
+    enabled: true
+  PlayerAdvancementDoneEvent:
+    enabled: true
+  PlayerAnimationEvent:
+    enabled: true
+  PlayerArmorStandManipulateEvent:
+    enabled: true
+  PlayerBedEnterEvent:
+    enabled: true
+  PlayerBedLeaveEvent:
+    enabled: true
+  PlayerBucketEmptyEvent:
+    enabled: true
+  PlayerBucketEntityEvent:
+    enabled: true
+  PlayerBucketEvent:
+    enabled: true
+  PlayerBucketFillEvent:
+    enabled: true
+  PlayerBucketFishEvent:
+    enabled: true
+  PlayerChangedMainHandEvent:
+    enabled: true
+  PlayerChangedWorldEvent:
+    enabled: true
+  PlayerChannelEvent:
+    enabled: true
+  PlayerCommandPreprocessEvent:
+    enabled: true
+  PlayerCommandSendEvent:
+    enabled: true
+  PlayerDropItemEvent:
+    enabled: true
+  PlayerEditBookEvent:
+    enabled: true
+  PlayerEggThrowEvent:
+    enabled: true
+  PlayerExpChangeEvent:
+    enabled: true
+  PlayerFishEvent:
+    enabled: true
+  PlayerGameModeChangeEvent:
+    enabled: true
+  PlayerHarvestBlockEvent:
+    enabled: true
+  PlayerInteractAtEntityEvent:
+    enabled: true
+  PlayerInteractEntityEvent:
+    enabled: true
+  PlayerInteractEvent:
+    enabled: true
+  PlayerItemBreakEvent:
+    enabled: true
+  PlayerItemConsumeEvent:
+    enabled: true
+  PlayerItemDamageEvent:
+    enabled: true
+  PlayerItemHeldEvent:
+    enabled: true
+  PlayerItemMendEvent:
+    enabled: true
+  PlayerJoinEvent:
+    enabled: true
+  PlayerKickEvent:
+    enabled: true
+  PlayerLevelChangeEvent:
+    enabled: true
+  PlayerLocaleChangeEvent:
+    enabled: true
+  PlayerLoginEvent:
+    enabled: true
+  PlayerMoveEvent:
+    enabled: true
+  PlayerPickupArrowEvent:
+    enabled: true
+  PlayerPickupItemEvent:
+    enabled: true
+  PlayerPortalEvent:
+    enabled: true
+  PlayerQuitEvent:
+    enabled: true
+  PlayerRecipeDiscoverEvent:
+    enabled: true
+  PlayerRegisterChannelEvent:
+    enabled: true
+  PlayerResourcePackStatusEvent:
+    enabled: true
+  PlayerRespawnEvent:
+    enabled: true
+  PlayerRiptideEvent:
+    enabled: true
+  PlayerShearEntityEvent:
+    enabled: true
+  PlayerStatisticIncrementEvent:
+    enabled: true
+  PlayerSwapHandItemsEvent:
+    enabled: true
+  PlayerTakeLecternBookEvent:
+    enabled: true
+  PlayerTeleportEvent:
+    enabled: true
+  PlayerToggleFlightEvent:
+    enabled: true
+  PlayerToggleSneakEvent:
+    enabled: true
+  PlayerToggleSprintEvent:
+    enabled: true
+  PlayerUnleashEntityEvent:
+    enabled: true
+  PlayerUnregisterChannelEvent:
+    enabled: true
+  PlayerVelocityEvent:
+    enabled: true
+  AreaEffectCloudApplyEvent:
+    enabled: true
+  ArrowBodyCountChangeEvent:
+    enabled: true
+  BatToggleSleepEvent:
+    enabled: true
+  CreatureSpawnEvent:
+    enabled: true
+  CreeperPowerEvent:
+    enabled: true
+  EnderDragonChangePhaseEvent:
+    enabled: true
+  EntityAirChangeEvent:
+    enabled: true
+  EntityBreakDoorEvent:
+    enabled: true
+  EntityBreedEvent:
+    enabled: true
+  EntityChangeBlockEvent:
+    enabled: true
+  EntityCombustByBlockEvent:
+    enabled: true
+  EntityCombustByEntityEvent:
+    enabled: true
+  EntityCombustEvent:
+    enabled: true
+  EntityCreatePortalEvent:
+    enabled: true
+  EntityDamageByBlockEvent:
+    enabled: true
+  EntityDamageByEntityEvent:
+    enabled: true
+  EntityDamageEvent:
+    enabled: true
+  EntityDeathEvent:
+    enabled: true
+  EntityDropItemEvent:
+    enabled: true
+  EntityEnterBlockEvent:
+    enabled: true
+  EntityEnterLoveModeEvent:
+    enabled: true
+  EntityEvent:
+    enabled: true
+  EntityExhaustionEvent:
+    enabled: true
+  EntityExplodeEvent:
+    enabled: true
+  EntityInteractEvent:
+    enabled: true
+  EntityPickupItemEvent:
+    enabled: true
+  EntityPlaceEvent:
+    enabled: true
+  EntityPortalEnterEvent:
+    enabled: true
+  EntityPortalEvent:
+    enabled: true
+  EntityPortalExitEvent:
+    enabled: true
+  EntityPoseChangeEvent:
+    enabled: true
+  EntityPotionEffectEvent:
+    enabled: true
+  EntityRegainHealthEvent:
+    enabled: true
+  EntityResurrectEvent:
+    enabled: true
+  EntityShootBowEvent:
+    enabled: true
+  EntitySpawnEvent:
+    enabled: true
+  EntitySpellCastEvent:
+    enabled: true
+  EntityTameEvent:
+    enabled: true
+  EntityTargetEvent:
+    enabled: true
+  EntityTargetLivingEntityEvent:
+    enabled: true
+  EntityTeleportEvent:
+    enabled: true
+  EntityToggleGlideEvent:
+    enabled: true
+  EntityToggleSwimEvent:
+    enabled: true
+  EntityTransformEvent:
+    enabled: true
+  EntityUnleashEvent:
+    enabled: true
+  ExpBottleEvent:
+    enabled: true
+  ExplosionPrimeEvent:
+    enabled: true
+  FireworkExplodeEvent:
+    enabled: true
+  FoodLevelChangeEvent:
+    enabled: true
+  HorseJumpEvent:
+    enabled: true
+  ItemDespawnEvent:
+    enabled: true
+  ItemMergeEvent:
+    enabled: true
+  ItemSpawnEvent:
+    enabled: true
+  LingeringPotionSplashEvent:
+    enabled: true
+  PiglinBarterEvent:
+    enabled: true
+  PigZapEvent:
+    enabled: true
+  PigZombieAngerEvent:
+    enabled: true
+  PlayerDeathEvent:
+    enabled: true
+  PlayerLeashEntityEvent:
+    enabled: true
+  PotionSplashEvent:
+    enabled: true
+  ProjectileHitEvent:
+    enabled: true
+  ProjectileLaunchEvent:
+    enabled: true
+  SheepDyeWoolEvent:
+    enabled: true
+  SheepRegrowWoolEvent:
+    enabled: true
+  SlimeSplitEvent:
+    enabled: true
+  SpawnerSpawnEvent:
+    enabled: true
+  StriderTemperatureChangeEvent:
+    enabled: true
+  VillagerAcquireTradeEvent:
+    enabled: true
+  VillagerCareerChangeEvent:
+    enabled: true
+  VillagerReplenishTradeEvent:
+    enabled: true
+  BlockBreakEvent:
+    enabled: true
+  BlockBurnEvent:
+    enabled: true
+  BlockCanBuildEvent:
+    enabled: true
+  BlockCookEvent:
+    enabled: true
+  BlockDamageEvent:
+    enabled: true
+  BlockDispenseArmorEvent:
+    enabled: true
+  BlockDispenseEvent:
+    enabled: true
+  BlockDropItemEvent:
+    enabled: true
+  BlockEvent:
+    enabled: true
+  BlockExpEvent:
+    enabled: true
+  BlockExplodeEvent:
+    enabled: true
+  BlockFadeEvent:
+    enabled: true
+  BlockFertilizeEvent:
+    enabled: true
+  BlockFormEvent:
+    enabled: true
+  BlockFromToEvent:
+    enabled: true
+  BlockGrowEvent:
+    enabled: true
+  BlockIgniteEvent:
+    enabled: true
+  BlockMultiPlaceEvent:
+    enabled: true
+  BlockPhysicsEvent:
+    enabled: true
+  BlockPistonEvent:
+    enabled: true
+  BlockPistonExtendEvent:
+    enabled: true
+  BlockPistonRetractEvent:
+    enabled: true
+  BlockPlaceEvent:
+    enabled: true
+  BlockReceiveGameEvent:
+    enabled: true
+  BlockRedstoneEvent:
+    enabled: true
+  BlockShearEntityEvent:
+    enabled: true
+  BlockSpreadEvent:
+    enabled: true
+  CauldronLevelChangeEvent:
+    enabled: true
+  EntityBlockFormEvent:
+    enabled: true
+  FluidLevelChangeEvent:
+    enabled: true
+  LeavesDecayEvent:
+    enabled: true
+  MoistureChangeEvent:
+    enabled: true
+  NotePlayEvent:
+    enabled: true
+  SignChangeEvent:
+    enabled: true
+  SpongeAbsorbEvent:
+    enabled: true
+
