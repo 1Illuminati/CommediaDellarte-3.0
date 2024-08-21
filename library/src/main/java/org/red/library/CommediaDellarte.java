@@ -63,7 +63,11 @@ public final class CommediaDellarte {
         return manager.getAWorld(worldUUID);
     }
 
-    public static <T> InteractiveManager<T> getInteractiveManager(Class<T> managerType) {
+    public static <T> InteractiveManager<T> getInteractiveManager(@NotNull Class<T> managerType) {
         return manager.getInteractiveManager(managerType);
+    }
+
+    public static <T> boolean setInteractiveManager(@NotNull Class<T> clazz, @NotNull InteractiveManager<T> manager) {
+        return CommediaDellarte.manager.setInteractiveManager(clazz, manager);
     }
 }

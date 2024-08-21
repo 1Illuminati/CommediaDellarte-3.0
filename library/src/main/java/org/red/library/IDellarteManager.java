@@ -48,6 +48,8 @@ public interface IDellarteManager {
     A_World getAWorld(UUID worldUUID);
 
     <T> InteractiveManager<T> getInteractiveManager(@NotNull Class<T> clazz);
+
+    <T> boolean setInteractiveManager(@NotNull Class<T> clazz, @NotNull InteractiveManager<T> manager);
     
     Timer createTimer(@NotNull NamespacedKey key, int maxTime, @Nullable Runnable runnable);
 

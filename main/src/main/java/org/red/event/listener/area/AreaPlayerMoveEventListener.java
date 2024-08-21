@@ -6,7 +6,8 @@ import org.red.library.event.area.player.AreaPlayerMoveEvent;
 
 public class AreaPlayerMoveEventListener extends AreaPlayerEventListener<PlayerMoveEvent> {
     public AreaPlayerMoveEventListener() {
-        super(AreaPlayerMoveEvent.class);
+        super(AreaPlayerMoveEvent.class, PlayerMoveEvent.class);
+        register();
     }
 
     @Override

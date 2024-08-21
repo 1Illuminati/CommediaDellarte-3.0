@@ -2,7 +2,8 @@ package org.red.event.listener.area;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.event.Event;
+import org.bukkit.event.*;
+import org.bukkit.plugin.EventExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.red.CommediaDellartePlugin;
 import org.red.event.listener.DellarteListener;
@@ -13,17 +14,26 @@ import org.red.world.A_WorldImpl;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class AreaEventListener<T extends Event> extends DellarteListener {
+public abstract class AreaEventListener<T extends Event> extends DellarteListener implements EventExecutor {
     private final Class<? extends AreaEvent<T>> areaEventClass;
+    private final Class<T> eventClass;
 
-    public AreaEventListener(Class<? extends AreaEvent<T>> clazz) {
-        areaEventClass = clazz;
+    public AreaEventListener(Class<? extends AreaEvent<T>> areaEventClass, Class<T> eventClass) {
+        this.areaEventClass = areaEventClass;
+        this.eventClass = eventClass;
+    }
+
+    public AreaEventListener(Class<? extends AreaEvent<T>> areaEventClass, String classPath) throws ClassNotFoundException {
+        this.areaEventClass = areaEventClass;
+        Class<?> clazz = Class.forName(classPath);
+        this.eventClass = (Class<T>) clazz;
     }
 
     public Class<? extends AreaEvent<T>> getAreaEventClass() {
         return this.areaEventClass;
     }
 
+    @EventHandler
     public abstract void onEvent(T event);
 
     public void runAreaEvent(@NotNull T event, Location... locations) {
@@ -64,8 +74,16 @@ public abstract class AreaEventListener<T extends Event> extends DellarteListene
         boolean isEnabled = CommediaDellartePlugin.instance.getConfig().getBoolean("area-event." +
                 this.getAreaEventClass().getName().replaceAll("area", "") + ".enabled", true);
 
-        if (isEnabled)
-            super.register();
+        if (!isEnabled) return;
+
+        Bukkit.getPluginManager().registerEvent(eventClass, this, EventPriority.NORMAL, this, CommediaDellartePlugin.instance);
+        CommediaDellartePlugin.sendDebugLog("Register Area Event - " + areaEventClass.getName());
     }
 
+    @Override
+    public void execute(@NotNull Listener listener, @NotNull Event event) {
+        if (!eventClass.isAssignableFrom(event.getClass())) return;
+
+        this.onEvent(eventClass.cast(event));
+    }
 }

@@ -5,8 +5,8 @@ import org.bukkit.event.player.PlayerEvent;
 import org.red.library.event.area.player.AreaPlayerEvent;
 
 public class AreaPlayerEventListener<T extends PlayerEvent> extends AreaEventListener<T> {
-    public AreaPlayerEventListener(Class<? extends AreaPlayerEvent<T>> clazz) {
-        super(clazz);
+    public AreaPlayerEventListener(Class<? extends AreaPlayerEvent<T>> clazz, Class<T> eventClass) {
+        super(clazz, eventClass);
         this.register();
     }
 

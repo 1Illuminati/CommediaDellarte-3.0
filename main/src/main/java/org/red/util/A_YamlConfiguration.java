@@ -8,6 +8,7 @@ import org.red.CommediaDellartePlugin;
 import org.red.library.util.A_Data;
 
 import java.io.*;
+import java.nio.file.Files;
 
 /**
  * try catch 두르기 귀찮을때 사용 잘 안사용함
@@ -15,6 +16,7 @@ import java.io.*;
 public class A_YamlConfiguration extends YamlConfiguration {
     public void save(@NotNull File file)  {
         try {
+            Files.createDirectories(file.toPath().getParent());
             boolean delete = file.delete();
             if (!delete) {
                 CommediaDellartePlugin.sendDebugLog(file.getPath() + " is Not Deleted");
@@ -47,11 +49,12 @@ public class A_YamlConfiguration extends YamlConfiguration {
 
     public A_Data loadAData(String fileLoc, @Nullable String yamlLoc) {
         this.load(new A_File(fileLoc));
-        return (A_Data) this.get(yamlLoc == null ? "" : yamlLoc);
+        Object obj = this.get(yamlLoc == null ? "a_data" : yamlLoc, A_Data.newAData());
+        return (A_Data) obj;
     }
 
     public void saveAData(String fileLoc, @Nullable String yamlLoc, A_Data aData) {
-        this.set(yamlLoc == null ? "" : yamlLoc, aData);
+        this.set(yamlLoc == null ? "a_data" : yamlLoc, aData);
         this.save(new A_File(fileLoc));
     }
 }

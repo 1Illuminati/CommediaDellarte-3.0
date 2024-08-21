@@ -10,6 +10,6 @@ import java.io.File;
  */
 public class A_File extends File {
     public A_File(@NotNull String pathname) {
-        super(CommediaDellartePlugin.instance.getDataFolder().getPath() + pathname);
+        super(CommediaDellartePlugin.instance.getDataFolder().getPath() + "/" + pathname);
     }
 }

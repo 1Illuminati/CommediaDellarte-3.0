@@ -6,8 +6,8 @@ import org.red.library.event.area.block.AreaBlockEvent;
 
 public class AreaBlockEventListener<T extends BlockEvent> extends AreaEventListener<T> {
 
-    public AreaBlockEventListener(Class<? extends AreaBlockEvent<T>> clazz) {
-        super(clazz);
+    public AreaBlockEventListener(Class<? extends AreaBlockEvent<T>> clazz, Class<T> eventClass) {
+        super(clazz, eventClass);
         this.register();
     }
 

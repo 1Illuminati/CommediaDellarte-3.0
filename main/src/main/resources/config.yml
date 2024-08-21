@@ -3,7 +3,7 @@ debug: false
 enable-vault: false
 
 
-# 만약 설정 값을 변경하고 싶다면 서버를 껏다 켜야합니다.
+# area-event의 경우 설정 값을 변경하고 싶다면 서버를 껏다 켜야합니다.
 area-event:
   # Player event
   AsyncPlayerChatEvent:
@@ -21,8 +21,6 @@ area-event:
   PlayerBucketEmptyEvent:
     enabled: true
   PlayerBucketEntityEvent:
-    enabled: true
-  PlayerBucketEvent:
     enabled: true
   PlayerBucketFillEvent:
     enabled: true
@@ -297,8 +295,6 @@ area-event:
   BlockMultiPlaceEvent:
     enabled: true
   BlockPhysicsEvent:
-    enabled: true
-  BlockPistonEvent:
     enabled: true
   BlockPistonExtendEvent:
     enabled: true

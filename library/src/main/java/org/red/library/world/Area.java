@@ -56,26 +56,4 @@ public interface Area extends A_DataHolder {
 
     @NotNull
     List<LivingEntity> getLivingEntities();
-
-    default AreaPriority getPriority() {
-        return AreaPriority.NORMAL;
-    }
-
-    enum AreaPriority {
-        WORLD(6),
-        HIGHEST(5),
-        HIGH(4),
-        NORMAL(3),
-        LOW(2),
-        LOWEST(1);
-
-        private final int num;
-        AreaPriority(int num) {
-            this.num = num;
-        }
-
-        public int getNum() {
-            return num;
-        }
-    }
 }

@@ -12,6 +12,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -42,8 +43,9 @@ public class CustomGui implements InventoryHolder {
         return inventory;
     }
 
+    @Nullable
     public Button getButton(int slot) {
-        return this.buttons.get(slot);
+        return this.buttons.getOrDefault(slot, null);
     }
 
     public boolean hasButton(int slot) {
@@ -58,17 +60,11 @@ public class CustomGui implements InventoryHolder {
         this.buttons.remove(slot);
     }
 
-    public void onClick(InventoryClickEvent event) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public void onClick(InventoryClickEvent event) {}
 
-    public void onClose(InventoryCloseEvent event) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public void onClose(InventoryCloseEvent event) {}
 
-    public void onOpen(InventoryOpenEvent event) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public void onOpen(InventoryOpenEvent event) {}
 
     public int getSize() {
         return inventory.getSize();

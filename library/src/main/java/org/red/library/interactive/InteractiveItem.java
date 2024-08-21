@@ -69,6 +69,12 @@ public interface InteractiveItem extends InteractiveObj<ItemStack> {
         return dataContainer.has(getKey(), PersistentDataType.STRING);
     }
 
+    default void removeInteractive(ItemStack stack) {
+        if (!isHasInteractive(stack)) return;
+
+        new ItemBuilder(stack).removePersistentDataContainer(getKey()).build();
+    }
+
     interface InteractiveItemAct extends InteractiveAct<ItemStack> {
 
     }

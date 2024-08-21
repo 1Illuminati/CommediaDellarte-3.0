@@ -57,16 +57,17 @@ public class InteractiveManagerImpl<T> implements InteractiveManager<T> {
     }
 
     @Override
-    public void runInteractiveObj(@NotNull InteractiveObj<T> obj, @NotNull Class<? extends InteractiveAct<T>> act, @NotNull Event event) {
-        InteractiveObjInfo<T> info = this.interactiveObjInfoMaps.getOrDefault(obj.getKey(), null);
+    public void runInteractiveObj(@NotNull T obj, @NotNull InteractiveObj<T> interactiveObj, @NotNull Class<? extends InteractiveAct<T>> act, @NotNull Event event) {
+        InteractiveObjInfo<T> info = this.interactiveObjInfoMaps.getOrDefault(interactiveObj.getKey(), null);
 
-        if (info == null) throw new RuntimeException(new InteractiveException.NotRegisteredInteractiveObj(obj));
+        if (info == null) throw new RuntimeException(new InteractiveException.NotRegisteredInteractiveObj(interactiveObj));
 
         if (info.methodMap.containsKeys(act, event.getClass())) {
             Method method = info.methodMap.get(act, event.getClass());
 
             try {
-                method.invoke(obj, event);
+                method.invoke(interactiveObj, obj, event);
+                CommediaDellartePlugin.sendDebugLog("Run InteractiveObj Key-" + interactiveObj.getKey() + ", Class-" + managerType.getName());
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
@@ -83,7 +84,8 @@ public class InteractiveManagerImpl<T> implements InteractiveManager<T> {
                 Method method = value.methodMap.get(act, event.getClass());
 
                 try {
-                    method.invoke(obj, event);
+                    method.invoke(value.obj, obj, event);
+                    CommediaDellartePlugin.sendDebugLog("Run InteractiveObj Key-" + value.obj.getKey() + ", Class-" + managerType.getName());
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
@@ -106,11 +108,12 @@ public class InteractiveManagerImpl<T> implements InteractiveManager<T> {
             Class<? extends Event> event = actAnnotation.event();
             Class<?>[] classes = method.getParameterTypes();
 
-            if (classes.length != 1)
+            if (classes.length != 2)
                 continue;
 
-            Class<?> clazz = classes[0];
-            if (clazz.isAssignableFrom(event))
+            Class<?> objClass = classes[0];
+            Class<?> eventClass = classes[1];
+            if (objClass.isAssignableFrom(this.managerType) && eventClass.isAssignableFrom(event))
                 objInfo.methodMap.put(act, event, method);
 
         }

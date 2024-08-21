@@ -46,6 +46,12 @@ public final class A_WorldImpl implements A_World, A_DataSaveLoad {
 
     @Override
     @NotNull
+    public World getWorld() {
+        return this.world;
+    }
+
+    @Override
+    @NotNull
     public Block getBlockAt(int i, int i1, int i2) {
         return world.getBlockAt(i, i1, i2);
     }
@@ -294,84 +300,6 @@ public final class A_WorldImpl implements A_World, A_DataSaveLoad {
         return world.strikeLightningEffect(location);
     }
 
-    @Override
-    public @NotNull World getWorld() {
-        return this.world;
-    }
-
-    @Override
-    public @NotNull A_World getAWorld() {
-        return this;
-    }
-
-    @Override
-    public @NotNull NamespacedKey getKey() {
-        return new NamespacedKey(CommediaDellartePlugin.instance, this.getName());
-    }
-
-    @Override
-    public boolean contain(Vector vec) {
-        return true;
-    }
-
-    @Override
-    public boolean contain(Vector start, Vector end) {
-        return true;
-    }
-
-    @Override
-    public boolean contain(Location vec) {
-        World vecWorld = vec.getWorld();
-        if (vecWorld == null) return false;
-        return vecWorld.getName().equals(this.getName());
-    }
-
-    @Override
-    public boolean contain(Location start, Location end) {
-        return contain(start) && contain(end);
-    }
-
-    @Override
-    public boolean contain(Area area) {
-        return area.getAWorld().getName().equals(this.getName());
-    }
-
-    @Override
-    public boolean contain(BoundingBox boundingBox) {
-        return true;
-    }
-
-    @Override
-    public boolean overlap(Vector start, Vector end) {
-        return true;
-    }
-
-    @Override
-    public boolean overlap(Location start, Location end) {
-        return contain(start) && contain(end);
-    }
-
-    @Override
-    public boolean overlap(Area area) {
-        return area.getAWorld().getName().equals(this.getName());
-    }
-
-    @Override
-    public boolean overlap(BoundingBox boundingBox) {
-        return true;
-    }
-
-    @Override
-    public boolean isEventEnable() {
-        return true;
-    }
-
-    @Override
-    public @Nullable BoundingBox getBoundingBox() {
-        return null;
-    }
-
-    @Override
     @NotNull
     public List<Entity> getEntities() {
         return world.getEntities();
@@ -382,12 +310,6 @@ public final class A_WorldImpl implements A_World, A_DataSaveLoad {
     public List<LivingEntity> getLivingEntities() {
         return world.getLivingEntities();
     }
-
-    @Override
-    public AreaPriority getPriority() {
-        return AreaPriority.WORLD;
-    }
-
     @Override
     @NotNull
     @Deprecated

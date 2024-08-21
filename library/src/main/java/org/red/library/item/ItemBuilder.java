@@ -138,6 +138,11 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder removePersistentDataContainer(NamespacedKey key) {
+        persistentDataContainer.remove(key);
+        return this;
+    }
+
     public ItemStack build() {
         return this.setItemMeta(this.itemMeta).itemStack;
     }

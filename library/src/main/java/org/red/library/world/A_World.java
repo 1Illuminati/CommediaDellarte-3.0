@@ -27,7 +27,10 @@ import java.io.File;
 import java.util.*;
 import java.util.function.Predicate;
 
-public interface A_World extends Area, A_DataHolder {
+public interface A_World extends A_DataHolder {
+
+    @NotNull
+    World getWorld();
 
     @NotNull
     BlockState getBlockState(int i, int i1, int i2);

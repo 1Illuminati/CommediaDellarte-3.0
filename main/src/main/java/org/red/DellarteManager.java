@@ -53,13 +53,13 @@ public class DellarteManager implements IDellarteManager {
         entities.forEach((uuid, aEntity) -> {
             yamlConfiguration.set(uuid.toString(), aEntity.getAData());
         });
-        yamlConfiguration.save(new A_File("entities"));
+        yamlConfiguration.save(new A_File("entities.yml"));
         CommediaDellartePlugin.sendDebugLog("Saved Entities Data");
     }
 
     public void entitiesDataLoad() {
         A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
-        yamlConfiguration.load(new A_File("entities"));
+        yamlConfiguration.load(new A_File("entities.yml"));
         yamlConfiguration.getKeys(false).forEach(key -> {
             UUID uuid = UUID.fromString(key);
             Entity entity = Bukkit.getEntity(uuid);
@@ -154,7 +154,16 @@ public class DellarteManager implements IDellarteManager {
 
     @Override
     public <T> InteractiveManager<T> getInteractiveManager(@NotNull Class<T> clazz) {
-        return interactiveManagerHashMap.computeIfAbsent(clazz, p -> new InteractiveManagerImpl<>(clazz));
+        if (!this.interactiveManagerHashMap.containsKey(clazz)) throw new NullPointerException("");
+        return this.interactiveManagerHashMap.get(clazz);
+    }
+
+    @Override
+    public <T> boolean setInteractiveManager(@NotNull Class<T> clazz, @NotNull InteractiveManager<T> manager) {
+        if (this.interactiveManagerHashMap.containsKey(clazz)) return false;
+
+        this.interactiveManagerHashMap.put(clazz, manager);
+        return true;
     }
 
     @Override

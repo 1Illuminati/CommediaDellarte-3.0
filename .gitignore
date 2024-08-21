@@ -8,6 +8,11 @@
 # IntelliJ
 out/
 
+#not library
+country/
+gamyung/
+project/
+
 # Compiled class file
 *.class
 
@@ -111,3 +116,5 @@ buildNumber.properties
 
 # Common working directory
 run/
+/gamyung/
+/gamyung/

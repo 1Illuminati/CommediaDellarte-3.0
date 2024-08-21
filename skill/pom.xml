@@ -9,10 +9,10 @@
         <version>3.0</version>
     </parent>
     <groupId>org.red</groupId>
-    <name>CommediaDellarte_Skill</name>
     <artifactId>skill</artifactId>
     <packaging>jar</packaging>
     <version>1.0</version>
+    <name>CommediaDellarte Skill</name>
 
     <dependencies>
         <dependency>

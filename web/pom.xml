@@ -9,10 +9,10 @@
         <version>3.0</version>
     </parent>
     <groupId>org.red</groupId>
-    <name>CommediaDellarte_Web</name>
     <artifactId>web</artifactId>
     <packaging>jar</packaging>
     <version>1.0</version>
+    <name>CommediaDellarte Web</name>
 
     <dependencies>
         <dependency>

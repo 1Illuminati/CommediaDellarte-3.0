@@ -7,7 +7,7 @@ import org.red.library.event.area.entity.AreaPlayerLeashEntityEvent;
 public class AreaPlayerLeashEntityEventListener extends AreaEventListener<PlayerLeashEntityEvent> {
 
     public AreaPlayerLeashEntityEventListener() {
-        super(AreaPlayerLeashEntityEvent.class);
+        super(AreaPlayerLeashEntityEvent.class, PlayerLeashEntityEvent.class);
         register();
     }
 

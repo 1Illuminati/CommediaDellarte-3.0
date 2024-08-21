@@ -19,7 +19,7 @@ public interface InteractiveManager<T> {
     @Nullable
     InteractiveObj<T> getInteractiveObj(@NotNull NamespacedKey key);
 
-    void runInteractiveObj(@NotNull InteractiveObj<T> obj, @NotNull Class<? extends InteractiveAct<T>> act, @NotNull  Event event);
+    void runInteractiveObj(@NotNull T obj, @NotNull InteractiveObj<T> interactiveObj, @NotNull Class<? extends InteractiveAct<T>> act, @NotNull  Event event);
 
     void runHasInteractiveObj(@NotNull T obj, @NotNull Class<? extends InteractiveAct<T>> act, @NotNull Event event);
 }

@@ -1,4 +1,4 @@
-package org.red.skill;
+package org.red.fun;
 
 public class Skill {
 

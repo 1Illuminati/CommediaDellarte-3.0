@@ -9,11 +9,49 @@
         <version>3.0</version>
     </parent>
     <groupId>org.red</groupId>
-    <name>CommediaDellarte_Main</name>
     <artifactId>main</artifactId>
+    <version>3.0</version>
     <packaging>jar</packaging>
 
+    <build>
+        <finalName>${project.parent.name} ${project.version}</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-jar</id>
+                        <phase>package</phase> <!-- package 단계에서 실행 -->
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>D:/Minecraft/bungeecord_test/lobby/plugins</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>${project.build.finalName}.jar</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
+        <dependency>
+            <groupId>org.red</groupId>
+            <artifactId>library</artifactId>
+            <version>3.0</version>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
@@ -27,15 +65,15 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.red</groupId>
-            <artifactId>library</artifactId>
-            <version>3.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
             <version>5.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.6</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
