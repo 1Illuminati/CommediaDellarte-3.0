@@ -7,35 +7,22 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class A_Data implements ConfigurationSerializable {
-    private final Map<String, DataMap> dataMaps;
-    private final Map<String, CoolTimeMap> coolTimes;
-    public A_Data(Map<String, DataMap> dataMaps, Map<String, CoolTimeMap> coolTimes) {
-        this.dataMaps = dataMaps;
-        this.coolTimes = coolTimes;
-    }
+public record A_Data(Map<String, DataMap> dataMaps,
+                     Map<String, CoolTimeMap> coolTimes) implements ConfigurationSerializable {
 
     public DataMap getDataMap(Plugin plugin) {
         return dataMaps.computeIfAbsent(plugin.getName(), k -> new DataMap());
-    }
-
-    public Map<String, DataMap> getDataMaps() {
-        return dataMaps;
     }
 
     public CoolTimeMap getCoolTime(Plugin plugin) {
         return coolTimes.computeIfAbsent(plugin.getName(), k -> new CoolTimeMap());
     }
 
-    public Map<String, CoolTimeMap> getCoolTimes() {
-        return coolTimes;
-    }
-
     public void copy(A_Data aData) {
         this.dataMaps.clear();
-        if (aData.getDataMaps() != null) this.dataMaps.putAll(aData.getDataMaps());
+        if (aData.dataMaps() != null) this.dataMaps.putAll(aData.dataMaps());
         this.coolTimes.clear();
-        if (aData.getCoolTimes() != null) this.coolTimes.putAll(aData.getCoolTimes());
+        if (aData.coolTimes() != null) this.coolTimes.putAll(aData.coolTimes());
     }
 
     @NotNull

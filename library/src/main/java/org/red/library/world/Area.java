@@ -13,7 +13,7 @@ import org.red.library.util.A_DataHolder;
 
 import java.util.List;
 
-public interface Area extends A_DataHolder {
+public interface Area {
     @NotNull
     World getWorld();
 

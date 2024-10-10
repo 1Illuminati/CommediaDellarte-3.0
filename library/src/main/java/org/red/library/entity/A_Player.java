@@ -20,11 +20,29 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.library.inventory.CustomGui;
 import org.red.library.user.A_OfflinePlayer;
+import org.red.library.user.Wallet;
 
 import java.net.InetSocketAddress;
 import java.util.*;
 
 public interface A_Player extends A_LivingEntity {
+    boolean comparePlayer(String name);
+
+    boolean comparePlayer(UUID uuid);
+
+    boolean comparePlayer(Player player);
+
+    boolean comparePlayer(OfflinePlayer player);
+
+    boolean comparePlayer(A_Player player);
+
+    boolean comparePlayer(A_OfflinePlayer player);
+
+    boolean isIgnoreInvCloseEvent();
+
+    void setIgnoreInvCloseEvent(boolean ignoreInvCloseEvent);
+
+    Wallet getWallet();
 
     ItemStack getPlayerSkull();
 
@@ -51,8 +69,6 @@ public interface A_Player extends A_LivingEntity {
 
     boolean hasPlayerRunnable(NamespacedKey key);
 
-    void closeInventoryIgnoreEvent();
-
     void hideEntity(Entity entity);
 
     boolean isHiddenEntity(Entity entity);
@@ -74,6 +90,14 @@ public interface A_Player extends A_LivingEntity {
     void delayOpenInventory(CustomGui inv);
 
     void delayOpenInventory(CustomGui inv, int delay);
+
+    void delayOpenInventory(Inventory inv, boolean ignoreInvCloseEvent);
+
+    void delayOpenInventory(Inventory inv, int delay, boolean ignoreInvCloseEvent);
+
+    void delayOpenInventory(CustomGui inv, boolean ignoreInvCloseEvent);
+
+    void delayOpenInventory(CustomGui inv, int delay, boolean ignoreInvCloseEvent);
 
     BlockState lastBreakBlock();
 

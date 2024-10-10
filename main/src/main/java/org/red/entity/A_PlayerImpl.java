@@ -39,6 +39,7 @@ import org.red.CommediaDellartePlugin;
 import org.red.library.entity.A_Player;
 import org.red.library.inventory.CustomGui;
 import org.red.library.user.A_OfflinePlayer;
+import org.red.library.user.Wallet;
 import org.red.library.util.A_Data;
 import org.red.user.A_OfflinePlayerImpl;
 import org.red.util.A_DataSaveLoad;
@@ -49,7 +50,7 @@ import java.util.*;
 public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player, A_DataSaveLoad {
     private final A_OfflinePlayerImpl offlinePlayer;
     private final Player player;
-    private boolean isIgnoreInvCloseEvent = false;
+    private boolean ignoreInvCloseEvent = false;
 
     public A_PlayerImpl(A_OfflinePlayerImpl offlinePlayer, Player player) {
         super(player, offlinePlayer.getAData());
@@ -62,6 +63,48 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player, A_Data
         super(player, aData);
         this.offlinePlayer = null;
         this.player = player;
+    }
+
+    public Wallet getWallet() {
+        return this.offlinePlayer.getWallet();
+    }
+
+    @Override
+    public boolean comparePlayer(String name) {
+        return player.getName().equals(name);
+    }
+
+    @Override
+    public boolean comparePlayer(UUID uuid) {
+        return player.getUniqueId().compareTo(uuid) <= 0;
+    }
+
+    @Override
+    public boolean comparePlayer(Player player) {
+        return this.comparePlayer(player.getUniqueId());
+    }
+
+    @Override
+    public boolean comparePlayer(OfflinePlayer player) {
+        return this.comparePlayer(player.getUniqueId());
+    }
+
+    @Override
+    public boolean comparePlayer(A_Player player) {
+        return this.comparePlayer(player.getUniqueId());
+    }
+
+    @Override
+    public boolean comparePlayer(A_OfflinePlayer player) {
+        return this.comparePlayer(player.getUniqueId());
+    }
+
+    public boolean isIgnoreInvCloseEvent() {
+        return this.ignoreInvCloseEvent;
+    }
+
+    public void setIgnoreInvCloseEvent(boolean ignoreInvCloseEvent) {
+        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
     }
 
     @Override
@@ -336,13 +379,7 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player, A_Data
         return false;
     }
 
-    @Override
-    public void closeInventoryIgnoreEvent() {
-        this.isIgnoreInvCloseEvent = true;
-        this.closeInventory();
-    }
 
-    @Override
     public void hideEntity(Entity entity) {
 
     }
@@ -395,6 +432,30 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player, A_Data
     @Override
     public void delayOpenInventory(CustomGui inv, int delay) {
         this.delayOpenInventory(inv.getInventory(), delay);
+    }
+
+    @Override
+    public void delayOpenInventory(Inventory inv, boolean ignoreInvCloseEvent) {
+        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
+        this.delayOpenInventory(inv);
+    }
+
+    @Override
+    public void delayOpenInventory(Inventory inv, int delay, boolean ignoreInvCloseEvent) {
+        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
+        this.delayOpenInventory(inv, delay);
+    }
+
+    @Override
+    public void delayOpenInventory(CustomGui inv, boolean ignoreInvCloseEvent) {
+        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
+        this.delayOpenInventory(inv);
+    }
+
+    @Override
+    public void delayOpenInventory(CustomGui inv, int delay, boolean ignoreInvCloseEvent) {
+        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
+        this.delayOpenInventory(inv, delay);
     }
 
     @Override
@@ -837,8 +898,8 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player, A_Data
     }
 
     @Override
-    public @Nullable InventoryView openInventory(@NotNull Inventory var1, boolean ignoreEvent) {
-        this.isIgnoreInvCloseEvent = ignoreEvent;
+    public @Nullable InventoryView openInventory(@NotNull Inventory var1, boolean ignoreInvCloseEvent) {
+        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
         return player.openInventory(var1);
     }
 
@@ -848,8 +909,8 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player, A_Data
     }
 
     @Override
-    public @Nullable InventoryView openInventory(@NotNull CustomGui var1, boolean ignoreEvent) {
-        this.isIgnoreInvCloseEvent = ignoreEvent;
+    public @Nullable InventoryView openInventory(@NotNull CustomGui var1, boolean ignoreInvCloseEvent) {
+        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
         return player.openInventory(var1.getInventory());
     }
 
@@ -888,8 +949,8 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player, A_Data
     }
 
     @Override
-    public void closeInventory(boolean ignoreInventoryEvent) {
-        this.isIgnoreInvCloseEvent = ignoreInventoryEvent;
+    public void closeInventory(boolean ignoreInvCloseEvent) {
+        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
         this.closeInventory();
     }
 

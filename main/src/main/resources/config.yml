@@ -1,6 +1,7 @@
 config-version: 1.0
 debug: false
 enable-vault: false
+vault-format: "원"
 
 
 # area-event의 경우 설정 값을 변경하고 싶다면 서버를 껏다 켜야합니다.

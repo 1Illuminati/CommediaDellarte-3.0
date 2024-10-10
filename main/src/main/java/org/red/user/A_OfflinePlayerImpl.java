@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.red.CommediaDellartePlugin;
 import org.red.library.entity.A_Player;
 import org.red.library.user.A_OfflinePlayer;
+import org.red.library.user.Wallet;
 import org.red.library.util.A_Data;
 import org.red.library.util.CoolTimeMap;
 import org.red.library.util.DataMap;
@@ -38,6 +39,11 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer, A_DataSaveLoa
     }
 
     @Override
+    public Wallet getWallet() {
+        return this.getDataMap().getClass("wallet", Wallet.class, new Wallet(this, 0));
+    }
+
+    @Override
     public ItemStack getPlayerSkull() {
         return null;
     }
@@ -46,14 +52,14 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer, A_DataSaveLoa
     public void aDataSave() {
         A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
         yamlConfiguration.saveAData("player/" + this.getUniqueId(), null, this.data);
-        CommediaDellartePlugin.sendDebugLog("Saved PlayerData name: " + getName() + " uuid: " + getUniqueId());
+        CommediaDellartePlugin.sendDebugLog("Saved PlayerData name: " + getName() + " uuid: " + getUniqueId() + ".yml");
     }
 
     @Override
     public void aDataLoad() {
         A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
         this.data.copy(yamlConfiguration.loadAData("player/" + this.getUniqueId(), null));
-        CommediaDellartePlugin.sendDebugLog("Loaded PlayerData name: " + getName() + " uuid: " + getUniqueId());
+        CommediaDellartePlugin.sendDebugLog("Loaded PlayerData name: " + getName() + " uuid: " + getUniqueId() + ".yml");
     }
 
     @Override

@@ -7,6 +7,9 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
+import org.red.library.util.finder.FindHandler;
+import org.red.library.util.finder.HasNext;
 
 import java.util.*;
 
@@ -149,11 +152,12 @@ public class DataMap implements ConfigurationSerializable {
     }
 
     public void put(String key, Object value) {
+        if (key.contains(".")) throw new IllegalArgumentException("key cannot contain '.'");
         map.put(key, value);
     }
 
     public DataMap set(String key, Object value) {
-        map.put(key, value);
+        put(key, value);
         return this;
     }
 
@@ -192,5 +196,17 @@ public class DataMap implements ConfigurationSerializable {
     @Override
     public Map<String, Object> serialize() {
         return map;
+    }
+
+    @Nullable
+    public Object finder(String path) {
+        String[] strs = path.split("\\.");
+
+        FindHandler<?> lastFinder = A_Util.objToHandler(strs[0]);
+        for (int index = 1; lastFinder != null && lastFinder.hasNext() && strs.length > index; index++) {
+            lastFinder = ((HasNext) lastFinder).getNext(strs[index]);
+        }
+
+        return lastFinder == null ? null : lastFinder.getData();
     }
 }

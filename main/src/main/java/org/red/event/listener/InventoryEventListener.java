@@ -6,13 +6,15 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.red.library.CommediaDellarte;
+import org.red.library.entity.A_Player;
 import org.red.library.inventory.Button;
 import org.red.library.inventory.CustomGui;
 
 public class InventoryEventListener extends DellarteListener {
 
     @EventHandler
-    public void onClickEvent(InventoryClickEvent event){
+    public void onClickEvent(InventoryClickEvent event) {
         Inventory inv = event.getInventory();
         InventoryHolder holder = inv.getHolder();
 
@@ -31,6 +33,13 @@ public class InventoryEventListener extends DellarteListener {
         InventoryHolder holder = inv.getHolder();
 
         if (!(holder instanceof CustomGui gui)) return;
+
+        A_Player player = CommediaDellarte.getAPlayer(event.getPlayer().getUniqueId());
+
+        if (player != null && player.isIgnoreInvCloseEvent()) {
+            player.setIgnoreInvCloseEvent(false);
+            return;
+        }
 
         gui.onClose(event);
     }

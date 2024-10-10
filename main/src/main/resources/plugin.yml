@@ -4,3 +4,13 @@ main: org.red.CommediaDellartePlugin
 authors: [Inok, RedKiller, Double]
 api-version: 1.17
 description: Final Dellarte
+
+softdepend:
+  - Vault
+
+commands:
+  a_economy:
+    description: Using for Vault
+    aliases: [ae]
+    permission: a.economy
+    usage: "/<command> <player> add/get/set"

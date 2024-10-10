@@ -2,6 +2,7 @@ package org.red.library.item;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
@@ -9,14 +10,13 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.lang.reflect.Field;
+import java.util.*;
 
 public class ItemBuilder {
     protected final ItemStack itemStack;
@@ -145,5 +145,79 @@ public class ItemBuilder {
 
     public ItemStack build() {
         return this.setItemMeta(this.itemMeta).itemStack;
+    }
+
+    public static ItemStack createItem(String display, Material material, List<String> lore, int customModelData, int amount) {
+        return new ItemBuilder(material).setDisplayName(display).setLore(lore).setAmount(amount).setCustomModelData(customModelData).build();
+    }
+
+    public static ItemStack createItem(String display, Material material, List<String> lore, int customModelData) {
+        return createItem(display, material, lore, customModelData, 1);
+    }
+
+    public static ItemStack createItem(String display, Material material, String lore, int customModelData, int amount) {
+        return new ItemBuilder(material).setDisplayName(display).setLore(lore).setAmount(amount).setCustomModelData(customModelData).build();
+    }
+
+    public static ItemStack createItem(String display, Material material, String lore, int customModelData) {
+        return createItem(display, material, lore, customModelData, 1);
+    }
+
+    public static ItemStack createItem(String display, Material material, List<String> lore) {
+        return new ItemBuilder(material).setDisplayName(display).setLore(lore).build();
+    }
+
+    public static ItemStack createItem(String display, Material material, String lore) {
+        return new ItemBuilder(material).setDisplayName(display).setLore(lore).build();
+    }
+
+    public static ItemStack createItem(String display, Material material) {
+        return new ItemBuilder(material).setDisplayName(display).build();
+    }
+
+    public static ItemStack air() {
+        return new ItemStack(Material.AIR);
+    }
+
+    public ItemStack getSkullByUrl(String url) {
+        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+        if (url.isEmpty()) {
+            return skull;
+        }
+
+        SkullMeta skullMeta = (SkullMeta)skull.getItemMeta();
+
+        StringBuilder builder = new StringBuilder();
+        url.chars().filter(c -> (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')).forEach(c -> {
+            if (builder.length() != 0 && builder.length() / 4 == 0) builder.append("-");
+            builder.append((char) c);
+        });
+
+        try {
+            Class<?> gameProfile = Class.forName("com.mojang.authlib.GameProfile");
+            Class<?> property = Class.forName("com.mojang.authlib.properties.Property");
+            Object profile = gameProfile.getConstructor(UUID.class, String.class).newInstance(UUID.fromString(builder.toString()), null);
+            byte[] encodedData = Base64.getEncoder().encode(String.format("{textures:{SKIN:{url:\"%s\"}}}", url).getBytes());
+            gameProfile.getMethod("getProperties").invoke(profile).getClass().getMethod("put", Object.class, Object.class).invoke(gameProfile.getMethod("getProperties").invoke(profile), "textures", property.getConstructor(String.class, String.class).newInstance("textures", new String(encodedData)));
+            Field profileField = skullMeta.getClass().getDeclaredField("profile");
+            profileField.setAccessible(true);
+            profileField.set(skullMeta, profile);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
+
+        skull.setItemMeta(skullMeta);
+        return skull;
+    }
+    public ItemStack getSkull(OfflinePlayer player) {
+        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+        if (player == null) {
+            return skull;
+        }
+
+        SkullMeta skullMeta = (SkullMeta)skull.getItemMeta();
+        skullMeta.setOwningPlayer(player);
+        skull.setItemMeta(skullMeta);
+        return skull;
     }
 }

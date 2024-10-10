@@ -32,6 +32,16 @@ public interface A_World extends A_DataHolder {
     @NotNull
     World getWorld();
 
+    boolean compareWorld(@NotNull String world);
+
+    boolean compareWorld(@NotNull UUID worldUUID);
+
+    boolean compareWorld(@NotNull World world);
+
+    boolean compareWorld(@NotNull Location location);
+
+    boolean compareWorld(@NotNull A_World world);
+
     @NotNull
     BlockState getBlockState(int i, int i1, int i2);
 

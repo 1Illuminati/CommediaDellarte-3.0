@@ -15,12 +15,12 @@ public class ItemStackHandler extends FindHandler<ItemStack> implements HasNext 
         if (meta == null) return null;
 
         return switch (key) {
-            case "Amount" -> new FindHandler<>(getData().getAmount());
-            case "Type" -> new FindHandler<>(getData().getType());
-            case "Durability" -> new FindHandler<>(getData().getDurability());
-            case "Display" -> meta.hasDisplayName() ? new FindHandler<>(meta.getDisplayName()) : null;
-            case "Lore" -> meta.hasLore() ? new FindHandler<>(meta.getLore()) : null;
-            case "CustomModelData" -> meta.hasCustomModelData() ? new FindHandler<>(meta.getCustomModelData()) : null;
+            case "amount" -> new FindHandler<>(getData().getAmount());
+            case "type" -> new FindHandler<>(getData().getType());
+            case "durability" -> new FindHandler<>(getData().getDurability());
+            case "display" -> meta.hasDisplayName() ? new FindHandler<>(meta.getDisplayName()) : null;
+            case "lore" -> meta.hasLore() ? new FindHandler<>(meta.getLore()) : null;
+            case "customModelData" -> meta.hasCustomModelData() ? new FindHandler<>(meta.getCustomModelData()) : null;
             default -> null;
         };
     }

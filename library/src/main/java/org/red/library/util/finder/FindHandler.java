@@ -13,4 +13,8 @@ public class FindHandler<T> {
     public T getData() {
         return this.data;
     }
+
+    public boolean hasNext() {
+        return this instanceof HasNext;
+    }
 }

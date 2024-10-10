@@ -135,7 +135,7 @@ public class DellarteManager implements IDellarteManager {
         return worlds.computeIfAbsent(world.getUID(), uuid -> {
            A_WorldImpl aWorld = new A_WorldImpl(world, A_Data.newAData());
            aWorld.aDataLoad();
-            CommediaDellartePlugin.sendDebugLog("Created World name: " + world.getName() + " uuid: " + world.getUID());
+           CommediaDellartePlugin.sendDebugLog("Created World name: " + world.getName() + " uuid: " + world.getUID());
            return aWorld;
         });
     }

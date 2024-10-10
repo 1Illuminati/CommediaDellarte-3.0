@@ -8,6 +8,8 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.red.compatibility.vault.A_Vault;
+import org.red.command.A_VaultCommand;
 import org.red.event.listener.InteractiveItemListener;
 import org.red.event.listener.InteractiveTileListener;
 import org.red.event.listener.InventoryEventListener;
@@ -18,6 +20,7 @@ import org.red.library.event.FirstLoadEvent;
 import org.red.library.event.area.block.*;
 import org.red.library.event.area.entity.*;
 import org.red.library.event.area.player.*;
+import org.red.library.user.Wallet;
 import org.red.library.util.A_Data;
 import org.red.library.util.CoolTimeMap;
 import org.red.library.util.DataMap;
@@ -41,6 +44,10 @@ public class CommediaDellartePlugin extends JavaPlugin {
         this.saveDefaultConfig();
         configurationSerializationSetting();
         getLogger().info("CommediaDellartePlugin enabled");
+        Config.loadConfig(this.getConfig());
+        setSoftPlugin();
+        getCommand("a_economy").setExecutor(new A_VaultCommand());
+
 
         Bukkit.getScheduler().runTaskLater(this, () -> {
             manager = new DellarteManager();
@@ -60,11 +67,20 @@ public class CommediaDellartePlugin extends JavaPlugin {
         getLogger().info("CommediaDellartePlugin disabled");
     }
 
+    private void setSoftPlugin() {
+        if(softPluginCheck("Vault")) A_Vault.setEconomy();
+    }
+
+    private boolean softPluginCheck(String plName) {
+        return Bukkit.getPluginManager().getPlugin(plName) != null;
+    }
+
     private void configurationSerializationSetting() {
         ConfigurationSerialization.registerClass(DataMap.class);
         ConfigurationSerialization.registerClass(CoolTimeMap.class);
         ConfigurationSerialization.registerClass(A_Data.class);
         ConfigurationSerialization.registerClass(NamespaceMap.class);
+        ConfigurationSerialization.registerClass(Wallet.class);
         sendDebugLog("Setting All ConfigurationSerialization");
     }
 

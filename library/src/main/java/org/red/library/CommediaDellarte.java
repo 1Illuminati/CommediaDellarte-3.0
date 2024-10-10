@@ -1,7 +1,9 @@
 package org.red.library;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -13,6 +15,8 @@ import org.red.library.entity.A_LivingEntity;
 import org.red.library.entity.A_Player;
 import org.red.library.interactive.InteractiveManager;
 import org.red.library.user.A_OfflinePlayer;
+import org.red.library.util.BossBarTimer;
+import org.red.library.util.Timer;
 import org.red.library.world.A_World;
 
 import java.util.UUID;
@@ -69,5 +73,13 @@ public final class CommediaDellarte {
 
     public static <T> boolean setInteractiveManager(@NotNull Class<T> clazz, @NotNull InteractiveManager<T> manager) {
         return CommediaDellarte.manager.setInteractiveManager(clazz, manager);
+    }
+
+    public static Timer createTimer(@NotNull NamespacedKey key, int maxTime, @Nullable Runnable runnable) {
+        return manager.createTimer(key, maxTime, runnable);
+    }
+
+    public static BossBarTimer createBossBarTimer(NamespacedKey key, int maxTime, @Nullable Runnable runnable, BossBar... bossBars) {
+        return manager.createBossBarTimer(key, maxTime, runnable, bossBars);
     }
 }

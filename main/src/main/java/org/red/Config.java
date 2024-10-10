@@ -7,6 +7,7 @@ import java.util.Arrays;
 public enum Config {
     VERSION("config-version"),
     VAULT("enable-vault"),
+    VAULT_FORMAT("vault-format"),
     DEBUG("debug");
 
     private final String path;

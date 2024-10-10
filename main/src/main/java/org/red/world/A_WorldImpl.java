@@ -51,6 +51,31 @@ public final class A_WorldImpl implements A_World, A_DataSaveLoad {
     }
 
     @Override
+    public boolean compareWorld(@NotNull String world) {
+        return this.world.getName().equals(world);
+    }
+
+    @Override
+    public boolean compareWorld(@NotNull UUID worldUUID) {
+        return this.world.getUID().compareTo(worldUUID) <= 0;
+    }
+
+    @Override
+    public boolean compareWorld(@NotNull World world) {
+        return compareWorld(world.getUID());
+    }
+
+    @Override
+    public boolean compareWorld(@NotNull Location location) {
+        return location.getWorld() != null && compareWorld(location.getWorld());
+    }
+
+    @Override
+    public boolean compareWorld(@NotNull A_World world) {
+        return compareWorld(world.getWorld());
+    }
+
+    @Override
     @NotNull
     public Block getBlockAt(int i, int i1, int i2) {
         return world.getBlockAt(i, i1, i2);
@@ -1325,13 +1350,13 @@ public final class A_WorldImpl implements A_World, A_DataSaveLoad {
     public void aDataSave() {
         A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
         yamlConfiguration.saveAData("world/" + this.getName(), null, this.data);
-        CommediaDellartePlugin.sendDebugLog("Saved PlayerData name: " + getName() + " uuid: " + getUID());
+        CommediaDellartePlugin.sendDebugLog("Saved PlayerData name: " + getName() + " uuid: " + getUID() + ".yml");
     }
 
     @Override
     public void aDataLoad() {
         A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
         this.data.copy(yamlConfiguration.loadAData("world/" + this.getName(), null));
-        CommediaDellartePlugin.sendDebugLog("Loaded PlayerData name: " + getName() + " uuid: " + getUID());
+        CommediaDellartePlugin.sendDebugLog("Loaded PlayerData name: " + getName() + " uuid: " + getUID() + ".yml");
     }
 }
