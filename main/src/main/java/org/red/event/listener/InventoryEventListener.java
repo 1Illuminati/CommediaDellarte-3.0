@@ -19,6 +19,7 @@ public class InventoryEventListener extends DellarteListener {
         InventoryHolder holder = inv.getHolder();
 
         if (!(holder instanceof CustomGui gui)) return;
+        if (gui.getAllClickCancel()) event.setCancelled(true);
 
         gui.onClick(event);
 

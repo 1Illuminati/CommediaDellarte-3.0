@@ -179,7 +179,7 @@ public class ItemBuilder {
         return new ItemStack(Material.AIR);
     }
 
-    public ItemStack getSkullByUrl(String url) {
+    public static ItemStack getSkullByUrl(String url) {
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         if (url.isEmpty()) {
             return skull;
@@ -209,7 +209,7 @@ public class ItemBuilder {
         skull.setItemMeta(skullMeta);
         return skull;
     }
-    public ItemStack getSkull(OfflinePlayer player) {
+    public static ItemStack getSkull(OfflinePlayer player) {
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         if (player == null) {
             return skull;

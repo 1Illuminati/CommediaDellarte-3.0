@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 public class CustomGui implements InventoryHolder {
     private final Inventory inventory;
     private final Map<Integer, Button> buttons = new HashMap<>();
+    private boolean allClickCancel = false;
 
     public CustomGui(@NotNull InventoryType type) {
         inventory = Bukkit.createInventory(this, type);
@@ -41,6 +42,14 @@ public class CustomGui implements InventoryHolder {
     @Override
     public Inventory getInventory() {
         return inventory;
+    }
+
+    public void setAllClickCancel(boolean allClickCancel) {
+        this.allClickCancel = allClickCancel;
+    }
+
+    public boolean getAllClickCancel() {
+        return this.allClickCancel;
     }
 
     @Nullable
@@ -91,6 +100,20 @@ public class CustomGui implements InventoryHolder {
         inventory.setItem(i, itemStack);
         this.setButton(i, button);
         return this.getItem(i);
+    }
+
+    public Map<Integer, ItemStack> setItems(ItemStack itemStack, Integer... slots) {
+        Map<Integer, ItemStack> map = new HashMap<>();
+        for (int i : slots)
+            map.put(i, setItem(i, itemStack));
+        return map;
+    }
+
+    public Map<Integer, ItemStack> setItems(ItemStack itemStack, Button button, Integer... slots) {
+        Map<Integer, ItemStack> map = new HashMap<>();
+        for (int i : slots)
+            map.put(i, setItem(i, itemStack, button));
+        return map;
     }
 
     public ItemStack fillItem(int startSlot, int endSlot, ItemStack itemStack) {
