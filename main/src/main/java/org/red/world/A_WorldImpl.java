@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.CommediaDellartePlugin;
+import org.red.library.CommediaDellarte;
 import org.red.library.util.A_Data;
 import org.red.library.util.CoolTimeMap;
 import org.red.library.util.DataMap;
@@ -36,12 +37,10 @@ import java.util.function.Predicate;
 
 public final class A_WorldImpl implements A_World, A_DataSaveLoad {
     private final World world;
-    private final A_Data data;
     private final Map<Plugin, List<Area>> areaMap = new HashMap<>();
 
-    public A_WorldImpl(World world, A_Data data) {
+    public A_WorldImpl(World world) {
         this.world = world;
-        this.data = data;
     }
 
     @Override
@@ -1328,7 +1327,7 @@ public final class A_WorldImpl implements A_World, A_DataSaveLoad {
 
     @Override
     public DataMap getDataMap(Plugin plugin) {
-        return this.data.getDataMap(plugin);
+        return CommediaDellarte.getPluginData(plugin).getWorldDataMap(getName());
     }
 
     @Override
@@ -1338,12 +1337,7 @@ public final class A_WorldImpl implements A_World, A_DataSaveLoad {
 
     @Override
     public CoolTimeMap getCoolTime(Plugin plugin) {
-        return this.data.getCoolTime(plugin);
-    }
-
-    @Override
-    public A_Data getAData() {
-        return data;
+        return CommediaDellarte.getPluginData(plugin).getWorldCoolTimeMap(getName());
     }
 
     @Override

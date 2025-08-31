@@ -8,6 +8,13 @@ public enum Config {
     VERSION("config-version"),
     VAULT("enable-vault"),
     VAULT_FORMAT("vault-format"),
+    DATABASE_ENABLED("database.enable"),
+    DATABASE_TYPE("database.type"),
+    DATABASE_HOST("database.host"),
+    DATABASE_PORT("database.port"),
+    DATABASE_NAME("database.name"),
+    DATABASE_USER("database.user"),
+    DATABASE_PASSWORD("database.password"),
     DEBUG("debug");
 
     private final String path;

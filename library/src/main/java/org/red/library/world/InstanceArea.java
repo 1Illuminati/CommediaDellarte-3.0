@@ -11,7 +11,6 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.library.CommediaDellarte;
-import org.red.library.util.A_Data;
 import org.red.library.util.A_DataHolder;
 import org.red.library.util.CoolTimeMap;
 import org.red.library.util.DataMap;
@@ -24,18 +23,12 @@ public class InstanceArea implements Area, A_DataHolder {
     private final String name;
     private final BoundingBox box;
     private final A_World world;
-    private final A_Data aData;
 
     public InstanceArea(String name, Plugin plugin, World world, Vector start, Vector end) {
-        this(name, plugin, world, start, end, A_Data.newAData());
-    }
-
-    public InstanceArea(String name, Plugin plugin, World world, Vector start, Vector end, A_Data aData) {
         this.plugin = plugin;
         this.name = name;
         this.box = BoundingBox.of(start, end);
         this.world = CommediaDellarte.getAWorld(world);
-        this.aData = aData;
     }
 
     @Override
@@ -140,7 +133,7 @@ public class InstanceArea implements Area, A_DataHolder {
 
     @Override
     public DataMap getDataMap(Plugin plugin) {
-        return this.aData.getDataMap(plugin);
+        return CommediaDellarte.getPluginData(plugin).getDataMap("area", name);
     }
 
     @Override
@@ -150,11 +143,6 @@ public class InstanceArea implements Area, A_DataHolder {
 
     @Override
     public CoolTimeMap getCoolTime(Plugin plugin) {
-        return this.aData.getCoolTime(plugin);
-    }
-
-    @Override
-    public A_Data getAData() {
-        return this.aData;
+        return CommediaDellarte.getPluginData(plugin).getCoolTimeMap("area", name);
     }
 }

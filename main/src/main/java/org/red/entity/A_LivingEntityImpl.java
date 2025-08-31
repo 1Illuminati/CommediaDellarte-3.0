@@ -26,7 +26,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.library.entity.A_LivingEntity;
-import org.red.library.util.A_Data;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,8 +35,8 @@ import java.util.UUID;
 public class A_LivingEntityImpl extends A_EntityImpl implements A_LivingEntity {
     private final LivingEntity entity;
 
-    public A_LivingEntityImpl(LivingEntity entity, A_Data data) {
-        super(entity, data);
+    public A_LivingEntityImpl(LivingEntity entity) {
+        super(entity);
         this.entity = entity;
     }
 

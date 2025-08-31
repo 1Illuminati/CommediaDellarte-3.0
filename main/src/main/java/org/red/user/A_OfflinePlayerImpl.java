@@ -8,6 +8,7 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.CommediaDellartePlugin;
+import org.red.library.CommediaDellarte;
 import org.red.library.entity.A_Player;
 import org.red.library.user.A_OfflinePlayer;
 import org.red.library.user.Wallet;
@@ -222,27 +223,26 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer, A_DataSaveLoa
     }
 
     @Override
+    @NotNull
     public DataMap getDataMap() {
-        return this.getDataMap(CommediaDellartePlugin.instance);
+        return getDataMap(CommediaDellartePlugin.instance);
     }
 
     @Override
+    @NotNull
     public DataMap getDataMap(Plugin plugin) {
-        return this.data.getDataMap(plugin);
+        return CommediaDellarte.getPluginData(plugin).getPlayerDataMap(this);
     }
 
     @Override
+    @NotNull
     public CoolTimeMap getCoolTime() {
-        return this.getCoolTime(CommediaDellartePlugin.instance);
+        return getCoolTime(CommediaDellartePlugin.instance);
     }
 
     @Override
+    @NotNull
     public CoolTimeMap getCoolTime(Plugin plugin) {
-        return this.data.getCoolTime(plugin);
-    }
-
-    @Override
-    public A_Data getAData() {
-        return this.data;
+        return CommediaDellarte.getPluginData(plugin).getPlayerCoolTimeMap(this);
     }
 }

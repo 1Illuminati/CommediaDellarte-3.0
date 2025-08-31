@@ -8,22 +8,24 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.entity.A_EntityImpl;
 import org.red.entity.A_LivingEntityImpl;
 import org.red.entity.A_NPCImpl;
 import org.red.entity.A_PlayerImpl;
-import org.red.interactive.InteractiveManagerImpl;
 import org.red.library.IDellarteManager;
 import org.red.library.entity.A_Entity;
 import org.red.library.interactive.InteractiveManager;
 import org.red.library.util.A_Data;
 import org.red.library.util.BossBarTimer;
 import org.red.library.util.Timer;
+import org.red.library.util.PluginData;
 import org.red.library.world.A_World;
 import org.red.user.A_OfflinePlayerImpl;
 import org.red.util.A_File;
+import org.red.util.A_PluginData;
 import org.red.util.A_YamlConfiguration;
 import org.red.util.BossBarTimerImpl;
 import org.red.util.TimerImpl;
@@ -37,8 +39,22 @@ public class DellarteManager implements IDellarteManager {
     private final HashMap<UUID, A_PlayerImpl> players = new HashMap<>();
     private final HashMap<UUID, A_OfflinePlayerImpl> offlinePlayers = new HashMap<>();
     private final HashMap<UUID, A_WorldImpl> worlds = new HashMap<>();
-    private final HashMap<UUID, A_EntityImpl> entities = new HashMap<>();
+    private final HashMap<UUID, A_EntityImpl> entities = new HashMap<>(); 
     private final HashMap<Class<?>, InteractiveManager> interactiveManagerHashMap = new HashMap<>();
+
+    private final HashMap<String, PluginData> pluginDataMap = new HashMap<>();
+
+    @Override
+    public PluginData getPluginData(Plugin plugin) {
+        return pluginDataMap.computeIfAbsent(plugin.getName(), k -> A_PluginData.newPluginData(plugin));
+    }
+
+    public void savePluginData(Plugin plugin) {
+        PluginData pluginData = pluginDataMap.get(plugin.getName());
+        CommediaDellartePlugin.sendDebugLog("Saving Plugin Data for " + plugin.getName());
+
+        
+    }
 
     public void allDataSave() {
         offlinePlayers.values().forEach(A_OfflinePlayerImpl::aDataSave);
@@ -57,7 +73,7 @@ public class DellarteManager implements IDellarteManager {
         CommediaDellartePlugin.sendDebugLog("Saved Entities Data");
     }
 
-    public void entitiesDataLoad() {
+    public void entitiesDataLoad() {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
         A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
         yamlConfiguration.load(new A_File("entities.yml"));
         yamlConfiguration.getKeys(false).forEach(key -> {
@@ -88,7 +104,7 @@ public class DellarteManager implements IDellarteManager {
     public A_PlayerImpl getAPlayer(@NotNull Player player) {
         if (player.hasMetadata("NPC")) {
             return NPCs.computeIfAbsent(player.getUniqueId(), uuid -> {
-                A_NPCImpl aNPC = new A_NPCImpl(player, A_Data.newAData());
+                A_NPCImpl aNPC = new A_NPCImpl(player);
                 CommediaDellartePlugin.sendDebugLog("Created Npc name: " + player.getName() + " uuid: " + uuid);
                 return aNPC;
             });
@@ -121,19 +137,19 @@ public class DellarteManager implements IDellarteManager {
     public A_EntityImpl getAEntity(@NotNull Entity entity) {
         if (entity instanceof Player player) return getAPlayer(player);
         if (entity instanceof LivingEntity livingEntity) return getALivingEntity(livingEntity);
-        return this.entities.computeIfAbsent(entity.getUniqueId(), uuid -> new A_EntityImpl(entity, A_Data.newAData()));
+        return this.entities.computeIfAbsent(entity.getUniqueId(), uuid -> new A_EntityImpl(entity);
     }
 
     @Override
     public A_LivingEntityImpl getALivingEntity(@NotNull LivingEntity entity) {
         if (entity instanceof Player player) return getAPlayer(player);
-        return (A_LivingEntityImpl) this.entities.computeIfAbsent(entity.getUniqueId(), uuid -> new A_LivingEntityImpl(entity, A_Data.newAData()));
+        return (A_LivingEntityImpl) this.entities.computeIfAbsent(entity.getUniqueId(), uuid -> new A_LivingEntityImpl(entity));
     }
 
     @Override
     public A_WorldImpl getAWorld(@NotNull World world) {
         return worlds.computeIfAbsent(world.getUID(), uuid -> {
-           A_WorldImpl aWorld = new A_WorldImpl(world, A_Data.newAData());
+           A_WorldImpl aWorld = new A_WorldImpl(world);
            aWorld.aDataLoad();
            CommediaDellartePlugin.sendDebugLog("Created World name: " + world.getName() + " uuid: " + world.getUID());
            return aWorld;

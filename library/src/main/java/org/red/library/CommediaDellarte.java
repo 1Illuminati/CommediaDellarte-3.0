@@ -18,6 +18,7 @@ import org.red.library.user.A_OfflinePlayer;
 import org.red.library.util.BossBarTimer;
 import org.red.library.util.Timer;
 import org.red.library.world.A_World;
+import org.red.library.util.PluginData;
 
 import java.util.UUID;
 
@@ -81,5 +82,9 @@ public final class CommediaDellarte {
 
     public static BossBarTimer createBossBarTimer(NamespacedKey key, int maxTime, @Nullable Runnable runnable, BossBar... bossBars) {
         return manager.createBossBarTimer(key, maxTime, runnable, bossBars);
+    }
+
+    public static PluginData getPluginData(Plugin plugin) {
+        return manager.getPluginData(plugin);
     }
 }
