@@ -36,11 +36,14 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.CommediaDellartePlugin;
+import org.red.library.CommediaDellarte;
 import org.red.library.entity.A_Player;
 import org.red.library.inventory.CustomGui;
 import org.red.library.user.A_OfflinePlayer;
 import org.red.library.user.Wallet;
 import org.red.library.util.A_Data;
+import org.red.library.util.CoolTimeMap;
+import org.red.library.util.DataMap;
 import org.red.user.A_OfflinePlayerImpl;
 import org.red.util.A_DataSaveLoad;
 
@@ -53,14 +56,14 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player, A_Data
     private boolean ignoreInvCloseEvent = false;
 
     public A_PlayerImpl(A_OfflinePlayerImpl offlinePlayer, Player player) {
-        super(player, offlinePlayer.getAData());
+        super(player);
         offlinePlayer.updateOfflinePlayer();
         this.offlinePlayer = offlinePlayer;
         this.player = player;
     }
 
-    protected A_PlayerImpl(A_Data aData, Player player) {
-        super(player, aData);
+    protected A_PlayerImpl(Player player) {
+        super(player);
         this.offlinePlayer = null;
         this.player = player;
     }

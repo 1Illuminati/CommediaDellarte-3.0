@@ -13,8 +13,8 @@
         <module>library</module>
         <module>web</module>
         <module>main</module>
+        <module>addon</module>
         <module>test</module>
-        <module>skill</module>
     </modules>
 
     <build>
@@ -42,6 +42,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spigot-api.version>1.17.1-R0.1-SNAPSHOT</spigot-api.version>
+        <folia-api.version>1.20.1-R0.1-SNAPSHOT</folia-api.version>
         <jackson.version>2.17.0</jackson.version>
     </properties>
     <dependencyManagement>
@@ -81,6 +82,10 @@
         <repository>
             <id>nexus</id>
             <url>https://mvn.lumine.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
     </repositories>
 </project>

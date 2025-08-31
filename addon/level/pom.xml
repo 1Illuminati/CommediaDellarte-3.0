@@ -4,15 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org</groupId>
-        <artifactId>red</artifactId>
-        <version>3.0</version>
+        <groupId>org.red</groupId>
+        <artifactId>addon</artifactId>
+        <version>1.0</version>
     </parent>
-    <groupId>org.red</groupId>
-    <artifactId>skill</artifactId>
+    <groupId>org.red.addon</groupId>
+    <artifactId>level</artifactId>
     <packaging>jar</packaging>
     <version>1.0</version>
-    <name>CommediaDellarte Skill</name>
+    <name>CommediaDellarte Addon-Level</name>
 
     <dependencies>
         <dependency>
@@ -26,6 +26,12 @@
             <artifactId>annotations</artifactId>
             <version>20.1.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.red</groupId>
+            <artifactId>library</artifactId>
+            <version>3.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

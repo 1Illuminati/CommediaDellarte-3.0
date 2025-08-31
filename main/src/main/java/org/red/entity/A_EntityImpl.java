@@ -25,9 +25,9 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.CommediaDellartePlugin;
+import org.red.library.CommediaDellarte;
 import org.red.library.entity.A_Entity;
 import org.red.library.entity.A_LivingEntity;
-import org.red.library.util.A_Data;
 import org.red.library.util.CoolTimeMap;
 import org.red.library.util.DataMap;
 
@@ -38,11 +38,9 @@ import java.util.UUID;
 
 public class A_EntityImpl implements A_Entity {
     private final Entity entity;
-    private final A_Data data;
 
-    public A_EntityImpl(Entity entity, A_Data data) {
+    public A_EntityImpl(Entity entity) {
         this.entity = entity;
-        this.data = data;
     }
 
     @Override
@@ -571,27 +569,26 @@ public class A_EntityImpl implements A_Entity {
     }
 
     @Override
+    @NotNull
     public DataMap getDataMap() {
         return getDataMap(CommediaDellartePlugin.instance);
     }
 
     @Override
+    @NotNull
     public DataMap getDataMap(Plugin plugin) {
-        return data.getDataMap(plugin);
+        return CommediaDellarte.getPluginData(plugin).getEntityDataMap(this);
     }
 
     @Override
+    @NotNull
     public CoolTimeMap getCoolTime() {
         return getCoolTime(CommediaDellartePlugin.instance);
     }
 
     @Override
+    @NotNull
     public CoolTimeMap getCoolTime(Plugin plugin) {
-        return data.getCoolTime(plugin);
-    }
-
-    @Override
-    public A_Data getAData() {
-        return this.data;
+        return CommediaDellarte.getPluginData(plugin).getEntityCoolTimeMap(this);
     }
 }

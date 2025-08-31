@@ -18,6 +18,7 @@ import org.red.library.user.A_OfflinePlayer;
 import org.red.library.util.BossBarTimer;
 import org.red.library.util.Timer;
 import org.red.library.world.A_World;
+import org.red.library.util.PluginData;
 
 import java.util.UUID;
 
@@ -54,4 +55,6 @@ public interface IDellarteManager {
     Timer createTimer(@NotNull NamespacedKey key, int maxTime, @Nullable Runnable runnable);
 
     BossBarTimer createBossBarTimer(NamespacedKey key, int maxTime, @Nullable Runnable runnable, BossBar... bossBars);
+
+    PluginData getPluginData(Plugin plugin);
 }

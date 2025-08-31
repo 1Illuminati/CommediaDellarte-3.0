@@ -10,6 +10,4 @@ public interface A_DataHolder {
     CoolTimeMap getCoolTime();
 
     CoolTimeMap getCoolTime(Plugin plugin);
-
-    A_Data getAData();
 }

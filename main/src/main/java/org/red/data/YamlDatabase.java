@@ -1,4 +1,4 @@
-package org.red.database;
+package org.red.data;
 
 public class YamlDatabase {
 }

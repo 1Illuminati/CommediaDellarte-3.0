@@ -1,0 +1,11 @@
+name: CommediaDellarteLevel
+version: 1.0
+main: org.red.addon.level.CommediaDellarteLevel
+authors: [Augh]
+api-version: 1.17
+description: Final Dellarte addon Level
+
+softdepend:
+  - CommediaDellarte
+
+commands:
