@@ -1,17 +1,17 @@
 package org.red.util;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;
 import org.red.CommediaDellartePlugin;
-import org.red.Config;
+import org.red.data.storage.DataStorage;
+import org.red.library.CommediaDellarte;
 import org.red.library.entity.A_Entity;
 import org.red.library.entity.A_Player;
 import org.red.library.user.A_OfflinePlayer;
@@ -31,12 +31,14 @@ public class A_PluginData implements PluginData {
         this.coolTimes = coolTimes;
     }
 
-    /**
-     * 
-     * @param type
-     * @param key
-     * @return
-     */
+    private void setDataMap(String type, String key, DataMap map) {
+        dataMaps.computeIfAbsent(type, k -> new DataMap()).put(key, map);
+    }
+
+    private void setCoolTimeMap(String type, String key, CoolTimeMap map) {
+        coolTimes.computeIfAbsent(type, k -> new DataMap()).put(key, map);
+    }
+
     public DataMap getDataMap(String type, String key) {
         return dataMaps.computeIfAbsent(type, k -> new DataMap()).getDataMap(key);
     }
@@ -104,72 +106,137 @@ public class A_PluginData implements PluginData {
         this.coolTimes.putAll(other.coolTimes);
     }
 
-    public void saveData() {
-        YamlConfiguration yamlConfig = new YamlConfiguration();
-        yamlConfig.set("data_maps", dataMaps);
-        yamlConfig.set("cool_times", coolTimes);
+    private void saveData(String type, String key, YamlConfiguration data) {
+        DataStorage storage = CommediaDellartePlugin.manager.getStorage();
+        storage.save(this.plugin.getName().toLowerCase(), type, key, data);
+    }
+
+    private YamlConfiguration loadData(String type, String key) {
+        DataStorage storage = CommediaDellartePlugin.manager.getStorage();
+        return storage.load(this.plugin.getName().toLowerCase(), type, key);
+    }
+
+    public void savePlayerData(A_OfflinePlayer player) {
+        DataMap map = this.getPlayerDataMap(player);
+        CoolTimeMap cool = this.getPlayerCoolTimeMap(player);
+
+        YamlConfiguration config = new YamlConfiguration();
+        config.set("data", map);
+        config.set("cool", cool);
         
-        if (Config.DATABASE_ENABLED.asBooleanValue()) saveDataDB(yamlConfig);
-        else {
-            try {
-                yamlConfig.save(new A_File("plugin_data/" + plugin.getName() + ".yml"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        CommediaDellartePlugin.sendDebugLog("Saving Plugin Data for " + plugin.getName());
+        saveData("player", player.getUniqueId().toString(), config);
     }
 
-    public void loadData() {
+    public void loadPlayerData(A_OfflinePlayer player) {
+        String key = player.getUniqueId().toString();
+        YamlConfiguration config = loadData("player", key);
+
+        setDataMap("player", key, config.getObject("data", DataMap.class, new DataMap()));
+        setCoolTimeMap("player", key, config.getObject("cool", CoolTimeMap.class, new CoolTimeMap()));
+    }
+
+    public void saveWorldData(A_World world) {
+        DataMap map = this.getWorldDataMap(world);
+        CoolTimeMap cool = this.getWorldCoolTimeMap(world);
+
+        YamlConfiguration config = new YamlConfiguration();
+        config.set("data", map);
+        config.set("cool", cool);
         
+        saveData("world", world.getName(), config);
     }
 
-    public void savePlayerData(A_Player player) {
+    public void loadWorldData(A_World world) {
+        String key = world.getName();
+        YamlConfiguration config = loadData("world", key);
 
+        setDataMap("world", key, config.getObject("data", DataMap.class, new DataMap()));
+        setCoolTimeMap("world", key, config.getObject("cool", CoolTimeMap.class, new CoolTimeMap()));
     }
-    
-    /**
-     * DB에 데이터 저장하는 코드
-     * 각 type값을 받아와 지원하는 db의 경우 jdbc url을 만들어 접속 후 데이터를 저장
-     */
-    private void saveDataDB(YamlConfiguration yamlConfig) {
-        int port = Config.DATABASE_PORT.asIntValue();
-        String type = Config.DATABASE_TYPE.asStringValue();
-        String host = Config.DATABASE_HOST.asStringValue();
-        String name = Config.DATABASE_NAME.asStringValue();
-        String user = Config.DATABASE_USER.asStringValue();
-        String password = Config.DATABASE_PASSWORD.asStringValue();
 
-        String url = makeJdbcUrl(type, host, port, name);
+    public void saveEntitiesData() {
+        DataStorage storage = CommediaDellartePlugin.manager.getStorage();
+        Set<String> keys = this.dataMaps.get("entity").keySet();
+        keys.addAll(this.coolTimes.get("entity").keySet());
 
-        // JDBC 4.0 이후 → Class.forName(...) 필요 없음
-        try (Connection conn = DriverManager.getConnection(url, user, password)) {
-            String sql = "INSERT INTO map_storage (data_string) VALUES (?)";
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, yamlConfig.saveToString());
-                pstmt.executeUpdate();
-                System.out.println("데이터 저장 완료!");
+        if (storage.getType() == DataStorage.Type.FILE) {
+            YamlConfiguration config = new YamlConfiguration();
+
+            keys.forEach(key -> {
+                Entity e = Bukkit.getEntity(UUID.fromString(key));
+                if (e != null) {
+                    A_Entity entity = CommediaDellarte.getAEntity(e);
+                    DataMap map = getEntityDataMap(entity);
+                    CoolTimeMap cool = getEntityCoolTimeMap(entity);
+
+                    config.set(key + ".data", map);
+                    config.set(key + ".cool", cool);
+                }
+            });
+
+            storage.save(plugin.getName().toLowerCase(), "entity", "entities", config);
+            return;
+        }
+
+        ;
+
+        keys.forEach(key -> {
+            Entity e = Bukkit.getEntity(UUID.fromString(key));
+            if (e != null) {
+                A_Entity entity = CommediaDellarte.getAEntity(e);
+                DataMap map = getEntityDataMap(entity);
+                CoolTimeMap cool = getEntityCoolTimeMap(entity);
+                
+                YamlConfiguration config = new YamlConfiguration();
+                config.set("data", map);
+                config.set("cool", cool);
+            
+                saveData("entity", entity.getUniqueId().toString(), config);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
     }
 
-    /**
-     * 지원하는 DB의 jdbc url 생성
-     */
-    private static String makeJdbcUrl(String dbType, String host, int port, String dbName) {
-        switch (dbType.toLowerCase()) {
-            case "mysql":
-                return "jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useSSL=false&serverTimezone=UTC";
-            case "postgresql":
-                return "jdbc:postgresql://" + host + ":" + port + "/" + dbName;
-            case "sqlserver":
-                return "jdbc:sqlserver://" + host + ":" + port + ";databaseName=" + dbName;
-            default:
-                throw new IllegalArgumentException("지원하지 않는 DB 타입: " + dbType);
+    public void loadEntitiesData() {
+        DataStorage storage = CommediaDellartePlugin.manager.getStorage();
+
+        if (storage.getType() == DataStorage.Type.FILE) {
+            YamlConfiguration config = storage.load(pluginLowerCase(), "entity", "entities");
+            if (config == null) return;
+
+            for (String key : config.getKeys(false)) {
+                Entity e = Bukkit.getEntity(UUID.fromString(key));
+                if (e != null) {
+                    DataMap map = (DataMap) config.get(key + ".data");
+                    CoolTimeMap cool = (CoolTimeMap) config.get(key + ".cool");
+
+                    if (map != null) {
+                        this.dataMaps.get("entity").put(key, map);
+                    }
+                    if (cool != null) {
+                        this.coolTimes.get("entity").put(key, cool);
+                    }
+                }
+            }
+            return;
         }
+
+        Map<String, YamlConfiguration> loaded = storage.loadAll(pluginLowerCase(), "entity");
+        loaded.forEach((uuid, config) -> {
+            Entity e = Bukkit.getEntity(UUID.fromString(uuid));
+            if (e != null) {
+                DataMap map = (DataMap) config.get("data");
+                CoolTimeMap cool = (CoolTimeMap) config.get("cool");
+
+                if (map != null) {
+                    this.dataMaps.get("entity").put(uuid, map);
+                }
+                if (cool != null) {
+                    this.coolTimes.get("entity").put(uuid, cool);
+                }
+            }
+        });
     }
+
 
     public static A_PluginData newPluginData(Plugin plugin) {
         return new A_PluginData(plugin, new HashMap<>(), new HashMap<>());
@@ -253,5 +320,9 @@ public class A_PluginData implements PluginData {
             this.dataMaps.putAll(otherData.dataMaps);
             this.coolTimes.putAll(otherData.coolTimes);
         } else throw new IllegalArgumentException("Incompatible PluginData implementation");
+    }
+
+    public String pluginLowerCase() {
+        return plugin.getName().toLowerCase();
     }
 }

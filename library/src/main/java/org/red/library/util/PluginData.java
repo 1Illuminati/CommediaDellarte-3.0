@@ -65,8 +65,4 @@ public interface PluginData {
     public boolean containsPlayerCoolTimeMap(UUID playerUUID);
 
     public void copyFrom(PluginData other);
-
-    public void saveData();
-
-    public void loadData();
 }

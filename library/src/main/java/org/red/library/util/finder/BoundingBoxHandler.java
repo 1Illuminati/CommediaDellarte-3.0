@@ -3,9 +3,15 @@ package org.red.library.util.finder;
 import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.Nullable;
 
+import com.google.gson.JsonObject;
+
 public class BoundingBoxHandler extends FindHandler<BoundingBox> implements HasNext {
     public BoundingBoxHandler(BoundingBox data) {
         super(data);
+    }
+
+    public void test() {
+        JsonObject obj = new JsonObject();
     }
 
     @Override

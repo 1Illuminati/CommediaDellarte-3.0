@@ -11,6 +11,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.red.data.storage.DataStorage;
+import org.red.data.storage.FileStorage;
+import org.red.data.storage.MySQLMariaStorage;
 import org.red.entity.A_EntityImpl;
 import org.red.entity.A_LivingEntityImpl;
 import org.red.entity.A_NPCImpl;
@@ -18,6 +21,7 @@ import org.red.entity.A_PlayerImpl;
 import org.red.library.IDellarteManager;
 import org.red.library.entity.A_Entity;
 import org.red.library.interactive.InteractiveManager;
+import org.red.library.user.A_OfflinePlayer;
 import org.red.library.util.A_Data;
 import org.red.library.util.BossBarTimer;
 import org.red.library.util.Timer;
@@ -31,6 +35,7 @@ import org.red.util.BossBarTimerImpl;
 import org.red.util.TimerImpl;
 import org.red.world.A_WorldImpl;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -41,6 +46,8 @@ public class DellarteManager implements IDellarteManager {
     private final HashMap<UUID, A_WorldImpl> worlds = new HashMap<>();
     private final HashMap<UUID, A_EntityImpl> entities = new HashMap<>(); 
     private final HashMap<Class<?>, InteractiveManager> interactiveManagerHashMap = new HashMap<>();
+    private DataStorage storage;
+    //private final HashMap<Class<?>, > handlerMap = new HashMap<>();
 
     private final HashMap<String, PluginData> pluginDataMap = new HashMap<>();
 
@@ -49,11 +56,25 @@ public class DellarteManager implements IDellarteManager {
         return pluginDataMap.computeIfAbsent(plugin.getName(), k -> A_PluginData.newPluginData(plugin));
     }
 
-    public void savePluginData(Plugin plugin) {
+    public void savePluginData(Plugin plugin, String key) {
         PluginData pluginData = pluginDataMap.get(plugin.getName());
         CommediaDellartePlugin.sendDebugLog("Saving Plugin Data for " + plugin.getName());
+    }
 
-        
+    public void saveWorldData(A_World world) {
+        pluginDataMap.values().forEach(data -> ((A_PluginData) data).saveWorldData(world));  
+    }
+
+    public void loadWorldData(A_World world) {
+        pluginDataMap.values().forEach(data -> ((A_PluginData) data).loadWorldData(world));  
+    }
+
+    public void savePlayerData(A_OfflinePlayer player) {
+        pluginDataMap.values().forEach(data -> ((A_PluginData) data).savePlayerData(player));  
+    }
+
+    public void loadPlayerData(A_OfflinePlayer player) {
+        pluginDataMap.values().forEach(data -> ((A_PluginData) data).loadPlayerData(player));  
     }
 
     public void allDataSave() {
@@ -65,27 +86,38 @@ public class DellarteManager implements IDellarteManager {
     }
 
     public void entitiesDataSave() {
-        A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
-        entities.forEach((uuid, aEntity) -> {
-            yamlConfiguration.set(uuid.toString(), aEntity.getAData());
-        });
-        yamlConfiguration.save(new A_File("entities.yml"));
-        CommediaDellartePlugin.sendDebugLog("Saved Entities Data");
+        pluginDataMap.values().forEach(data -> ((A_PluginData) data).saveEntitiesData());
     }
 
-    public void entitiesDataLoad() {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
-        A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
-        yamlConfiguration.load(new A_File("entities.yml"));
-        yamlConfiguration.getKeys(false).forEach(key -> {
-            UUID uuid = UUID.fromString(key);
-            Entity entity = Bukkit.getEntity(uuid);
+    public void entitiesDataLoad() {
+        pluginDataMap.values().forEach(data -> ((A_PluginData) data).loadEntitiesData());                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+    }
 
-            if (entity != null) {
-                A_Entity aEntity = getAEntity(entity);
-                aEntity.getAData().copy(yamlConfiguration.getSerializable(key, A_Data.class));
+    public DataStorage getStorage() {
+        return this.storage;
+    }
+
+    public void getStroageLoad() {
+        try {
+            if (!Config.DATABASE_ENABLED.asBooleanValue()) {
+                this.storage = new FileStorage();
+                return;
             }
-        });
-        CommediaDellartePlugin.sendDebugLog("Loaded Entities Data");
+
+            String type = Config.DATABASE_TYPE.asStringValue();
+            String host = Config.DATABASE_HOST.asStringValue();
+            String database = Config.DATABASE_NAME.asStringValue();
+            int port = Config.DATABASE_PORT.asIntValue();
+            String user = Config.DATABASE_USER.asStringValue();
+            String password = Config.DATABASE_PASSWORD.asStringValue();
+
+            switch (type) {
+                case "mysql", "mariadb" -> storage = new MySQLMariaStorage(host, database, port, user, password, type.equals("mysql"));
+                default -> this.storage = new FileStorage();
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -137,7 +169,7 @@ public class DellarteManager implements IDellarteManager {
     public A_EntityImpl getAEntity(@NotNull Entity entity) {
         if (entity instanceof Player player) return getAPlayer(player);
         if (entity instanceof LivingEntity livingEntity) return getALivingEntity(livingEntity);
-        return this.entities.computeIfAbsent(entity.getUniqueId(), uuid -> new A_EntityImpl(entity);
+        return this.entities.computeIfAbsent(entity.getUniqueId(), uuid -> new A_EntityImpl(entity));
     }
 
     @Override

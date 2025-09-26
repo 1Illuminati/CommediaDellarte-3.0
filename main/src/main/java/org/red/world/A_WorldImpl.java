@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.CommediaDellartePlugin;
+import org.red.DellarteManager;
 import org.red.library.CommediaDellarte;
 import org.red.library.util.A_Data;
 import org.red.library.util.CoolTimeMap;
@@ -1342,15 +1343,13 @@ public final class A_WorldImpl implements A_World, A_DataSaveLoad {
 
     @Override
     public void aDataSave() {
-        A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
-        yamlConfiguration.saveAData("world/" + this.getName(), null, this.data);
+        CommediaDellartePlugin.manager.saveWorldData(this);
         CommediaDellartePlugin.sendDebugLog("Saved PlayerData name: " + getName() + " uuid: " + getUID() + ".yml");
     }
 
     @Override
     public void aDataLoad() {
-        A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
-        this.data.copy(yamlConfiguration.loadAData("world/" + this.getName(), null));
+        CommediaDellartePlugin.manager.loadWorldData(this);
         CommediaDellartePlugin.sendDebugLog("Loaded PlayerData name: " + getName() + " uuid: " + getUID() + ".yml");
     }
 }

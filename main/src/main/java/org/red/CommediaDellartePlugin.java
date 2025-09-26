@@ -48,9 +48,9 @@ public class CommediaDellartePlugin extends JavaPlugin {
         setSoftPlugin();
         getCommand("a_economy").setExecutor(new A_VaultCommand());
 
-
         Bukkit.getScheduler().runTaskLater(this, () -> {
             manager = new DellarteManager();
+            manager.getStroageLoad();
             manager.entitiesDataLoad();
             manager.setInteractiveManager(ItemStack.class, new InteractiveManagerImpl<>(ItemStack.class));
             manager.setInteractiveManager(TileState.class, new InteractiveManagerImpl<>(TileState.class));

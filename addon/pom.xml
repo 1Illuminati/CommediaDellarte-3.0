@@ -15,8 +15,6 @@
     <name>CommediaDellarte Addon</name>
     <modules>
         <module>level</module>
-        <module>party</module>
-        <module>skill</module>
     </modules>
 
     <dependencyManagement>

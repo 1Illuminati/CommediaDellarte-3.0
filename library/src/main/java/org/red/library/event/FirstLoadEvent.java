@@ -3,7 +3,6 @@ package org.red.library.event;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.plugin.RegisteredListener;
 
 import java.util.Arrays;
 

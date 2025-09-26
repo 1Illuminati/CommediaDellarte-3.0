@@ -51,15 +51,13 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer, A_DataSaveLoa
 
     @Override
     public void aDataSave() {
-        A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
-        yamlConfiguration.saveAData("player/" + this.getUniqueId(), null, this.data);
+        CommediaDellartePlugin.manager.savePlayerData(this);
         CommediaDellartePlugin.sendDebugLog("Saved PlayerData name: " + getName() + " uuid: " + getUniqueId() + ".yml");
     }
 
     @Override
     public void aDataLoad() {
-        A_YamlConfiguration yamlConfiguration = new A_YamlConfiguration();
-        this.data.copy(yamlConfiguration.loadAData("player/" + this.getUniqueId(), null));
+        CommediaDellartePlugin.manager.loadPlayerData(this);
         CommediaDellartePlugin.sendDebugLog("Loaded PlayerData name: " + getName() + " uuid: " + getUniqueId() + ".yml");
     }
 

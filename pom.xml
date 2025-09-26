@@ -11,10 +11,7 @@
     <name>CommediaDellarte</name>
     <modules>
         <module>library</module>
-        <module>web</module>
         <module>main</module>
-        <module>addon</module>
-        <module>test</module>
     </modules>
 
     <build>

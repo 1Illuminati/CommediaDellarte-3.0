@@ -12,6 +12,11 @@ database:
   password: "password"
   database: "minecraft
 
+saveType: # database, file....
+  player: "file"
+  entity: "file"
+  world: "file"
+
 
 # area-event의 경우 설정 값을 변경하고 싶다면 서버를 껏다 켜야합니다.
 area-event:
