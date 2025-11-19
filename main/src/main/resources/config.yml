@@ -3,20 +3,21 @@ debug: false
 enable-vault: false
 vault-format: "원"
 
-database:
+database: 
   enable: false
-  type: "mysql" # mysql, sqlite, postgresql
+  type: "mysql" 
   host: "localhost"
   port: 3306
   username: "root"
   password: "password"
-  database: "minecraft
-
-saveType: # database, file....
-  player: "file"
-  entity: "file"
-  world: "file"
-
+  name: "minecraft"
+# save type file, database
+saveType: 
+  CommediaDellarte:
+    player: "file"
+    world: "file"
+    entity: "file"
+  
 
 # area-event의 경우 설정 값을 변경하고 싶다면 서버를 껏다 켜야합니다.
 area-event:

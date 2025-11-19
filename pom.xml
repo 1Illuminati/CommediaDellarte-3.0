@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org</groupId>
-    <artifactId>red</artifactId>
+    <groupId>org.red.minecraft</groupId>
+    <artifactId>dellarte</artifactId>
     <version>3.0</version>
     <packaging>pom</packaging>
     <name>CommediaDellarte</name>
@@ -83,6 +83,10 @@
         <repository>
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>maven-snapshots</id>
+            <url>https://nexus.redkiller.org/repository/maven-snapshots/</url>
         </repository>
     </repositories>
 </project>

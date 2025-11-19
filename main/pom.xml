@@ -4,11 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org</groupId>
-        <artifactId>red</artifactId>
+        <groupId>org.red.minecraft</groupId>
+        <artifactId>dellarte</artifactId>
         <version>3.0</version>
     </parent>
-    <groupId>org.red</groupId>
+    <groupId>org.red.minecraft.dellarte</groupId>
     <artifactId>main</artifactId>
     <version>3.0</version>
     <packaging>jar</packaging>
@@ -27,7 +27,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.red</groupId>
+            <groupId>org.red.minecraft.dellarte</groupId>
             <artifactId>library</artifactId>
             <version>3.0</version>
             <scope>compile</scope>
@@ -55,6 +55,12 @@
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.red.library</groupId>
+            <artifactId>data</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

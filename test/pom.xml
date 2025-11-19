@@ -4,24 +4,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org</groupId>
-        <artifactId>red</artifactId>
+        <groupId>org.red.minecraft</groupId>
+        <artifactId>dellarte</artifactId>
         <version>3.0</version>
     </parent>
-
-    <groupId>org.red</groupId>
+    <groupId>org.red.minecraft.dellarte</groupId>
     <artifactId>test</artifactId>
+    <version>3.0</version>
     <packaging>jar</packaging>
-    <version>1.0</version>
     <name>CommediaDellarte Test</name>
 
     <dependencies>
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>${spigot-api.version}</version>
-            <scope>compile</scope>
-        </dependency>
         <dependency>
             <groupId>org.red</groupId>
             <artifactId>library</artifactId>
@@ -29,33 +22,28 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>${spigot-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>20.1.0</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-            <scope>compile</scope>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.6</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.17.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.17.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.29</version>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.7</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
