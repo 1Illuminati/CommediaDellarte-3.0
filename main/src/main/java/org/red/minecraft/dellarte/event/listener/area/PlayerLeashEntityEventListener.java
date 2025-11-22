@@ -4,9 +4,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;
 import org.red.minecraft.dellarte.library.event.area.entity.AreaPlayerLeashEntityEvent;
 
-public class AreaPlayerLeashEntityEventListener extends AreaEventListener<PlayerLeashEntityEvent> {
+public class PlayerLeashEntityEventListener extends AllEventListener<PlayerLeashEntityEvent> {
 
-    public AreaPlayerLeashEntityEventListener() {
+    public PlayerLeashEntityEventListener() {
         super(AreaPlayerLeashEntityEvent.class, PlayerLeashEntityEvent.class);
         register();
     }

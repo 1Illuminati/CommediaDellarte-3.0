@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import org.red.minecraft.dellarte.library.interactive.*;
 import org.red.minecraft.dellarte.library.util.PairKeyMap;
 import org.red.minecraft.dellarte.CommediaDellartePlugin;
+import org.red.minecraft.dellarte.exception.InteractiveException;
 import org.red.minecraft.dellarte.library.interactive.InteractiveManager;
 
 import java.lang.reflect.InvocationTargetException;
@@ -61,7 +62,7 @@ public class InteractiveManagerImpl<T> implements InteractiveManager<T> {
     public void runInteractiveObj(@NotNull T obj, @NotNull InteractiveObj<T> interactiveObj, @NotNull Class<? extends InteractiveAct<T>> act, @NotNull Event event) {
         InteractiveObjInfo<T> info = this.interactiveObjInfoMaps.getOrDefault(interactiveObj.getKey(), null);
 
-        if (info == null) throw new RuntimeException(new InteractiveException.NotRegisteredInteractiveObj(interactiveObj));
+        if (info == null) throw new InteractiveException.NotRegisteredInteractiveObj(interactiveObj);
 
         if (info.methodMap.containsKeys(act, event.getClass())) {
             Method method = info.methodMap.get(act, event.getClass());
@@ -130,11 +131,11 @@ public class InteractiveManagerImpl<T> implements InteractiveManager<T> {
         try {
             act = (Class<? extends InteractiveAct<T>>) annotation.act();
         } catch (Exception e) {
-            throw new RuntimeException(new InteractiveException.InteractiveGenericException(obj));
+            throw new InteractiveException.InteractiveGenericException(obj);
         }
 
         if (!act.isAnnotationPresent(InteractiveAct.ActAnnotation.class)) {
-            throw new RuntimeException(new InteractiveException.InteractiveActAnnotationNotFound(obj));
+            throw new InteractiveException.InteractiveActAnnotationNotFound(obj);
         }
 
         return act;

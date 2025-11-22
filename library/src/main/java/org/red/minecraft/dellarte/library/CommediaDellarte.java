@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.red.minecraft.dellarte.library.data.PluginData;
 import org.red.minecraft.dellarte.library.entity.A_Entity;
 import org.red.minecraft.dellarte.library.entity.A_LivingEntity;
 import org.red.minecraft.dellarte.library.entity.A_Player;
@@ -82,9 +81,5 @@ public final class CommediaDellarte {
 
     public static BossBarTimer createBossBarTimer(NamespacedKey key, int maxTime, @Nullable Runnable runnable, BossBar... bossBars) {
         return manager.createBossBarTimer(key, maxTime, runnable, bossBars);
-    }
-
-    public static PluginData getPluginData(Plugin plugin) {
-        return manager.getPluginData(plugin);
     }
 }

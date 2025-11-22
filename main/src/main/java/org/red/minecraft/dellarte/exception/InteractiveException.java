@@ -1,8 +1,8 @@
-package org.red.minecraft.dellarte.interactive;
+package org.red.minecraft.dellarte.exception;
 
 import org.red.minecraft.dellarte.library.interactive.InteractiveObj;
 
-public class InteractiveException extends Exception {
+public class InteractiveException extends RuntimeException {
     public InteractiveException(InteractiveObj<?> obj, String message) {
         super("Obj: " + obj.getKey() + "/n" + message);
     }

@@ -14,16 +14,16 @@ import org.red.minecraft.dellarte.world.A_WorldImpl;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class AreaEventListener<T extends Event> extends DellarteListener implements EventExecutor {
+public abstract class AllEventListener<T extends Event> extends DellarteListener implements EventExecutor {
     private final Class<? extends AreaEvent<T>> areaEventClass;
     private final Class<T> eventClass;
 
-    public AreaEventListener(Class<? extends AreaEvent<T>> areaEventClass, Class<T> eventClass) {
+    public AllEventListener(Class<? extends AreaEvent<T>> areaEventClass, Class<T> eventClass) {
         this.areaEventClass = areaEventClass;
         this.eventClass = eventClass;
     }
 
-    public AreaEventListener(Class<? extends AreaEvent<T>> areaEventClass, String classPath) throws ClassNotFoundException {
+    public AllEventListener(Class<? extends AreaEvent<T>> areaEventClass, String classPath) throws ClassNotFoundException {
         this.areaEventClass = areaEventClass;
         Class<?> clazz = Class.forName(classPath);
         this.eventClass = (Class<T>) clazz;

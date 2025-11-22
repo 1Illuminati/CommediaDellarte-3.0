@@ -133,7 +133,8 @@ public class InstanceArea implements Area, A_DataHolder {
 
     @Override
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellarte.getPluginData(plugin).getDataMap("area", name);
+        return null;
+        //return CommediaDellarte.getPluginData(plugin).getDataMap("area", name);
     }
 
     @Override
@@ -143,6 +144,7 @@ public class InstanceArea implements Area, A_DataHolder {
 
     @Override
     public CoolTimeMap getCoolTime(Plugin plugin) {
-        return CommediaDellarte.getPluginData(plugin).getCoolTimeMap("area", name);
+        return null;
+        //return CommediaDellarte.getPluginData(plugin).getCoolTimeMap("area", name);
     }
 }

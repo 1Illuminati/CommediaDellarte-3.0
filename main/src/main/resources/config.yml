@@ -3,6 +3,7 @@ debug: false
 enable-vault: false
 vault-format: "원"
 
+# 데이터 베이스 설정
 database: 
   enable: false
   type: "mysql" 
@@ -11,12 +12,69 @@ database:
   username: "root"
   password: "password"
   name: "minecraft"
-# save type file, database
-saveType: 
+
+# 각 플러그인별 추가적인 타입 및 데이터 저장방식을 설정하는 설정
+#
+# 플러그인 이름:
+#   타입이름:
+# 위 같은 구조로 설정하며 각각 적용가능한 데이터 및 기본값은 다음과 같다
+# enable:true
+# saveType:"file"
+# autoSave:300
+# saveEvent:
+# - "ONDISABLE"
+# loadEvent:
+# - "ONENABLE"
+#
+# 데이터를 넣지 않을 경우 기본값으로 진행하며 enable이 false일 경우 타입 데이터를 불러올 수 는 있으나 저장은 하지 않는다
+# 해당 설정에서 만들지 않은 타입들을 불러올 경우 에러가 발생하게 된다.
+#
+# 설정된 플러그인이 로드 되지 않을 경우 무시하고 진행한다
+#
+# 해당 CommediaDellarte의 설정은 예시이며 수정 가능하다
+#
+# 기본적으로 모든 적용되는 플러그인에는 player,world,entity 기본으로 적용된다. 
+# 각 기본 타입별로 적용되는 기본값이 다르다
+# 만약 해당 타입을 적고 설정을 수정할 경우 해당 설정대로 적용된다.
+save: 
   CommediaDellarte:
-    player: "file"
-    world: "file"
-    entity: "file"
+    # player타입의 기본값
+    player: 
+      enable: true
+      # 데이터 저장방식 설정 file, mysql이 있으며 그 외는 아직 개발중
+      saveType: "file"
+      # 자동 저장 설정 설정 된 초 마다 저장한다
+      # -1로 할 경우 작동하지 않는다
+      autoSave: 300
+      # 데이터를 저장하는 시점을 이벤트로 지정하는 설정
+      # 각 이벤트를 대문자로 적으면되며 각 이벤트가 발생할때 저장한다
+      # ONDISABLE를 적을 경우 플러그인이 OnDisable될때 데이터를 저장한다.
+      saveEvent:
+      - "PLAYERQUITEVENT"
+      # 데이터를 불러오는 시점을 이벤트로 지정하는 설정
+      # 서버가 켜질때 따로 데이터를 로드하지 않으며 사용자가 따로 데이터를 로드해줘야한다.
+      # ONENABLE를 적을경우 서버가 켜지고 각 FirstLoadEvent이후 데이터를 로드한다.
+      # 이외에는 사용자가 직접 데이터를 로드해야한다.
+      loadEvent:
+      - "PLAYERJOINEVENT"
+    # world타입의 기본값
+    world:
+      enable: true
+      saveType: "file"
+      autoSave: 300
+      saveEvent:
+      - "ONDISABLE"
+      loadEvent:
+      - "ONENABLE"
+    # entity타입의 기본값
+    entity:
+      enable: true
+      saveType: "file"
+      autoSave: 300
+      saveEvent:
+      - "ONDISABLE"
+      loadEvent:
+      - "ONENABLE"
   
 
 # area-event의 경우 설정 값을 변경하고 싶다면 서버를 껏다 켜야합니다.

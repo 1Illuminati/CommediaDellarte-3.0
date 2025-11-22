@@ -4,8 +4,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.red.minecraft.dellarte.library.event.area.player.AreaPlayerMoveEvent;
 
-public class AreaPlayerMoveEventListener extends AreaPlayerEventListener<PlayerMoveEvent> {
-    public AreaPlayerMoveEventListener() {
+public class PlayerMoveEventListener extends AllPlayerEventListener<PlayerMoveEvent> {
+    public PlayerMoveEventListener() {
         super(AreaPlayerMoveEvent.class, PlayerMoveEvent.class);
         register();
     }

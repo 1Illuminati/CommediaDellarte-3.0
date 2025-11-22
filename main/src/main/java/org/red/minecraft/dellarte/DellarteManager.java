@@ -19,7 +19,6 @@ import org.red.minecraft.dellarte.entity.A_LivingEntityImpl;
 import org.red.minecraft.dellarte.entity.A_NPCImpl;
 import org.red.minecraft.dellarte.entity.A_PlayerImpl;
 import org.red.minecraft.dellarte.library.IDellarteManager;
-import org.red.minecraft.dellarte.library.data.PluginData;
 import org.red.minecraft.dellarte.library.interactive.InteractiveManager;
 import org.red.minecraft.dellarte.library.user.A_OfflinePlayer;
 import org.red.minecraft.dellarte.library.util.BossBarTimer;

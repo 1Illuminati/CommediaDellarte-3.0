@@ -1,8 +1,11 @@
 package org.red.minecraft.dellarte.library.util;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -118,5 +121,37 @@ public class PairKeyMap<K1, K2, V> implements ConfigurationSerializable {
         }
 
         return pairMap;
+    }
+
+    public Set<Map.Entry<PairKey<K1, K2>, V>> entrySet() {
+        return map.entrySet();
+    }
+
+    /** 전체 KeySet(PairKey) 반환 */
+    public Set<PairKey<K1, K2>> keySet() {
+        return map.keySet();
+    }
+
+    /** 전체 values 반환 */
+    public Collection<V> values() {
+        return map.values();
+    }
+
+    /** 첫 번째 키(K1)의 고유값 Set 반환 */
+    public Set<K1> firstKeySet() {
+        Set<K1> result = new HashSet<>();
+        for (PairKey<K1, K2> key : map.keySet()) {
+            result.add(key.key1());
+        }
+        return result;
+    }
+
+    /** 두 번째 키(K2)의 고유값 Set 반환 */
+    public Set<K2> secondKeySet() {
+        Set<K2> result = new HashSet<>();
+        for (PairKey<K1, K2> key : map.keySet()) {
+            result.add(key.key2());
+        }
+        return result;
     }
 }

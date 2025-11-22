@@ -4,8 +4,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerEvent;
 import org.red.minecraft.dellarte.library.event.area.player.AreaPlayerEvent;
 
-public class AreaPlayerEventListener<T extends PlayerEvent> extends AreaEventListener<T> {
-    public AreaPlayerEventListener(Class<? extends AreaPlayerEvent<T>> clazz, Class<T> eventClass) {
+public class AllPlayerEventListener<T extends PlayerEvent> extends AllEventListener<T> {
+    public AllPlayerEventListener(Class<? extends AreaPlayerEvent<T>> clazz, Class<T> eventClass) {
         super(clazz, eventClass);
         this.register();
     }
