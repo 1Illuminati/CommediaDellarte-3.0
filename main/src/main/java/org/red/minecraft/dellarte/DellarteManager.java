@@ -5,31 +5,40 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.boss.BossBar;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.red.minecraft.dellarte.data.storage.DataStorage;
-import org.red.minecraft.dellarte.data.storage.FileStorage;
-import org.red.minecraft.dellarte.data.storage.MySQLMariaStorage;
+import org.red.library.data.adapter.DatabaseAdapter;
+import org.red.library.data.adapter.FileAdapter;
+import org.red.library.data.adapter.IAdapter;
+import org.red.library.data.adapter.MySqlAdapter;
+import org.red.library.data.serialize.RegisterSerializable;
+import org.red.minecraft.dellarte.data.DataStorage;
+import org.red.minecraft.dellarte.data.NoneAdapter;
+import org.red.minecraft.dellarte.data.SaveConfig;
 import org.red.minecraft.dellarte.entity.A_EntityImpl;
 import org.red.minecraft.dellarte.entity.A_LivingEntityImpl;
 import org.red.minecraft.dellarte.entity.A_NPCImpl;
 import org.red.minecraft.dellarte.entity.A_PlayerImpl;
+import org.red.minecraft.dellarte.exception.DataStorageNullException;
 import org.red.minecraft.dellarte.library.IDellarteManager;
 import org.red.minecraft.dellarte.library.interactive.InteractiveManager;
-import org.red.minecraft.dellarte.library.user.A_OfflinePlayer;
 import org.red.minecraft.dellarte.library.util.BossBarTimer;
+import org.red.minecraft.dellarte.library.util.NamespaceMap;
 import org.red.minecraft.dellarte.library.util.Timer;
 import org.red.minecraft.dellarte.library.world.A_World;
 import org.red.minecraft.dellarte.user.A_OfflinePlayerImpl;
-import org.red.minecraft.dellarte.util.A_PluginData;
+import org.red.minecraft.dellarte.util.A_File;
 import org.red.minecraft.dellarte.util.BossBarTimerImpl;
 import org.red.minecraft.dellarte.util.TimerImpl;
 import org.red.minecraft.dellarte.world.A_WorldImpl;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -40,78 +49,92 @@ public class DellarteManager implements IDellarteManager {
     private final HashMap<UUID, A_WorldImpl> worlds = new HashMap<>();
     private final HashMap<UUID, A_EntityImpl> entities = new HashMap<>(); 
     private final HashMap<Class<?>, InteractiveManager> interactiveManagerHashMap = new HashMap<>();
-    private DataStorage storage;
     //private final HashMap<Class<?>, > handlerMap = new HashMap<>();
 
-    private final HashMap<String, PluginData> pluginDataMap = new HashMap<>();
+    private final NamespaceMap<DataStorage> map = new NamespaceMap<>();
+    private final NamespaceMap<BukkitTask> stroageTaskMap = new NamespaceMap<>();
 
     @Override
-    public PluginData getPluginData(Plugin plugin) {
-        return pluginDataMap.computeIfAbsent(plugin.getName(), k -> A_PluginData.newPluginData(plugin));
+    public DataStorage getStorage(NamespacedKey key) {
+        if (!map.containsKey(key)) throw new DataStorageNullException(key);
+
+        return map.get(key);
     }
 
-    public void savePluginData(Plugin plugin, String key) {
-        PluginData pluginData = pluginDataMap.get(plugin.getName()); 
-        CommediaDellartePlugin.sendDebugLog("Saving Plugin Data for " + plugin.getName());
+    public void setStorageAutoSave(DataStorage storage) {
+        int delay = storage.config().getAutoSaveTime() * 20;
+        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(CommediaDellartePlugin.instance, () -> {
+            storage.saveAll();
+        }, 
+        delay, delay);
+
+        stroageTaskMap.put(storage.getKey(), task);
     }
 
-    public void saveWorldData(A_World world) {
-        pluginDataMap.values().forEach(data -> ((A_PluginData) data).saveWorldData(world));  
+    /**
+     * 데이터 스토리지을 콘피그에서 불러와 생성하는 함수
+     */
+    public void createDataStorages() {
+        ConfigurationSection section = CommediaDellartePlugin.config.getConfigurationSection("data-storage");
+
+        section.getKeys(false).forEach(key -> {
+            ConfigurationSection pluginSection = section.getConfigurationSection(key);
+            pluginSection.getKeys(false).forEach(type -> {
+                SaveConfig config = SaveConfig.createSaveConfig(new NamespacedKey(key, type), pluginSection.getConfigurationSection(key));
+                DataStorage storage = new DataStorage(config, createAdapter(config));
+                map.put(config.getKey(), storage);
+                setStorageAutoSave(storage);
+            });
+        });
     }
 
-    public void loadWorldData(A_World world) {
-        pluginDataMap.values().forEach(data -> ((A_PluginData) data).loadWorldData(world));
+    /**
+     * 데이터 스토리지 생성에 필요한 어뎁터를 생성하는 함수
+     */
+    public IAdapter createAdapter(SaveConfig config) {
+        IAdapter result = null;
+
+        if (!config.isEnable()) return new NoneAdapter();
+
+        switch(config.getSaveType()) {
+            case FILE: result = new FileAdapter(new A_File(config.getKey().getNamespace() + "/" + config.getKey().getKey()));
+            case MYSQL: {
+                try {
+                    result = new MySqlAdapter(getDBConfigLoad(config.getKey()));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            };
+        };
+
+        return result;
     }
 
-    public void savePlayerData(A_OfflinePlayer player) {
-        pluginDataMap.values().forEach(data -> ((A_PluginData) data).savePlayerData(player));
+    /**
+     * 데이터베이스 어댑터에 필요한 설정을 생성하는 함수
+     * 에러가 날 경우 처리는 안되어있다
+     */
+    public DatabaseAdapter.Config getDBConfigLoad(NamespacedKey key) {
+        if (!Config.DATABASE_ENABLED.asBooleanValue()) {
+            return null;
+        }
+
+        String host = Config.DATABASE_HOST.asStringValue();
+        String database = Config.DATABASE_NAME.asStringValue();
+        int port = Config.DATABASE_PORT.asIntValue();
+        String user = Config.DATABASE_USER.asStringValue();
+        String password = Config.DATABASE_PASSWORD.asStringValue();
+
+        return new DatabaseAdapter.Config(host, database, port, user, password, key.toString().replace(":", "_"));
     }
 
-    public void loadPlayerData(A_OfflinePlayer player) {
-        pluginDataMap.values().forEach(data -> ((A_PluginData) data).loadPlayerData(player));  
+    @Override
+    public boolean containStorage(NamespacedKey key) {
+        return map.containsKey(key);
     }
 
     public void allDataSave() {
-        offlinePlayers.values().forEach(A_OfflinePlayerImpl::aDataSave);
-        CommediaDellartePlugin.sendDebugLog("Saved All Player Data");
-        worlds.values().forEach(A_WorldImpl::aDataSave);
-        CommediaDellartePlugin.sendDebugLog("Saved All World Data");
-        this.entitiesDataSave();
-    }
-
-    public void entitiesDataSave() {
-        pluginDataMap.values().forEach(data -> ((A_PluginData) data).saveEntitiesData());
-    }
-
-    public void entitiesDataLoad() {
-        pluginDataMap.values().forEach(data -> ((A_PluginData) data).loadEntitiesData());                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
-    }
-
-    public DataStorage getStorage() {
-        return this.storage;
-    }
-
-    public void getStroageLoad() {
-        try {
-            if (!Config.DATABASE_ENABLED.asBooleanValue()) {
-                this.storage = new FileStorage();
-                return;
-            }
-
-            String type = Config.DATABASE_TYPE.asStringValue();
-            String host = Config.DATABASE_HOST.asStringValue();
-            String database = Config.DATABASE_NAME.asStringValue();
-            int port = Config.DATABASE_PORT.asIntValue();
-            String user = Config.DATABASE_USER.asStringValue();
-            String password = Config.DATABASE_PASSWORD.asStringValue();
-
-            switch (type) {
-                case "mysql", "mariadb" -> storage = new MySQLMariaStorage(host, database, port, user, password, type.equals("mysql"));
-                default -> this.storage = new FileStorage();
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+        map.values().forEach(DataStorage::saveAll);
     }
 
     @Override
@@ -153,7 +176,6 @@ public class DellarteManager implements IDellarteManager {
     public A_OfflinePlayerImpl getAOfflinePlayer(@NotNull OfflinePlayer player) {
         return offlinePlayers.computeIfAbsent(player.getUniqueId(), uuid -> {
             A_OfflinePlayerImpl aOfflinePlayer = new A_OfflinePlayerImpl(player);
-            aOfflinePlayer.aDataLoad();
             CommediaDellartePlugin.sendDebugLog("Created OfflinePlayer name: " + player.getName() + " uuid: " + uuid);
             return aOfflinePlayer;
         });
@@ -175,10 +197,9 @@ public class DellarteManager implements IDellarteManager {
     @Override
     public A_WorldImpl getAWorld(@NotNull World world) {
         return worlds.computeIfAbsent(world.getUID(), uuid -> {
-           A_WorldImpl aWorld = new A_WorldImpl(world);
-           aWorld.aDataLoad();
-           CommediaDellartePlugin.sendDebugLog("Created World name: " + world.getName() + " uuid: " + world.getUID());
-           return aWorld;
+            A_WorldImpl aWorld = new A_WorldImpl(world);
+            CommediaDellartePlugin.sendDebugLog("Created World name: " + world.getName() + " uuid: " + world.getUID());
+            return aWorld;
         });
     }
 
@@ -216,5 +237,10 @@ public class DellarteManager implements IDellarteManager {
     @Override
     public BossBarTimer createBossBarTimer(NamespacedKey key, int maxTime, @Nullable Runnable runnable, BossBar... bossBars) {
         return new BossBarTimerImpl(key, maxTime, runnable, bossBars);
+    }
+
+    @Override
+    public <T> void registerSerializableClass(Class<T> clazz, RegisterSerializable<T> registerSerializable) {
+        DataStorage.regSerializableClass(clazz, registerSerializable);
     }
 }

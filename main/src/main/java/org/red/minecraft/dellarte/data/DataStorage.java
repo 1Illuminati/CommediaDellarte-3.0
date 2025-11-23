@@ -5,20 +5,30 @@ import java.util.UUID;
 
 import org.bukkit.NamespacedKey;
 import org.red.library.data.DataMapManager;
+import org.red.library.data.adapter.FileAdapter;
 import org.red.library.data.adapter.IAdapter;
 import org.red.library.data.serialize.RegisterSerializable;
 import org.red.minecraft.dellarte.library.data.IDataStroage;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
 import org.red.minecraft.dellarte.library.util.CoolTimeMap;
+import org.red.minecraft.dellarte.util.A_File;
 
 public class DataStorage extends DataMapManager implements IDataStroage {
-    private static HashMap<Class<?>, RegisterSerializable<?>> REG_SERIALIZE_MAP = new HashMap<>();
+    public static DataStorage createDefaultDataStorage(NamespacedKey key) {
+        return new DataStorage(SaveConfig.createDefaultConfig(key), new FileAdapter(new A_File(key.getNamespace() + "/" + key.getKey())));
+    }
+
+    private static final HashMap<Class<?>, RegisterSerializable<?>> REG_SERIALIZE_MAP = new HashMap<>();
     private final HashMap<UUID, A_DataMap> dataMaps = new HashMap<>();
     private final SaveConfig config;
 
     public DataStorage(SaveConfig config, IAdapter adapter) {
         super(adapter);
         this.config = config;
+    }
+
+    public static <T> void regSerializableClass(Class<T> clazz, RegisterSerializable<T> registerSerializable) {
+        DataStorage.REG_SERIALIZE_MAP.put(clazz, registerSerializable);
     }
 
     @Override
@@ -40,7 +50,6 @@ public class DataStorage extends DataMapManager implements IDataStroage {
         return this.config;
     }
     
-
     @Override
     public NamespacedKey getKey() {
         return config.getKey();
@@ -79,6 +88,11 @@ public class DataStorage extends DataMapManager implements IDataStroage {
     @Override
     public void deleteData(UUID key) {
         super.deleteDataMap(key.toString());
+    }
+
+    @Override
+    public void loadAll() {
+        super.getAdapter().loadAllKey().forEach(key -> super.loadDataMap(key));
     }
 
     @Override

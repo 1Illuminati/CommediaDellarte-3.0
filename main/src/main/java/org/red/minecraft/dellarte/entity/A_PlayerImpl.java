@@ -38,15 +38,13 @@ import org.jetbrains.annotations.Nullable;
 import org.red.minecraft.dellarte.library.entity.A_Player;
 import org.red.minecraft.dellarte.library.inventory.CustomGui;
 import org.red.minecraft.dellarte.library.user.A_OfflinePlayer;
-import org.red.minecraft.dellarte.library.user.Wallet;
 import org.red.minecraft.dellarte.CommediaDellartePlugin;
 import org.red.minecraft.dellarte.user.A_OfflinePlayerImpl;
-import org.red.minecraft.dellarte.util.A_DataSaveLoad;
 
 import java.net.InetSocketAddress;
 import java.util.*;
 
-public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player, A_DataSaveLoad {
+public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player {
     private final A_OfflinePlayerImpl offlinePlayer;
     private final Player player;
     private boolean ignoreInvCloseEvent = false;
@@ -62,10 +60,6 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player, A_Data
         super(player);
         this.offlinePlayer = null;
         this.player = player;
-    }
-
-    public Wallet getWallet() {
-        return this.offlinePlayer.getWallet();
     }
 
     @Override
@@ -2239,15 +2233,5 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player, A_Data
     @Override
     public Player getEntity() {
         return this.player;
-    }
-
-    @Override
-    public void aDataSave() {
-        this.offlinePlayer.aDataSave();
-    }
-
-    @Override
-    public void aDataLoad() {
-        this.offlinePlayer.aDataLoad();
     }
 }

@@ -20,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.minecraft.dellarte.library.inventory.CustomGui;
 import org.red.minecraft.dellarte.library.user.A_OfflinePlayer;
-import org.red.minecraft.dellarte.library.user.Wallet;
 
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -41,8 +40,6 @@ public interface A_Player extends A_LivingEntity {
     boolean isIgnoreInvCloseEvent();
 
     void setIgnoreInvCloseEvent(boolean ignoreInvCloseEvent);
-
-    Wallet getWallet();
 
     ItemStack getPlayerSkull();
 

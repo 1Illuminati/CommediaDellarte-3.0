@@ -24,7 +24,7 @@ database:
 # saveEvent:
 # - "ONDISABLE"
 # loadEvent:
-# - "ONENABLE"
+# - "FIRSTLOADEVENT"
 #
 # 데이터를 넣지 않을 경우 기본값으로 진행하며 enable이 false일 경우 타입 데이터를 불러올 수 는 있으나 저장은 하지 않는다
 # 해당 설정에서 만들지 않은 타입들을 불러올 경우 에러가 발생하게 된다.
@@ -36,7 +36,7 @@ database:
 # 기본적으로 모든 적용되는 플러그인에는 player,world,entity 기본으로 적용된다. 
 # 각 기본 타입별로 적용되는 기본값이 다르다
 # 만약 해당 타입을 적고 설정을 수정할 경우 해당 설정대로 적용된다.
-save: 
+data-storage: 
   CommediaDellarte:
     # player타입의 기본값
     player: 
@@ -47,16 +47,17 @@ save:
       # -1로 할 경우 작동하지 않는다
       autoSave: 300
       # 데이터를 저장하는 시점을 이벤트로 지정하는 설정
-      # 각 이벤트를 대문자로 적으면되며 각 이벤트가 발생할때 저장한다
+      # 각 이벤트를 대문자로 적으면되며 각 이벤트가 발생할때 저장한다.
       # ONDISABLE를 적을 경우 플러그인이 OnDisable될때 데이터를 저장한다.
       saveEvent:
-      - "PLAYERQUITEVENT"
+      - "ONDISABLE"
       # 데이터를 불러오는 시점을 이벤트로 지정하는 설정
+      # 각 이벤트를 대문자로 적으면되며 각 이벤트가 발생할때 불러온다.
       # 서버가 켜질때 따로 데이터를 로드하지 않으며 사용자가 따로 데이터를 로드해줘야한다.
-      # ONENABLE를 적을경우 서버가 켜지고 각 FirstLoadEvent이후 데이터를 로드한다.
+      # ONENABLE를 적을경우 서버가 켜지고 FirstLoadEvent이전에 데이터를 로드한다.
       # 이외에는 사용자가 직접 데이터를 로드해야한다.
       loadEvent:
-      - "PLAYERJOINEVENT"
+      - "FIRSTLOADEVENT"
     # world타입의 기본값
     world:
       enable: true
@@ -65,7 +66,7 @@ save:
       saveEvent:
       - "ONDISABLE"
       loadEvent:
-      - "ONENABLE"
+      - "FIRSTLOADEVENT"
     # entity타입의 기본값
     entity:
       enable: true
@@ -74,7 +75,7 @@ save:
       saveEvent:
       - "ONDISABLE"
       loadEvent:
-      - "ONENABLE"
+      - "FIRSTLOADEVENT"
   
 
 # area-event의 경우 설정 값을 변경하고 싶다면 서버를 껏다 켜야합니다.

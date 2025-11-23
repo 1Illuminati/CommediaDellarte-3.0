@@ -14,8 +14,6 @@ import org.red.minecraft.dellarte.library.util.A_DataHolder;
 import java.util.UUID;
 
 public interface A_OfflinePlayer extends A_DataHolder {
-    Wallet getWallet();
-
     ItemStack getPlayerSkull();
 
     boolean isOp();

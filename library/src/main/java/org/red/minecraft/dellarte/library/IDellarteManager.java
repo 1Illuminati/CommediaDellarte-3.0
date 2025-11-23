@@ -7,9 +7,10 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.red.library.data.serialize.RegisterSerializable;
+import org.red.minecraft.dellarte.library.data.IDataStroage;
 import org.red.minecraft.dellarte.library.entity.A_Entity;
 import org.red.minecraft.dellarte.library.entity.A_LivingEntity;
 import org.red.minecraft.dellarte.library.entity.A_Player;
@@ -22,6 +23,13 @@ import org.red.minecraft.dellarte.library.world.A_World;
 import java.util.UUID;
 
 public interface IDellarteManager {
+    
+    <T> void registerSerializableClass(Class<T> clazz, RegisterSerializable<T> registerSerializable);
+
+    IDataStroage getStorage(NamespacedKey key);
+
+    boolean containStorage(NamespacedKey key);
+    
     @Nullable
     A_Player getAPlayer(String name);
 

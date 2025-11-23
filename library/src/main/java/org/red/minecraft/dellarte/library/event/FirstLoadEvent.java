@@ -10,10 +10,7 @@ public class FirstLoadEvent extends Event {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
 
     public FirstLoadEvent() {
-        Arrays.stream(HANDLERS_LIST.getRegisteredListeners()).forEach(registeredListener -> {
-            Bukkit.getConsoleSender().sendMessage(registeredListener.getPlugin().getName());
-        });
-        Bukkit.getConsoleSender().sendMessage("TESTTESTTESTTEST222");
+        
     }
 
     @Override

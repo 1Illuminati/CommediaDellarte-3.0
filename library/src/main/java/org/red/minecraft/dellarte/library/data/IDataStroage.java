@@ -55,4 +55,9 @@ public interface IDataStroage extends Keyed {
      * 모든 데이터 저장
      */
     void saveAll();
+
+    /**
+     * 모든 데이터 로드
+     */
+    void loadAll();
 }

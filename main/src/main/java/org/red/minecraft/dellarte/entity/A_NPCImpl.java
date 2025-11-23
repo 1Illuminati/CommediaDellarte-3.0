@@ -12,14 +12,4 @@ public class A_NPCImpl extends A_PlayerImpl implements A_NPC {
     public boolean isNPC() {
         return true;
     }
-
-    @Override
-    public void aDataSave() {
-
-    }
-
-    @Override
-    public void aDataLoad() {
-
-    }
 }

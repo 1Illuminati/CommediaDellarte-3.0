@@ -10,16 +10,13 @@ import org.jetbrains.annotations.Nullable;
 import org.red.minecraft.dellarte.library.CommediaDellarte;
 import org.red.minecraft.dellarte.library.entity.A_Player;
 import org.red.minecraft.dellarte.library.user.A_OfflinePlayer;
-import org.red.minecraft.dellarte.library.user.Wallet;
-import org.red.minecraft.dellarte.library.util.A_Data;
 import org.red.minecraft.dellarte.library.util.CoolTimeMap;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
 import org.red.minecraft.dellarte.CommediaDellartePlugin;
-import org.red.minecraft.dellarte.util.A_DataSaveLoad;
 
 import java.util.UUID;
 
-public final class A_OfflinePlayerImpl implements A_OfflinePlayer, A_DataSaveLoad {
+public final class A_OfflinePlayerImpl implements A_OfflinePlayer {
     private OfflinePlayer offlinePlayer;
 
     public A_OfflinePlayerImpl(OfflinePlayer offlinePlayer) {
@@ -37,25 +34,8 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer, A_DataSaveLoa
     }
 
     @Override
-    public Wallet getWallet() {
-        return this.getDataMap().getClass("wallet", Wallet.class, new Wallet(this, 0));
-    }
-
-    @Override
     public ItemStack getPlayerSkull() {
         return null;
-    }
-
-    @Override
-    public void aDataSave() {
-        CommediaDellartePlugin.manager.savePlayerData(this);
-        CommediaDellartePlugin.sendDebugLog("Saved PlayerData name: " + getName() + " uuid: " + getUniqueId() + ".yml");
-    }
-
-    @Override
-    public void aDataLoad() {
-        CommediaDellartePlugin.manager.loadPlayerData(this);
-        CommediaDellartePlugin.sendDebugLog("Loaded PlayerData name: " + getName() + " uuid: " + getUniqueId() + ".yml");
     }
 
     @Override
@@ -226,7 +206,7 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer, A_DataSaveLoa
     @Override
     @NotNull
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellarte.getPluginData(plugin).getPlayerDataMap(this);
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "player")).getDataMap(getUniqueId());
     }
 
     @Override
@@ -238,6 +218,6 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer, A_DataSaveLoa
     @Override
     @NotNull
     public CoolTimeMap getCoolTime(Plugin plugin) {
-        return CommediaDellarte.getPluginData(plugin).getPlayerCoolTimeMap(this);
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "player")).getCoolTimeMap(getUniqueId());
     }
 }

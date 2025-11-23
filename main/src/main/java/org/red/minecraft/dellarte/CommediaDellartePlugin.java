@@ -2,14 +2,12 @@ package org.red.minecraft.dellarte;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.TileState;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.block.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.red.minecraft.dellarte.compatibility.vault.A_Vault;
-import org.red.minecraft.dellarte.command.A_VaultCommand;
 import org.red.minecraft.dellarte.event.listener.InteractiveItemListener;
 import org.red.minecraft.dellarte.event.listener.InteractiveTileListener;
 import org.red.minecraft.dellarte.event.listener.InventoryEventListener;
@@ -20,15 +18,11 @@ import org.red.minecraft.dellarte.library.event.FirstLoadEvent;
 import org.red.minecraft.dellarte.library.event.area.block.*;
 import org.red.minecraft.dellarte.library.event.area.entity.*;
 import org.red.minecraft.dellarte.library.event.area.player.*;
-import org.red.minecraft.dellarte.library.user.Wallet;
-import org.red.minecraft.dellarte.library.util.A_Data;
-import org.red.minecraft.dellarte.library.util.CoolTimeMap;
-import org.red.minecraft.dellarte.library.util.A_DataMap;
-import org.red.minecraft.dellarte.library.util.NamespaceMap;
 
 public class CommediaDellartePlugin extends JavaPlugin {
     public static CommediaDellartePlugin instance;
     public static DellarteManager manager;
+    public static FileConfiguration config;
 
     public static void sendLog(Object message) {
         Bukkit.getLogger().info("[ CommediaDellarte ]: " + message.toString());
@@ -42,16 +36,12 @@ public class CommediaDellartePlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
         this.saveDefaultConfig();
-        configurationSerializationSetting();
         getLogger().info("CommediaDellartePlugin enabled");
-        Config.loadConfig(this.getConfig());
-        setSoftPlugin();
-        getCommand("a_economy").setExecutor(new A_VaultCommand());
+        config = this.getConfig();
+        Config.loadConfig(config);
 
         Bukkit.getScheduler().runTaskLater(this, () -> {
             manager = new DellarteManager();
-            manager.getStroageLoad();
-            manager.entitiesDataLoad();
             manager.setInteractiveManager(ItemStack.class, new InteractiveManagerImpl<>(ItemStack.class));
             manager.setInteractiveManager(TileState.class, new InteractiveManagerImpl<>(TileState.class));
             CommediaDellarte.setDellarteManager(manager);
@@ -67,22 +57,9 @@ public class CommediaDellartePlugin extends JavaPlugin {
         getLogger().info("CommediaDellartePlugin disabled");
     }
 
-    private void setSoftPlugin() {
-        if(softPluginCheck("Vault")) A_Vault.setEconomy();
-    }
-
     private boolean softPluginCheck(String plName) {
         return Bukkit.getPluginManager().getPlugin(plName) != null;
     }
-
-    private void configurationSerializationSetting() {
-        ConfigurationSerialization.registerClass(CoolTimeMap.class);
-        ConfigurationSerialization.registerClass(A_Data.class);
-        ConfigurationSerialization.registerClass(NamespaceMap.class);
-        ConfigurationSerialization.registerClass(Wallet.class);
-        sendDebugLog("Setting All ConfigurationSerialization");
-    }
-
 
     private void setEventListener() {
 

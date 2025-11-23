@@ -3,6 +3,8 @@ package org.red.minecraft.dellarte.library.util;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
+import org.red.library.data.DataMap;
+import org.red.library.data.serialize.DataMapSerializable;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,7 +14,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class NamespaceMap<T> implements ConfigurationSerializable {
+public class NamespaceMap<T> implements DataMapSerializable {
     private final Map<NamespacedKey, T> map = new HashMap<>();
 
     public int size() {
@@ -122,14 +124,14 @@ public class NamespaceMap<T> implements ConfigurationSerializable {
     }
 
     @Override
-    public @NotNull Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<>();
+    public @NotNull DataMap serialize() {
+        DataMap result = new DataMap();
         for (Map.Entry<NamespacedKey, T> entry : this.entrySet()) {
             String namespace = entry.getKey().getNamespace();
             String key = entry.getKey().getKey();
             T value = entry.getValue();
 
-            Map<String, Object> map = (Map<String, Object>) result.computeIfAbsent(namespace, k -> new HashMap<>());
+            DataMap map = result.getDataMap(namespace);
             map.put(key, value);
         }
 
@@ -137,15 +139,12 @@ public class NamespaceMap<T> implements ConfigurationSerializable {
         return result;
     }
 
-    public static <T> NamespaceMap<T> deserialize(Map<String, Object> map) {
+    public static <T> NamespaceMap<T> deserialize(DataMap map) {
         NamespaceMap<T> result = new NamespaceMap<>();
-        map.remove("==");
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String namespace = entry.getKey();
-            Map<String, Object> value = (Map<String, Object>) entry.getValue();
-            for (Map.Entry<String, Object> entry1 : value.entrySet()) {
-                String key = entry1.getKey();
-                T value1 = (T) entry1.getValue();
+        for (String namespace : map.keySet()) {
+            DataMap value = map.getDataMap(namespace);
+            for (String key : value.keySet()) {
+                T value1 = (T) value.get(key);
 
                 result.put(new NamespacedKey(namespace, key), value1);
             }

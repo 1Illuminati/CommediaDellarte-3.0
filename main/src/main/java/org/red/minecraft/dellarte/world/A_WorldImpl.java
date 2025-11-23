@@ -27,13 +27,12 @@ import org.red.minecraft.dellarte.library.util.A_DataMap;
 import org.red.minecraft.dellarte.library.world.A_World;
 import org.red.minecraft.dellarte.library.world.Area;
 import org.red.minecraft.dellarte.CommediaDellartePlugin;
-import org.red.minecraft.dellarte.util.A_DataSaveLoad;
 
 import java.io.File;
 import java.util.*;
 import java.util.function.Predicate;
 
-public final class A_WorldImpl implements A_World, A_DataSaveLoad {
+public final class A_WorldImpl implements A_World {
     private final World world;
     private final Map<Plugin, List<Area>> areaMap = new HashMap<>();
 
@@ -1325,7 +1324,7 @@ public final class A_WorldImpl implements A_World, A_DataSaveLoad {
 
     @Override
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellarte.getPluginData(plugin).getWorldDataMap(getName());
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "world")).getDataMap(getUID());
     }
 
     @Override
@@ -1335,18 +1334,6 @@ public final class A_WorldImpl implements A_World, A_DataSaveLoad {
 
     @Override
     public CoolTimeMap getCoolTime(Plugin plugin) {
-        return CommediaDellarte.getPluginData(plugin).getWorldCoolTimeMap(getName());
-    }
-
-    @Override
-    public void aDataSave() {
-        CommediaDellartePlugin.manager.saveWorldData(this);
-        CommediaDellartePlugin.sendDebugLog("Saved PlayerData name: " + getName() + " uuid: " + getUID() + ".yml");
-    }
-
-    @Override
-    public void aDataLoad() {
-        CommediaDellartePlugin.manager.loadWorldData(this);
-        CommediaDellartePlugin.sendDebugLog("Loaded PlayerData name: " + getName() + " uuid: " + getUID() + ".yml");
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "world")).getCoolTimeMap(getUID());
     }
 }

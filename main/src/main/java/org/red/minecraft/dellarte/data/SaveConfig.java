@@ -1,5 +1,6 @@
 package org.red.minecraft.dellarte.data;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Keyed;
@@ -8,16 +9,26 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.Event;
 
 public final class SaveConfig implements Keyed {
+    private static final SaveType DEFAULT_SAVETYPE = SaveType.FILE;
+    private static final int DEFAULT_AUTOSAVETIME = 300;
+    private static final List<String> DEFAULT_SAVEEVENT = List.of("ONDISABLE");
+    private static final List<String> DEFAULT_LOADEVENT = List.of("FIRSTLOADEVENT");
+    public static SaveConfig createDefaultConfig(NamespacedKey nameSpacedKey) {
+        return new SaveConfig(nameSpacedKey, true, DEFAULT_SAVETYPE, DEFAULT_AUTOSAVETIME, DEFAULT_SAVEEVENT, DEFAULT_LOADEVENT);
+    }
+    
     private final NamespacedKey nameSpace;
+    private final boolean enable;
     private final SaveType saveType;
-    private final double autoSaveTime;
+    private final int autoSaveTime;
     private final List<String> saveEvent;
     private final List<String> loadEvent;
     private final boolean saveAtOnDisable;
     private final boolean loadAtOnEnable;
 
-    private SaveConfig(NamespacedKey nameSpace, SaveType saveType, double autoSaveTime, List<String> saveEvent, List<String> loadEvent) {
+    private SaveConfig(NamespacedKey nameSpace, boolean enable, SaveType saveType, int autoSaveTime, List<String> saveEvent, List<String> loadEvent) {
         this.nameSpace = nameSpace;
+        this.enable = enable;
         this.saveType = saveType;
         this.autoSaveTime = autoSaveTime;
         this.saveEvent = saveEvent;
@@ -26,11 +37,15 @@ public final class SaveConfig implements Keyed {
         this.saveAtOnDisable = saveEvent.contains("ONDISABLE");
     }
 
+    public boolean isEnable() {
+        return this.enable;
+    }
+
     public SaveType getSaveType() {
         return this.saveType;
     }
 
-    public double getAutoSaveTime() {
+    public int getAutoSaveTime() {
         return this.autoSaveTime;
     }
 
@@ -51,13 +66,19 @@ public final class SaveConfig implements Keyed {
     }
 
     public static SaveConfig createSaveConfig(NamespacedKey nameSapce, ConfigurationSection section) {
-        return new SaveConfig(nameSapce, SaveType.valueOf(section.getString("saveType")), section.getDouble("autoSaveTime"), 
-                section.getStringList("saveEvent"), section.getStringList("loadEvent"));
+        boolean enable = section.getBoolean("enable", true);
+        SaveType saveType = section.contains("saveType") ? SaveType.valueOf(section.getString("saveType")) : DEFAULT_SAVETYPE;
+        int autoSaveTime = section.getInt("autoSaveTime", DEFAULT_AUTOSAVETIME);
+        List<String> saveEvent = section.contains("saveEvent") ? section.getStringList("saveEvent") : DEFAULT_SAVEEVENT;
+        List<String> loadEvent = section.contains("loadEvent") ? section.getStringList("loadEvent") : DEFAULT_LOADEVENT;
+
+        return new SaveConfig(nameSapce, enable, saveType, autoSaveTime, saveEvent, loadEvent);
     }
 
     public enum SaveType {
         FILE,
-        MYSQL
+        MYSQL,
+        NONE
     }
 
     @Override

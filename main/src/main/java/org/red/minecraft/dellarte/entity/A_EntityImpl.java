@@ -2,6 +2,7 @@ package org.red.minecraft.dellarte.entity;
 
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
@@ -577,7 +578,7 @@ public class A_EntityImpl implements A_Entity {
     @Override
     @NotNull
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellarte.getPluginData(plugin).getEntityDataMap(this);
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "entity")).getDataMap(getUniqueId());
     }
 
     @Override
@@ -589,6 +590,6 @@ public class A_EntityImpl implements A_Entity {
     @Override
     @NotNull
     public CoolTimeMap getCoolTime(Plugin plugin) {
-        return CommediaDellarte.getPluginData(plugin).getEntityCoolTimeMap(this);
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "entity")).getCoolTimeMap(getUniqueId());
     }
 }

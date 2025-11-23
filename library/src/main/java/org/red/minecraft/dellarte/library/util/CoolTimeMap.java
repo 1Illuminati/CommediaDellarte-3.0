@@ -1,16 +1,16 @@
 package org.red.minecraft.dellarte.library.util;
 
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
+import org.red.library.data.DataMap;
+import org.red.library.data.serialize.DataMapSerializable;
 
 import java.util.*;
 
-public class CoolTimeMap implements ConfigurationSerializable {
+public class CoolTimeMap implements DataMapSerializable {
     private Map<String, Long> map = new HashMap<>();
 
-    public static CoolTimeMap deserialize(Map<String, Object> map) {
+    public static CoolTimeMap deserialize(DataMap map) {
         CoolTimeMap coolTime = new CoolTimeMap();
-        map.remove("==");
 
         for (Map.Entry<String, Object> entry : map.entrySet())
             coolTime.map.put(entry.getKey(), Long.valueOf((String) entry.getValue()));
@@ -98,8 +98,8 @@ public class CoolTimeMap implements ConfigurationSerializable {
     }
 
     @Override
-    public @NotNull Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
+    public @NotNull DataMap serialize() {
+        DataMap map = new DataMap();
 
         for (Map.Entry<String, Long> entry : this.map.entrySet())
             map.put(entry.getKey(), String.valueOf(entry.getValue()));
