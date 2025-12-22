@@ -1,6 +1,7 @@
 package org.red.minecraft.dellarte;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.TileState;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.block.*;
@@ -8,12 +9,18 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
 import org.red.minecraft.dellarte.event.listener.InteractiveItemListener;
 import org.red.minecraft.dellarte.event.listener.InteractiveTileListener;
 import org.red.minecraft.dellarte.event.listener.InventoryEventListener;
 import org.red.minecraft.dellarte.event.listener.area.*;
 import org.red.minecraft.dellarte.interactive.*;
 import org.red.minecraft.dellarte.library.CommediaDellarte;
+import org.red.minecraft.dellarte.library.data.serialize.BoundingBoxSerialize;
+import org.red.minecraft.dellarte.library.data.serialize.ItemStackSerialize;
+import org.red.minecraft.dellarte.library.data.serialize.LocationSerialize;
+import org.red.minecraft.dellarte.library.data.serialize.VectorSerialize;
 import org.red.minecraft.dellarte.library.event.FirstLoadEvent;
 import org.red.minecraft.dellarte.library.event.area.block.*;
 import org.red.minecraft.dellarte.library.event.area.entity.*;
@@ -40,13 +47,20 @@ public class CommediaDellartePlugin extends JavaPlugin {
         config = this.getConfig();
         Config.loadConfig(config);
 
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            manager = new DellarteManager();
-            manager.setInteractiveManager(ItemStack.class, new InteractiveManagerImpl<>(ItemStack.class));
-            manager.setInteractiveManager(TileState.class, new InteractiveManagerImpl<>(TileState.class));
-            CommediaDellarte.setDellarteManager(manager);
-            this.setEventListener();
+        manager = new DellarteManager();
+        manager.setInteractiveManager(ItemStack.class, new InteractiveManagerImpl<>(ItemStack.class));
+        manager.setInteractiveManager(TileState.class, new InteractiveManagerImpl<>(TileState.class));
+        CommediaDellarte.setDellarteManager(manager);
+        this.setEventListener();
 
+        manager.registerSerializableClass(ItemStack.class, new ItemStackSerialize());
+        manager.registerSerializableClass(Location.class, new LocationSerialize());
+        manager.registerSerializableClass(BoundingBox.class, new BoundingBoxSerialize());
+        manager.registerSerializableClass(Vector.class, new VectorSerialize());
+
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            CommediaDellartePlugin.manager.createDataStorages();
+            CommediaDellartePlugin.manager.allDataLoad();
             Bukkit.getPluginManager().callEvent(new FirstLoadEvent());
         }, 1);
     }

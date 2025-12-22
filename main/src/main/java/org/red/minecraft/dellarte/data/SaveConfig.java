@@ -66,6 +66,9 @@ public final class SaveConfig implements Keyed {
     }
 
     public static SaveConfig createSaveConfig(NamespacedKey nameSapce, ConfigurationSection section) {
+        if (section == null) 
+            return new SaveConfig(nameSapce, true, DEFAULT_SAVETYPE, DEFAULT_AUTOSAVETIME, DEFAULT_SAVEEVENT, DEFAULT_LOADEVENT);
+
         boolean enable = section.getBoolean("enable", true);
         SaveType saveType = section.contains("saveType") ? SaveType.valueOf(section.getString("saveType")) : DEFAULT_SAVETYPE;
         int autoSaveTime = section.getInt("autoSaveTime", DEFAULT_AUTOSAVETIME);

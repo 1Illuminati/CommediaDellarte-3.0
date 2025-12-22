@@ -28,6 +28,9 @@ public interface A_OfflinePlayer extends A_DataHolder {
     @NotNull
     UUID getUniqueId();
 
+    @NotNull
+    String getUniqueIdStr();
+
     boolean isBanned();
 
     boolean isWhitelisted();

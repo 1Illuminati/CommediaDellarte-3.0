@@ -80,12 +80,25 @@ public class DellarteManager implements IDellarteManager {
         section.getKeys(false).forEach(key -> {
             ConfigurationSection pluginSection = section.getConfigurationSection(key);
             pluginSection.getKeys(false).forEach(type -> {
-                SaveConfig config = SaveConfig.createSaveConfig(new NamespacedKey(key, type), pluginSection.getConfigurationSection(key));
+                SaveConfig config = SaveConfig.createSaveConfig(new NamespacedKey(key.toLowerCase(), type), pluginSection.getConfigurationSection(key));
                 DataStorage storage = new DataStorage(config, createAdapter(config));
                 map.put(config.getKey(), storage);
                 setStorageAutoSave(storage);
             });
+
+            
+            if (!pluginSection.contains("player"))
+                createDefaultStorage(key, "player");
+            if (!pluginSection.contains("entity"))
+                createDefaultStorage(key, "entity");
+            if (!pluginSection.contains("world"))
+                createDefaultStorage(key, "world");
         });
+    }
+
+    public void createDefaultStorage(String key, String type) {
+        NamespacedKey nkey = new NamespacedKey(key.toLowerCase(), type);
+        map.put(nkey, DataStorage.createDefaultDataStorage(nkey));
     }
 
     /**
@@ -134,6 +147,10 @@ public class DellarteManager implements IDellarteManager {
     }
 
     public void allDataSave() {
+        map.values().forEach(DataStorage::saveAll);
+    }
+
+    public void allDataLoad() {
         map.values().forEach(DataStorage::saveAll);
     }
 

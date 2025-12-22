@@ -163,6 +163,9 @@ public interface A_Entity extends A_DataHolder {
     @NotNull
     UUID getUniqueId();
 
+    @NotNull
+    String getUniqueIdStr();
+
     int getTicksLived();
 
     void setTicksLived(int var1);

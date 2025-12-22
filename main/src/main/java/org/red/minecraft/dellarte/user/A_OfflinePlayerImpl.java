@@ -206,7 +206,7 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer {
     @Override
     @NotNull
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "player")).getDataMap(getUniqueId());
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "player")).getDataMap(getUniqueIdStr());
     }
 
     @Override
@@ -218,6 +218,11 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer {
     @Override
     @NotNull
     public CoolTimeMap getCoolTime(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "player")).getCoolTimeMap(getUniqueId());
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "player")).getCoolTimeMap(getUniqueIdStr());
+    }
+
+    @Override
+    public @NotNull String getUniqueIdStr() {
+        return this.getUniqueId().toString();
     }
 }

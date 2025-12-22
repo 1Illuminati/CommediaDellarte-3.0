@@ -578,7 +578,7 @@ public class A_EntityImpl implements A_Entity {
     @Override
     @NotNull
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "entity")).getDataMap(getUniqueId());
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "entity")).getDataMap(getUniqueIdStr());
     }
 
     @Override
@@ -590,6 +590,11 @@ public class A_EntityImpl implements A_Entity {
     @Override
     @NotNull
     public CoolTimeMap getCoolTime(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "entity")).getCoolTimeMap(getUniqueId());
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "entity")).getCoolTimeMap(getUniqueIdStr());
+    }
+
+    @Override
+    public @NotNull String getUniqueIdStr() {
+        return this.getUniqueId().toString();
     }
 }

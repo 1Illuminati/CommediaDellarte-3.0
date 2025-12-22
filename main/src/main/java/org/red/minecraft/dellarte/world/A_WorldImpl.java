@@ -1324,7 +1324,7 @@ public final class A_WorldImpl implements A_World {
 
     @Override
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "world")).getDataMap(getUID());
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "world")).getDataMap(getName());
     }
 
     @Override
@@ -1334,6 +1334,6 @@ public final class A_WorldImpl implements A_World {
 
     @Override
     public CoolTimeMap getCoolTime(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "world")).getCoolTimeMap(getUID());
+        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "world")).getCoolTimeMap(getName());
     }
 }

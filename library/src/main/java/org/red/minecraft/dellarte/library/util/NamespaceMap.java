@@ -1,7 +1,6 @@
 package org.red.minecraft.dellarte.library.util;
 
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
 import org.red.library.data.DataMap;
 import org.red.library.data.serialize.DataMapSerializable;
