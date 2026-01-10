@@ -14,6 +14,7 @@ import org.bukkit.util.Vector;
 import org.red.minecraft.dellarte.event.listener.InteractiveItemListener;
 import org.red.minecraft.dellarte.event.listener.InteractiveTileListener;
 import org.red.minecraft.dellarte.event.listener.InventoryEventListener;
+import org.red.minecraft.dellarte.event.listener.PlayerChatListener;
 import org.red.minecraft.dellarte.event.listener.area.*;
 import org.red.minecraft.dellarte.interactive.*;
 import org.red.minecraft.dellarte.library.CommediaDellarte;
@@ -80,6 +81,7 @@ public class CommediaDellartePlugin extends JavaPlugin {
         new InteractiveItemListener().register();
         new InteractiveTileListener().register();
         new InventoryEventListener().register();
+        new PlayerChatListener().register();
 
         // Register Area Block Event
         new AllBlockEventListener<>(AreaBlockBreakEvent.class, BlockBreakEvent.class);

@@ -1,10 +1,7 @@
 package org.red.minecraft.dellarte.library.event;
 
-import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-
-import java.util.Arrays;
 
 public class FirstLoadEvent extends Event {
     private static final HandlerList HANDLERS_LIST = new HandlerList();

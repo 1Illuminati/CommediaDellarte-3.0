@@ -17,6 +17,7 @@ import org.bukkit.conversations.ConversationAbandonedEvent;
 import org.bukkit.entity.*;
 import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.map.MapView;
@@ -39,6 +40,8 @@ import org.red.minecraft.dellarte.library.entity.A_Player;
 import org.red.minecraft.dellarte.library.inventory.CustomGui;
 import org.red.minecraft.dellarte.library.user.A_OfflinePlayer;
 import org.red.minecraft.dellarte.CommediaDellartePlugin;
+import org.red.minecraft.dellarte.library.util.NamespaceMap;
+import org.red.minecraft.dellarte.library.util.PairData;
 import org.red.minecraft.dellarte.user.A_OfflinePlayerImpl;
 
 import java.net.InetSocketAddress;
@@ -47,7 +50,8 @@ import java.util.*;
 public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player {
     private final A_OfflinePlayerImpl offlinePlayer;
     private final Player player;
-    private boolean ignoreInvCloseEvent = false;
+    private final Map<PlayerStatus, Boolean> statusMap = new HashMap<>();
+    private final NamespaceMap<PairData<PlayerChatRunnable, Boolean>> chatRunMap = new NamespaceMap<>();
 
     public A_PlayerImpl(A_OfflinePlayerImpl offlinePlayer, Player player) {
         super(player);
@@ -90,14 +94,6 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player {
     @Override
     public boolean comparePlayer(A_OfflinePlayer player) {
         return this.comparePlayer(player.getUniqueId());
-    }
-
-    public boolean isIgnoreInvCloseEvent() {
-        return this.ignoreInvCloseEvent;
-    }
-
-    public void setIgnoreInvCloseEvent(boolean ignoreInvCloseEvent) {
-        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
     }
 
     @Override
@@ -429,25 +425,25 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player {
 
     @Override
     public void delayOpenInventory(Inventory inv, boolean ignoreInvCloseEvent) {
-        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
+        this.setPlayerStatus(PlayerStatus.IgnoreInvClose, ignoreInvCloseEvent);
         this.delayOpenInventory(inv);
     }
 
     @Override
     public void delayOpenInventory(Inventory inv, int delay, boolean ignoreInvCloseEvent) {
-        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
+        this.setPlayerStatus(PlayerStatus.IgnoreInvClose, ignoreInvCloseEvent);
         this.delayOpenInventory(inv, delay);
     }
 
     @Override
     public void delayOpenInventory(CustomGui inv, boolean ignoreInvCloseEvent) {
-        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
+        this.setPlayerStatus(PlayerStatus.IgnoreInvClose, ignoreInvCloseEvent);
         this.delayOpenInventory(inv);
     }
 
     @Override
     public void delayOpenInventory(CustomGui inv, int delay, boolean ignoreInvCloseEvent) {
-        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
+        this.setPlayerStatus(PlayerStatus.IgnoreInvClose, ignoreInvCloseEvent);
         this.delayOpenInventory(inv, delay);
     }
 
@@ -850,6 +846,50 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player {
     }
 
     @Override
+    public boolean getPlayerStatus(PlayerStatus status) {
+        return this.statusMap.getOrDefault(status, false);
+    }
+
+    @Override
+    public void switchPlayerStatus(PlayerStatus status) {
+        this.setPlayerStatus(status, !this.getPlayerStatus(status));
+    }
+
+    @Override
+    public void setPlayerStatus(PlayerStatus status, boolean bool) {
+        this.statusMap.put(status, bool);
+    }
+
+    @Override
+    public void setPlayerChatRunnable(PlayerChatRunnable runnable, NamespacedKey key) {
+        this.setPlayerChatRunnable(runnable, key, true);
+    }
+
+    @Override
+    public void setPlayerChatRunnable(PlayerChatRunnable runnable, NamespacedKey key, boolean sync) {
+        this.setPlayerStatus(PlayerStatus.ChatEvent, true);
+        this.chatRunMap.put(key, new PairData<>(runnable, sync));
+    }
+
+    public void runPlayerChatRunnable(AsyncPlayerChatEvent event) {
+        this.chatRunMap.values().forEach(pairData -> {
+            PlayerChatRunnable runnable = pairData.dataA();
+            boolean sync = pairData.dataB();
+            boolean eventSync = event.isAsynchronous();
+
+            if (sync == eventSync) {
+                runnable.run(event);
+            } else if (sync) {
+                Bukkit.getScheduler().runTask(CommediaDellartePlugin.instance, () -> runnable.run(event));
+            } else {
+                Bukkit.getScheduler().runTaskAsynchronously(CommediaDellartePlugin.instance, () -> runnable.run(event));
+            }
+        });
+
+        this.chatRunMap.clear();
+    }
+
+    @Override
     @NotNull
     public String getName() {
         return player.getName();
@@ -892,7 +932,7 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player {
 
     @Override
     public @Nullable InventoryView openInventory(@NotNull Inventory var1, boolean ignoreInvCloseEvent) {
-        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
+        this.setPlayerStatus(PlayerStatus.IgnoreInvClose, ignoreInvCloseEvent);
         return player.openInventory(var1);
     }
 
@@ -903,7 +943,7 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player {
 
     @Override
     public @Nullable InventoryView openInventory(@NotNull CustomGui var1, boolean ignoreInvCloseEvent) {
-        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
+        this.setPlayerStatus(PlayerStatus.IgnoreInvClose, ignoreInvCloseEvent);
         return player.openInventory(var1.getInventory());
     }
 
@@ -943,7 +983,7 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player {
 
     @Override
     public void closeInventory(boolean ignoreInvCloseEvent) {
-        this.ignoreInvCloseEvent = ignoreInvCloseEvent;
+        this.setPlayerStatus(PlayerStatus.IgnoreInvClose, ignoreInvCloseEvent);
         this.closeInventory();
     }
 

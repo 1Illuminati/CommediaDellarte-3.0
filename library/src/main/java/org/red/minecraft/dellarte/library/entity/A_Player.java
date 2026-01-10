@@ -12,6 +12,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.map.MapView;
 import org.bukkit.plugin.Plugin;
@@ -36,10 +37,6 @@ public interface A_Player extends A_LivingEntity {
     boolean comparePlayer(A_Player player);
 
     boolean comparePlayer(A_OfflinePlayer player);
-
-    boolean isIgnoreInvCloseEvent();
-
-    void setIgnoreInvCloseEvent(boolean ignoreInvCloseEvent);
 
     ItemStack getPlayerSkull();
 
@@ -554,4 +551,23 @@ public interface A_Player extends A_LivingEntity {
 
     @NotNull
     Player.Spigot spigot();
+
+    boolean getPlayerStatus(PlayerStatus status);
+
+    void switchPlayerStatus(PlayerStatus status);
+
+    void setPlayerStatus(PlayerStatus status, boolean bool);
+
+    void setPlayerChatRunnable(PlayerChatRunnable runnable, NamespacedKey key);
+
+    void setPlayerChatRunnable(PlayerChatRunnable runnable, NamespacedKey key, boolean sync);
+
+    enum PlayerStatus {
+        IgnoreInvClose,
+        ChatEvent,
+    }
+
+    interface PlayerChatRunnable {
+        void run(AsyncPlayerChatEvent event);
+    }
 }

@@ -38,8 +38,8 @@ public class InventoryEventListener extends DellarteListener {
 
         A_Player player = CommediaDellarte.getAPlayer(event.getPlayer().getUniqueId());
 
-        if (player != null && player.isIgnoreInvCloseEvent()) {
-            player.setIgnoreInvCloseEvent(false);
+        if (player != null && player.getPlayerStatus(A_Player.PlayerStatus.IgnoreInvClose)) {
+            player.switchPlayerStatus(A_Player.PlayerStatus.IgnoreInvClose);
             return;
         }
 
