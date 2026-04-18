@@ -9,7 +9,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -84,6 +83,7 @@ public class DellarteManager implements IDellarteManager {
                 DataStorage storage = new DataStorage(config, createAdapter(config));
                 map.put(config.getKey(), storage);
                 setStorageAutoSave(storage);
+                CommediaDellartePlugin.sendDebugLog("CreateStroage - " + storage.getKey());
             });
 
             
@@ -110,14 +110,19 @@ public class DellarteManager implements IDellarteManager {
         if (!config.isEnable()) return new NoneAdapter();
 
         switch(config.getSaveType()) {
-            case FILE: result = new FileAdapter(new A_File(config.getKey().getNamespace() + "/" + config.getKey().getKey()));
+            case FILE: {
+                result = new FileAdapter(new A_File(config.getKey().getNamespace() + "/" + config.getKey().getKey()));
+                break;
+            }
             case MYSQL: {
                 try {
                     result = new MySqlAdapter(getDBConfigLoad(config.getKey()));
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-            };
+
+                break;
+            }
         };
 
         return result;

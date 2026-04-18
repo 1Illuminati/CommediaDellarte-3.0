@@ -7,12 +7,12 @@ import org.red.library.data.DataMapManager;
 import org.red.library.data.adapter.FileAdapter;
 import org.red.library.data.adapter.IAdapter;
 import org.red.library.data.serialize.RegisterSerializable;
-import org.red.minecraft.dellarte.library.data.IDataStroage;
+import org.red.minecraft.dellarte.library.data.IDataStorage;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
 import org.red.minecraft.dellarte.library.util.CoolTimeMap;
 import org.red.minecraft.dellarte.util.A_File;
 
-public class DataStorage extends DataMapManager implements IDataStroage {
+public class DataStorage extends DataMapManager implements IDataStorage {
     public static DataStorage createDefaultDataStorage(NamespacedKey key) {
         return new DataStorage(SaveConfig.createDefaultConfig(key), new FileAdapter(new A_File(key.getNamespace() + "/" + key.getKey())));
     }
@@ -65,8 +65,12 @@ public class DataStorage extends DataMapManager implements IDataStroage {
     }
 
     public A_DataMap getData(String key) {
-        if (loadedData(key)) return dataMaps.get(key);
-        else if (containData(key)) loadData(key);
+        if (loadedData(key)) {
+            return dataMaps.get(key);
+        }
+        else if (containDataMap(key)) {
+            loadData(key);
+        }
         else dataMaps.put(key, new A_DataMap());
 
         return getData(key);
@@ -79,12 +83,12 @@ public class DataStorage extends DataMapManager implements IDataStroage {
 
     @Override
     public boolean containData(String key) {
-        return dataMaps.containsKey(key);
+        return super.containDataMap(key);
     }
 
     @Override
     public void saveData(String key) {
-        super.saveDataMap(key, getDataMap(key));
+        super.saveDataMap(key, getData(key));
     }
 
     @Override
@@ -99,7 +103,7 @@ public class DataStorage extends DataMapManager implements IDataStroage {
 
     @Override
     public void loadAll() {
-        super.getAdapter().loadAllKey().forEach(key -> super.loadDataMap(key));
+        super.getAdapter().loadAllKey().forEach(key -> loadData(key));
     }
 
     @Override

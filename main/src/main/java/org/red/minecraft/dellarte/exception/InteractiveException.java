@@ -24,4 +24,10 @@ public class InteractiveException extends RuntimeException {
             super(obj, "Please register the InteractiveObj first.");
         }
     }
+
+    public static class IllegalParameterInteractiveObj extends InteractiveException {
+        public IllegalParameterInteractiveObj(InteractiveObj<?> obj) {
+            super(obj, "Parameter must be event class or generic type, non");
+        }
+    }
 }

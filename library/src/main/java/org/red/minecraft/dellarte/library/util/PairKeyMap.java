@@ -44,6 +44,12 @@ public class PairKeyMap<K1, K2, V> implements ConfigurationSerializable {
         return map.remove(key);
     }
 
+    public V getOrDefault(K1 key1, K2 key2, V nullValue) {
+        if (containsKeys(key1, key2))
+            return nullValue;
+        else return get(key1, key2);
+    }
+
     public Map<K1, V> getByFirstKey(K1 key1) {
         Map<K1, V> resultMap = new HashMap<>();
         for (Map.Entry<PairKey<K1, K2>, V> entry : map.entrySet()) {

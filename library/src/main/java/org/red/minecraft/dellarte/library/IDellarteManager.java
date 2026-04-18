@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.library.data.serialize.RegisterSerializable;
-import org.red.minecraft.dellarte.library.data.IDataStroage;
+import org.red.minecraft.dellarte.library.data.IDataStorage;
 import org.red.minecraft.dellarte.library.entity.A_Entity;
 import org.red.minecraft.dellarte.library.entity.A_LivingEntity;
 import org.red.minecraft.dellarte.library.entity.A_Player;
@@ -26,7 +26,7 @@ public interface IDellarteManager {
     
     <T> void registerSerializableClass(Class<T> clazz, RegisterSerializable<T> registerSerializable);
 
-    IDataStroage getStorage(NamespacedKey key);
+    IDataStorage getStorage(NamespacedKey key);
 
     boolean containStorage(NamespacedKey key);
     

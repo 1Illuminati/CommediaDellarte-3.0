@@ -12,6 +12,7 @@ import org.red.minecraft.dellarte.library.interactive.InteractiveManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +72,7 @@ public class InteractiveManagerImpl<T> implements InteractiveManager<T> {
                 method.invoke(interactiveObj, obj, event);
                 CommediaDellartePlugin.sendDebugLog("Run InteractiveObj Key-" + interactiveObj.getKey() + ", Class-" + managerType.getName());
             } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
+                throw new InteractiveException(interactiveObj, e.getMessage());
             }
         }
     }
@@ -82,14 +83,30 @@ public class InteractiveManagerImpl<T> implements InteractiveManager<T> {
         for (InteractiveObjInfo<T> value : interactiveObjInfoMaps.values()) {
             if (!value.getObj().isHasInteractive(obj)) continue;
 
-            if (value.methodMap.containsKeys(act, event.getClass())) {
-                Method method = value.methodMap.get(act, event.getClass());
+            Class<? extends Event> eventClass = event.getClass();
+
+            if (value.methodMap.containsKeys(act, eventClass)) {
+                Method method = value.methodMap.get(act, eventClass);
 
                 try {
-                    method.invoke(value.obj, obj, event);
+                    Parameter[] params = method.getParameters();
+                    Object[] args = new Object[params.length];
+
+                    for (int i = 0; i < params.length; i++) {
+                        Class<?> type = params[i].getType();
+                        if (type.isAssignableFrom(this.managerType)) {
+                            args[i] = obj;
+                        } else if (type.isAssignableFrom(eventClass)) {
+                            args[i] = event;
+                        } else {
+                            throw new InteractiveException.IllegalParameterInteractiveObj(value.obj);
+                        }
+                    }
+
+                    method.invoke(value.obj, args);
                     CommediaDellartePlugin.sendDebugLog("Run InteractiveObj Key-" + value.obj.getKey() + ", Class-" + managerType.getName());
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
+                    throw new InteractiveException(value.obj, e.getMessage());
                 }
             }
         }
@@ -103,42 +120,58 @@ public class InteractiveManagerImpl<T> implements InteractiveManager<T> {
             if (!method.isAnnotationPresent(InteractiveAnnotation.class))
                 continue;
 
-            Class<? extends InteractiveAct<T>> act = getAct(obj, method);
-
-            InteractiveAct.ActAnnotation actAnnotation = act.getAnnotation(InteractiveAct.ActAnnotation.class);
-
-            Class<? extends Event> event = actAnnotation.event();
+            List<Class<? extends InteractiveAct<T>>> acts = getAct(obj, method);
             Class<?>[] classes = method.getParameterTypes();
 
-            if (classes.length != 2)
+            if (classes.length <= 2)
                 continue;
 
-            Class<?> objClass = classes[0];
-            Class<?> eventClass = classes[1];
-            if (objClass.isAssignableFrom(this.managerType) && eventClass.isAssignableFrom(event))
-                objInfo.methodMap.put(act, event, method);
+            for (Class<? extends InteractiveAct<T>> act : acts) {
+                Class<? extends Event> event = act.getAnnotation(InteractiveAct.ActAnnotation.class).event();
 
+
+                if (paramCheck(method.getParameters(), event))
+                    throw new InteractiveException.IllegalParameterInteractiveObj(obj);
+
+
+                objInfo.methodMap.put(act, event, method);
+            }
         }
 
         return objInfo;
     }
 
-    private @NotNull Class<? extends InteractiveAct<T>> getAct(InteractiveObj<T> obj, Method method) {
-        InteractiveAnnotation annotation = method.getAnnotation(InteractiveAnnotation.class);
+    private boolean paramCheck(Parameter[] params, Class<? extends Event> event) {
+        if (params.length <= 2)
+            return false;
 
-        Class<? extends InteractiveAct<T>> act;
-
-        try {
-            act = (Class<? extends InteractiveAct<T>>) annotation.act();
-        } catch (Exception e) {
-            throw new InteractiveException.InteractiveGenericException(obj);
+        for (Parameter param : params) {
+            if (!param.getType().isAssignableFrom(this.managerType) && !param.getType().isAssignableFrom(event))
+                return false;
         }
 
-        if (!act.isAnnotationPresent(InteractiveAct.ActAnnotation.class)) {
-            throw new InteractiveException.InteractiveActAnnotationNotFound(obj);
+        return true;
+    }
+
+    private @NotNull List<Class<? extends InteractiveAct<T>>> getAct(InteractiveObj<T> obj, Method method) {
+        InteractiveAnnotation[] annotations = method.getAnnotationsByType(InteractiveAnnotation.class);
+
+        List<Class<? extends InteractiveAct<T>>> acts = new ArrayList<>();
+
+        for (InteractiveAnnotation annotation : annotations) {
+            Class<? extends InteractiveAct<T>> act = (Class<? extends InteractiveAct<T>>) annotation.act();
+
+            if (!act.isAnnotationPresent(InteractiveAct.ActAnnotation.class))
+                throw new InteractiveException.InteractiveActAnnotationNotFound(obj);
+
+            try {
+                acts.add(act);
+            } catch (Exception e) {
+                throw new InteractiveException.InteractiveGenericException(obj);
+            }
         }
 
-        return act;
+        return acts;
     }
 
 

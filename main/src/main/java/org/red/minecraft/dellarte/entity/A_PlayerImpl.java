@@ -877,7 +877,7 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player {
             boolean sync = pairData.dataB();
             boolean eventSync = event.isAsynchronous();
 
-            if (sync == eventSync) {
+            if (sync != eventSync) {
                 runnable.run(event);
             } else if (sync) {
                 Bukkit.getScheduler().runTask(CommediaDellartePlugin.instance, () -> runnable.run(event));

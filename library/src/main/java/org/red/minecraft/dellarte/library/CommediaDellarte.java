@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.library.data.serialize.RegisterSerializable;
-import org.red.minecraft.dellarte.library.data.IDataStroage;
+import org.red.minecraft.dellarte.library.data.IDataStorage;
 import org.red.minecraft.dellarte.library.entity.A_Entity;
 import org.red.minecraft.dellarte.library.entity.A_LivingEntity;
 import org.red.minecraft.dellarte.library.entity.A_Player;
@@ -33,7 +33,7 @@ public final class CommediaDellarte {
         CommediaDellarte.manager = manager;
     }
 
-    public static IDataStroage getStorage(NamespacedKey key) {
+    public static IDataStorage getStorage(NamespacedKey key) {
         return manager.getStorage(key);
     }
 

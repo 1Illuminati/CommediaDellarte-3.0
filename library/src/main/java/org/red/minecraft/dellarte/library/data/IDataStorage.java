@@ -1,7 +1,5 @@
 package org.red.minecraft.dellarte.library.data;
 
-import java.util.UUID;
-
 import org.bukkit.Keyed;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
 import org.red.minecraft.dellarte.library.util.CoolTimeMap;
@@ -14,7 +12,7 @@ import org.red.minecraft.dellarte.library.util.CoolTimeMap;
  * 
  * CommediaDellarte config에서 사전 설정을 통해 제작된다
  */
-public interface IDataStroage extends Keyed {
+public interface IDataStorage extends Keyed {
 
     /**
      * 데이터 맵 불러오기

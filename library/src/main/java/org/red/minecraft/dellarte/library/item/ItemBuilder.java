@@ -198,7 +198,12 @@ public class ItemBuilder {
             Class<?> property = Class.forName("com.mojang.authlib.properties.Property");
             Object profile = gameProfile.getConstructor(UUID.class, String.class).newInstance(UUID.fromString(builder.toString()), null);
             byte[] encodedData = Base64.getEncoder().encode(String.format("{textures:{SKIN:{url:\"%s\"}}}", url).getBytes());
-            gameProfile.getMethod("getProperties").invoke(profile).getClass().getMethod("put", Object.class, Object.class).invoke(gameProfile.getMethod("getProperties").invoke(profile), "textures", property.getConstructor(String.class, String.class).newInstance("textures", new String(encodedData)));
+
+            String funcName = "getProperties";
+            if (!Arrays.stream(gameProfile.getMethods()).anyMatch(m -> m.getName().equals("getProperties")))
+                funcName = "properties";
+
+            gameProfile.getMethod(funcName).invoke(profile).getClass().getMethod("put", Object.class, Object.class).invoke(gameProfile.getMethod(funcName).invoke(profile), "textures", property.getConstructor(String.class, String.class).newInstance("textures", new String(encodedData)));
             Field profileField = skullMeta.getClass().getDeclaredField("profile");
             profileField.setAccessible(true);
             profileField.set(skullMeta, profile);
