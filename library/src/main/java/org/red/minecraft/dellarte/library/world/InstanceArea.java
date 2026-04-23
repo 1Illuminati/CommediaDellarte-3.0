@@ -11,14 +11,15 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.minecraft.dellarte.library.CommediaDellarte;
-import org.red.minecraft.dellarte.library.util.A_DataHolder;
-import org.red.minecraft.dellarte.library.util.CoolTimeMap;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class InstanceArea implements Area, A_DataHolder {
+/**
+ * 간단하게 사용할때 쓰라고 만든 구현체
+ */
+public class InstanceArea implements Area {
     private final Plugin plugin;
     private final String name;
     private final BoundingBox box;
@@ -126,25 +127,11 @@ public class InstanceArea implements Area, A_DataHolder {
         return entities;
     }
 
-    @Override
+    /**
+     * Area에 데이터를 저장이 필요할때 사용하는 함수
+     * @return 해당 Area DataMap
+     */
     public A_DataMap getDataMap() {
-        return this.getDataMap(plugin);
-    }
-
-    @Override
-    public A_DataMap getDataMap(Plugin plugin) {
-        return null;
-        //return CommediaDellarte.getPluginData(plugin).getDataMap("area", name);
-    }
-
-    @Override
-    public CoolTimeMap getCoolTime() {
-        return this.getCoolTime(plugin);
-    }
-
-    @Override
-    public CoolTimeMap getCoolTime(Plugin plugin) {
-        return null;
-        //return CommediaDellarte.getPluginData(plugin).getCoolTimeMap("area", name);
+        return this.world.getDataMap(this.plugin).getDataMap("area--" + this.name);
     }
 }

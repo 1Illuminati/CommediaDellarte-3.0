@@ -1,7 +1,7 @@
 name: CommediaDellarte
 version: 3.1-SNAPSHOT
 main: org.red.minecraft.dellarte.CommediaDellartePlugin
-authors: [Inok, RedKiller, Double]
+authors: Double_Z_
 api-version: 1.17
 description: Final Dellarte
 

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Server Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header>
+    <h1>⛏ Server Dashboard</h1>
+    <span id="refresh-timer">새로고침: 5s</span>
+</header>
+
+<main>
+    <section class="card" id="status-card">
+        <h2>서버 상태</h2>
+        <div class="stat-grid">
+            <div class="stat">
+                <span class="label">버전</span>
+                <span class="value" id="stat-version">—</span>
+            </div>
+            <div class="stat">
+                <span class="label">접속 인원</span>
+                <span class="value" id="stat-online">—</span>
+            </div>
+            <div class="stat">
+                <span class="label">최대 인원</span>
+                <span class="value" id="stat-max">—</span>
+            </div>
+            <div class="stat">
+                <span class="label">MOTD</span>
+                <span class="value" id="stat-motd">—</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="card" id="players-card">
+        <h2>접속 중인 플레이어</h2>
+        <div id="player-list">
+            <p class="empty">데이터를 불러오는 중...</p>
+        </div>
+    </section>
+</main>
+
+<script src="/js/main.js"></script>
+</body>
+</html>

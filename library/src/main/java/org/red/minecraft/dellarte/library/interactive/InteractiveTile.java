@@ -3,10 +3,8 @@ package org.red.minecraft.dellarte.library.interactive;
 import org.bukkit.block.TileState;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.red.minecraft.dellarte.library.item.ItemBuilder;
 
 public interface InteractiveTile extends InteractiveObj<TileState> {
     @InteractiveAct.ActAnnotation(event = BlockBreakEvent.class)

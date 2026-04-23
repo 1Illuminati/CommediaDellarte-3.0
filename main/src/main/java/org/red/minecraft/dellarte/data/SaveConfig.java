@@ -1,6 +1,5 @@
 package org.red.minecraft.dellarte.data;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Keyed;
@@ -65,9 +64,9 @@ public final class SaveConfig implements Keyed {
         return this.loadEvent.contains(event.getEventName().toUpperCase());
     }
 
-    public static SaveConfig createSaveConfig(NamespacedKey nameSapce, ConfigurationSection section) {
+    public static SaveConfig createSaveConfig(NamespacedKey nameSpace, ConfigurationSection section) {
         if (section == null) 
-            return new SaveConfig(nameSapce, true, DEFAULT_SAVETYPE, DEFAULT_AUTOSAVETIME, DEFAULT_SAVEEVENT, DEFAULT_LOADEVENT);
+            return new SaveConfig(nameSpace, true, DEFAULT_SAVETYPE, DEFAULT_AUTOSAVETIME, DEFAULT_SAVEEVENT, DEFAULT_LOADEVENT);
 
         boolean enable = section.getBoolean("enable", true);
         SaveType saveType = section.contains("saveType") ? SaveType.valueOf(section.getString("saveType")) : DEFAULT_SAVETYPE;
@@ -75,7 +74,7 @@ public final class SaveConfig implements Keyed {
         List<String> saveEvent = section.contains("saveEvent") ? section.getStringList("saveEvent") : DEFAULT_SAVEEVENT;
         List<String> loadEvent = section.contains("loadEvent") ? section.getStringList("loadEvent") : DEFAULT_LOADEVENT;
 
-        return new SaveConfig(nameSapce, enable, saveType, autoSaveTime, saveEvent, loadEvent);
+        return new SaveConfig(nameSpace, enable, saveType, autoSaveTime, saveEvent, loadEvent);
     }
 
     public enum SaveType {

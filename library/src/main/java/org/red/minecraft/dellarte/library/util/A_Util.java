@@ -1,13 +1,11 @@
 package org.red.minecraft.dellarte.library.util;
 
-import org.bukkit.Location;
-import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
-import org.red.minecraft.dellarte.library.util.finder.*;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 public final class A_Util {
     private A_Util() {
@@ -21,39 +19,29 @@ public final class A_Util {
         return copyList;
     }
 
-    public static FindHandler<?> objToHandler(@NotNull Object obj) {
-        if (obj instanceof Integer temp) {
-            return new FindHandler<>(temp);
-        } else if (obj instanceof Double temp) {
-            return new FindHandler<>(temp);
-        } else if (obj instanceof Boolean temp) {
-            return new FindHandler<>(temp);
-        } else if (obj instanceof String temp) {
-            return new FindHandler<>(temp);
-        } else if (obj instanceof Vector temp) {
-            return new VectorHandler(temp);
-        } else if (obj instanceof Location temp) {
-            return new LocationHandler(temp);
-        } else if (obj instanceof A_DataMap temp) {
-            return new DataMapHandler(temp);
-        } else if (obj instanceof UUID temp) {
-            return new FindHandler<>(temp);
-        } else if (obj instanceof CoolTimeMap temp) {
-            return new CoolTimeMapHandler(temp);
-        } else if (obj instanceof Class<?> temp) {
-            return new FindHandler<>(temp);
-        } else if (obj instanceof Long temp) {
-            return new FindHandler<>(temp);
-        } else if (obj instanceof Float temp) {
-            return new FindHandler<>(temp);
-        } else if (obj instanceof Character temp) {
-            return new FindHandler<>(temp);
-        } else if (obj instanceof Byte temp) {
-            return new FindHandler<>(temp);
-        } else if (obj instanceof BoundingBoxHandler temp) {
-            return new FindHandler<>(temp);
-        } else {
-            return new FindHandler<>(obj);
+    public static Map<String, Object> deserializeAll(Map<String, Object> map) {
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            if (value instanceof ConfigurationSerializable) {
+                Map<String, Object> serialized = ((ConfigurationSerializable) value).serialize();
+                result.put(key, deserializeAll(serialized));
+            } else if (value instanceof Map) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> nested = (Map<String, Object>) value;
+                    result.put(key, deserializeAll(nested));
+                } catch (ClassCastException e) {
+                    result.put(key, value);
+                }
+            } else {
+                result.put(key, value);
+            }
         }
+        return result;
     }
+
 }

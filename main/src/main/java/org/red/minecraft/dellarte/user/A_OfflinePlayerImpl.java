@@ -199,20 +199,8 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer {
 
     @Override
     @NotNull
-    public A_DataMap getDataMap() {
-        return getDataMap(CommediaDellartePlugin.instance);
-    }
-
-    @Override
-    @NotNull
     public A_DataMap getDataMap(Plugin plugin) {
         return CommediaDellarte.getStorage(new NamespacedKey(plugin, "player")).getDataMap(getUniqueIdStr());
-    }
-
-    @Override
-    @NotNull
-    public CoolTimeMap getCoolTime() {
-        return getCoolTime(CommediaDellartePlugin.instance);
     }
 
     @Override

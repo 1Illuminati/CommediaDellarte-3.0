@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 public class CustomGuiBuilder {
 
     private final CustomGui gui;
-    private boolean allClickCancel = false;
 
     public CustomGuiBuilder(@NotNull InventoryType type) {
         gui = new CustomGui(type);

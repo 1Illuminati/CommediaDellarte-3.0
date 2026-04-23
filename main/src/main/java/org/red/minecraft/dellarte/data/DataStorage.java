@@ -11,6 +11,7 @@ import org.red.minecraft.dellarte.library.data.IDataStorage;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
 import org.red.minecraft.dellarte.library.util.CoolTimeMap;
 import org.red.minecraft.dellarte.util.A_File;
+import org.red.minecraft.dellarte.util.ConvertUtil;
 
 public class DataStorage extends DataMapManager implements IDataStorage {
     public static DataStorage createDefaultDataStorage(NamespacedKey key) {
@@ -88,12 +89,12 @@ public class DataStorage extends DataMapManager implements IDataStorage {
 
     @Override
     public void saveData(String key) {
-        super.saveDataMap(key, getData(key));
+        super.saveDataMap(key, ConvertUtil.convertADataMap(getData(key)));
     }
 
     @Override
     public void loadData(String key) {
-        dataMaps.put(key, A_DataMap.convert(super.loadDataMap(key)));
+        dataMaps.put(key, ConvertUtil.convertDataMap(super.loadDataMap(key)));
     }
 
     @Override

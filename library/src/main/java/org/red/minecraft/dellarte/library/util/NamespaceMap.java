@@ -1,9 +1,8 @@
 package org.red.minecraft.dellarte.library.util;
 
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
-import org.red.library.data.DataMap;
-import org.red.library.data.serialize.DataMapSerializable;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,7 +12,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class NamespaceMap<T> implements DataMapSerializable {
+public class NamespaceMap<T> implements ConfigurationSerializable {
     private final Map<NamespacedKey, T> map = new HashMap<>();
 
     public int size() {
@@ -123,14 +122,14 @@ public class NamespaceMap<T> implements DataMapSerializable {
     }
 
     @Override
-    public @NotNull DataMap serialize() {
-        DataMap result = new DataMap();
+    public @NotNull Map<String, Object> serialize() {
+        Map<String, Object> result = new HashMap<>();
         for (Map.Entry<NamespacedKey, T> entry : this.entrySet()) {
             String namespace = entry.getKey().getNamespace();
             String key = entry.getKey().getKey();
             T value = entry.getValue();
 
-            DataMap map = result.getDataMap(namespace);
+            Map<String, Object> map = (Map<String, Object>) result.computeIfAbsent(namespace, k -> new HashMap<String, Object>());
             map.put(key, value);
         }
 
@@ -138,10 +137,10 @@ public class NamespaceMap<T> implements DataMapSerializable {
         return result;
     }
 
-    public static <T> NamespaceMap<T> deserialize(DataMap map) {
+    public static <T> NamespaceMap<T> deserialize(Map<String, Object> map) {
         NamespaceMap<T> result = new NamespaceMap<>();
         for (String namespace : map.keySet()) {
-            DataMap value = map.getDataMap(namespace);
+            Map<String, Object> value = (Map<String, Object>) map.get(namespace);
             for (String key : value.keySet()) {
                 T value1 = (T) value.get(key);
 

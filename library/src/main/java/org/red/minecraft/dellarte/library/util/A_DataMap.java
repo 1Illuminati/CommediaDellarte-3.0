@@ -3,184 +3,171 @@ package org.red.minecraft.dellarte.library.util;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.red.library.data.DataMap;
-import org.red.minecraft.dellarte.library.util.finder.FindHandler;
-import org.red.minecraft.dellarte.library.util.finder.HasNext;
 
-import javax.xml.crypto.Data;
 import java.util.*;
 
-public class A_DataMap extends DataMap {
+public class A_DataMap implements ConfigurationSerializable {
+    private Map<String, Object> map;
 
-    public static A_DataMap convert(DataMap dataMap) {
-        A_DataMap result = new A_DataMap();
-        result.copy(dataMap);
-        return result;
+    public A_DataMap() {
+        this.map = new HashMap<>();
     }
 
-    @Override
-    public void copy(DataMap dataMap) {
-        super.copy(dataMap);
+    public A_DataMap(Map<String, Object> map) {
+        this();
+        this.map.putAll(map);
     }
 
-    @Override
+    public void copy(A_DataMap dataMap) {
+        this.map = dataMap.getMap();
+    }
+
     public void copy(Map<String, Object> map) {
-        super.copy(map);
+        this.map = map;
     }
 
-    @Override
     public int getInt(String key) {
-        return super.getInt(key);
+        return this.getInt(key, 0);
     }
 
-    @Override
     public int getInt(String key, int nullValue) {
-        return super.getInt(key, nullValue);
+        return (Integer)this.get(key, nullValue);
     }
 
-    @Override
     public void addInt(String key, int value) {
-        super.addInt(key, value);
+        this.put(key, this.getInt(key) + value);
     }
 
-    @Override
     public double getDouble(String key) {
-        return super.getDouble(key);
+        return this.getDouble(key, (double)0.0F);
     }
 
-    @Override
     public double getDouble(String key, double nullValue) {
-        return super.getDouble(key, nullValue);
+        return (Double)this.get(key, nullValue);
     }
 
-    @Override
     public void addDouble(String key, double value) {
-        super.addDouble(key, value);
+        this.put(key, this.getDouble(key) + value);
     }
 
-    @Override
     public String getString(String key) {
-        return super.getString(key);
+        return this.getString(key, "");
     }
 
-    @Override
     public String getString(String key, String nullValue) {
-        return super.getString(key, nullValue);
+        Object obj = this.get(key, nullValue);
+        return obj == null ? "" : obj.toString();
     }
 
-    @Override
     public boolean getBoolean(String key) {
-        return super.getBoolean(key);
+        return this.getBoolean(key, false);
     }
 
-    @Override
     public boolean getBoolean(String key, boolean nullValue) {
-        return super.getBoolean(key, nullValue);
+        return (Boolean)this.get(key, nullValue);
     }
 
-    @Override
     public Object get(String key) {
-        return super.get(key);
+        return this.get(key, (Object)null);
     }
 
-    @Override
     public Object get(String key, Object nullValue) {
-        return super.get(key, nullValue);
+        if (key.contains(".")) {
+            throw new IllegalArgumentException("key cannot contain '.'");
+        } else {
+            if (!this.map.containsKey(key)) {
+                this.put(key, nullValue);
+            }
+
+            return this.map.get(key);
+        }
     }
 
-    @Override
     public <T> T getClass(String key, Class<T> clazz) {
-        return super.getClass(key, clazz);
+        return (T)this.getClass(key, clazz, (Object)null);
     }
 
-    @Override
     public <T> T getClass(String key, Class<T> clazz, Object nullValue) {
-        return super.getClass(key, clazz, nullValue);
+        if (!this.map.containsKey(key)) {
+            this.put(key, nullValue);
+        }
+
+        return (T)clazz.cast(this.map.get(key));
     }
 
-    @Override
     public <T> List<T> getList(String key) {
-        return super.getList(key);
+        return this.<T>getList(key, new ArrayList());
     }
 
-    @Override
     public <T> List<T> getList(String key, List<T> nullValue) {
-        return super.getList(key, nullValue);
+        return (List)this.get(key, nullValue);
     }
 
-    @Override
     public A_DataMap getDataMap(String key) {
-        return A_DataMap.convert(super.getDataMap(key));
+        return this.getDataMap(key, new A_DataMap());
     }
 
-    @Override
-    public DataMap getDataMap(String key, DataMap nullValue) {
-        return super.getDataMap(key, nullValue);
+    public A_DataMap getDataMap(String key, A_DataMap nullValue) {
+        return (A_DataMap)this.get(key, nullValue);
     }
 
-    @Override
     public UUID getUUID(String key) {
-        return super.getUUID(key);
+        return this.getUUID(key, UUID.randomUUID());
     }
 
-    @Override
     public UUID getUUID(String key, UUID nullValue) {
-        return super.getUUID(key, nullValue);
+        return (UUID)this.get(key, nullValue);
     }
 
-    @Override
     public void put(String key, Object value) {
-        super.put(key, value);
+        if (key.contains(".")) {
+            throw new IllegalArgumentException("key cannot contain '.'");
+        } else {
+            this.map.put(key, value);
+        }
     }
 
-    @Override
     public A_DataMap set(String key, Object value) {
-        super.put(key, value);
+        this.put(key, value);
         return this;
     }
 
-    @Override
     public void remove(String key) {
-        super.remove(key);
+        this.map.remove(key);
     }
 
-    @Override
     public boolean containsKey(String key) {
-        return super.containsKey(key);
+        return this.map.containsKey(key);
     }
 
-    @Override
     public Map<String, Object> getMap() {
-        return super.getMap();
+        return this.map;
     }
 
-    @Override
     public Set<String> keySet() {
-        return super.keySet();
+        return this.map.keySet();
     }
 
-    @Override
     public Collection<Object> values() {
-        return super.values();
+        return this.map.values();
     }
 
-    @Override
     public Set<Map.Entry<String, Object>> entrySet() {
-        return super.entrySet();
+        return this.map.entrySet();
     }
 
-    @Override
     public String toString() {
-        return super.toString();
+        return this.map.toString();
     }
 
-    @Override
     public void clear() {
-        super.clear();
+        this.map.clear();
     }
 
     public ItemStack getItemStack(String key) {
@@ -218,18 +205,43 @@ public class A_DataMap extends DataMap {
     @Nullable
     public Object finder(String path) {
         String[] strs = path.split("\\.");
+        Object current = this.map;
+        Object result = null;
 
-        FindHandler<?> lastFinder = A_Util.objToHandler(strs[0]);
-        for (int index = 1; lastFinder != null && lastFinder.hasNext() && strs.length > index; index++) {
-            lastFinder = ((HasNext) lastFinder).getNext(strs[index]);
+        for (String str : strs) {
+            if (current == null) break;
+            else if (current instanceof Map map) {
+                try {
+                    result = map.get(str);
+                } catch (ClassCastException e) {
+                    return null;
+                }
+            }
+            else if (current instanceof List<?> list) {
+                try {
+                    int index = Integer.parseInt(str);
+                    if (index < 0 || index >= list.size()) return null;
+                    result = list.get(index);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+            else result = null;
+
+            current = result;
+            if (current instanceof ConfigurationSerializable serializable)
+                current = serializable.serialize();
         }
 
-        return lastFinder == null ? null : lastFinder.getData();
+        return result;
     }
 
-    public static A_DataMap deserialize(DataMap map) {
-        A_DataMap result = new A_DataMap();
-        result.getMap().putAll(map.getMap());
-        return result;
+    @Override
+    public @NotNull Map<String, Object> serialize() {
+        return this.map;
+    }
+
+    public static A_DataMap deserialize(Map<String, Object> map) {
+        return new A_DataMap(map);
     }
 }

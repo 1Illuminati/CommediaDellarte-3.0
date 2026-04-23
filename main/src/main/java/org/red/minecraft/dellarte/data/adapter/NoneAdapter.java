@@ -1,4 +1,4 @@
-package org.red.minecraft.dellarte.data;
+package org.red.minecraft.dellarte.data.adapter;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -26,9 +26,7 @@ public class NoneAdapter implements IAdapter {
 
     @Override
     public SerializeDataMap loadDataMap(String arg0) {
-        return map.computeIfAbsent(arg0, getKey -> {
-            return new SerializeDataMap();
-        });
+        return map.computeIfAbsent(arg0, getKey -> new SerializeDataMap());
     }
 
     @Override

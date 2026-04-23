@@ -1,15 +1,14 @@
 package org.red.minecraft.dellarte.library.util;
 
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
-import org.red.library.data.DataMap;
-import org.red.library.data.serialize.DataMapSerializable;
 
 import java.util.*;
 
-public class CoolTimeMap implements DataMapSerializable {
+public class CoolTimeMap implements ConfigurationSerializable {
     private Map<String, Long> map = new HashMap<>();
 
-    public static CoolTimeMap deserialize(DataMap map) {
+    public static CoolTimeMap deserialize(Map<String, Object> map) {
         CoolTimeMap coolTime = new CoolTimeMap();
 
         for (Map.Entry<String, Object> entry : map.entrySet())
@@ -98,13 +97,13 @@ public class CoolTimeMap implements DataMapSerializable {
     }
 
     @Override
-    public @NotNull DataMap serialize() {
-        DataMap map = new DataMap();
+    public @NotNull Map<String, Object> serialize() {
+        Map<String, Object> result = new HashMap<>();
 
         for (Map.Entry<String, Long> entry : this.map.entrySet())
-            map.put(entry.getKey(), String.valueOf(entry.getValue()));
+            result.put(entry.getKey(), String.valueOf(entry.getValue()));
 
-        return map;
+        return result;
     }
 
     public enum TimeType {

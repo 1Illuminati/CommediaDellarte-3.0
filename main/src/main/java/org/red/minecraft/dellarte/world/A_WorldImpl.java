@@ -1318,18 +1318,8 @@ public final class A_WorldImpl implements A_World {
     }
 
     @Override
-    public A_DataMap getDataMap() {
-        return this.getDataMap(CommediaDellartePlugin.instance);
-    }
-
-    @Override
     public A_DataMap getDataMap(Plugin plugin) {
         return CommediaDellarte.getStorage(new NamespacedKey(plugin, "world")).getDataMap(getName());
-    }
-
-    @Override
-    public CoolTimeMap getCoolTime() {
-        return this.getCoolTime(CommediaDellartePlugin.instance);
     }
 
     @Override
