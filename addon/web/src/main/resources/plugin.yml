@@ -1,11 +1,13 @@
 name: CommediaDellarteWeb
 version: 1.0-SNAPSHOT
 main: org.red.minecraft.dellarte.web.CommediaDellarteWebPlugin
-authors: Double_Z_
+authors: [Double_Z_]
 api-version: 1.17
 description: Dellarte addon display server data in web
 
 depend:
   - CommediaDellarte
+softdepend:
+  - spark
 
 web:

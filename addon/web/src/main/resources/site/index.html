@@ -3,46 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Server Dashboard</title>
+    <title>MC Dashboard</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
 <header>
-    <h1>⛏ Server Dashboard</h1>
-    <span id="refresh-timer">새로고침: 5s</span>
+    <div class="header-left">
+        <span class="logo">⛏</span>
+        <span class="title">Server Dashboard</span>
+    </div>
+    <div class="header-right">
+        <span id="uptime-label">—</span>
+        <span id="version-label"></span>
+        <button class="btn btn-warn" onclick="serverAction('restart')">재시작</button>
+        <button class="btn btn-danger" onclick="serverAction('shutdown')">종료</button>
+    </div>
 </header>
 
-<main>
-    <section class="card" id="status-card">
-        <h2>서버 상태</h2>
-        <div class="stat-grid">
-            <div class="stat">
-                <span class="label">버전</span>
-                <span class="value" id="stat-version">—</span>
-            </div>
-            <div class="stat">
-                <span class="label">접속 인원</span>
-                <span class="value" id="stat-online">—</span>
-            </div>
-            <div class="stat">
-                <span class="label">최대 인원</span>
-                <span class="value" id="stat-max">—</span>
-            </div>
-            <div class="stat">
-                <span class="label">MOTD</span>
-                <span class="value" id="stat-motd">—</span>
-            </div>
-        </div>
-    </section>
+<div class="layout">
 
-    <section class="card" id="players-card">
-        <h2>접속 중인 플레이어</h2>
-        <div id="player-list">
-            <p class="empty">데이터를 불러오는 중...</p>
+    <!-- 왼쪽 패널 -->
+    <div class="col-left">
+
+        <!-- 성능 지표 -->
+        <section class="card">
+            <h2>성능</h2>
+            <div class="stat-grid">
+                <div class="stat">
+                    <div class="stat-label">TPS <span class="sub">10s</span></div>
+                    <div class="stat-value" id="v-tps">—</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">TPS <span class="sub">5m</span></div>
+                    <div class="stat-value" id="v-tps5m">—</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">MSPT <span class="sub">mean</span></div>
+                    <div class="stat-value" id="v-mspt">—</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">MSPT <span class="sub">95%</span></div>
+                    <div class="stat-value" id="v-mspt95">—</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">CPU <span class="sub">프로세스</span></div>
+                    <div class="stat-value" id="v-cpu">—</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">CPU <span class="sub">시스템</span></div>
+                    <div class="stat-value" id="v-cpusys">—</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 메모리 -->
+        <section class="card">
+            <h2>메모리</h2>
+            <div class="mem-bar-wrap">
+                <div class="mem-bar"><div class="mem-fill" id="mem-fill"></div></div>
+                <span id="mem-label">— / — MB</span>
+            </div>
+        </section>
+
+        <!-- GC -->
+        <section class="card">
+            <h2>GC</h2>
+            <div id="gc-list"><p class="empty">spark 미설치</p></div>
+        </section>
+
+        <!-- 플레이어 -->
+        <section class="card">
+            <h2>플레이어 <span id="player-count" class="badge">0</span></h2>
+            <div id="player-list"><p class="empty">접속자 없음</p></div>
+        </section>
+
+        <!-- 플러그인 -->
+        <section class="card">
+            <h2>플러그인 <span id="plugin-count" class="badge">0</span></h2>
+            <div id="plugin-list"><p class="empty">로딩 중...</p></div>
+        </section>
+
+    </div>
+
+    <!-- 오른쪽 패널 -->
+    <div class="col-right">
+
+        <!-- 파일 매니저 -->
+        <section class="card">
+            <h2>파일 매니저</h2>
+            <div id="breadcrumb" class="breadcrumb"></div>
+            <div id="file-list"><p class="empty">로딩 중...</p></div>
+        </section>
+
+        <!-- 콘솔 -->
+        <section class="card console-card">
+            <div class="console-title-row">
+                <h2>콘솔</h2>
+                <button class="btn btn-muted" id="console-pause-btn" onclick="toggleConsolePause()">일시정지</button>
+            </div>
+            <div id="console-output"></div>
+            <div class="console-input-row">
+                <input type="text" id="cmd-input" placeholder="명령어 입력..."
+                       onkeydown="if(event.key==='Enter') sendCommand()">
+                <button class="btn btn-primary" onclick="sendCommand()">실행</button>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<!-- ── 플레이어 정보 모달 ── -->
+<div id="info-modal" class="modal-overlay" style="display:none"
+     onclick="if(event.target===this) closeInfoModal()">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="info-modal-title">플레이어 정보</h3>
+            <button class="modal-close" onclick="closeInfoModal()">✕</button>
         </div>
-    </section>
-</main>
+        <div id="info-modal-body" class="modal-body"></div>
+    </div>
+</div>
+
+<!-- ── 추방 / 밴 확인 모달 ── -->
+<div id="action-modal" class="modal-overlay" style="display:none"
+     onclick="if(event.target===this) closeActionModal()">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="action-modal-title">추방</h3>
+            <button class="modal-close" onclick="closeActionModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <label class="modal-label">사유 (비워두면 기본 메시지 사용)</label>
+            <input type="text" id="action-reason" class="modal-input" placeholder="사유 입력...">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-muted" onclick="closeActionModal()">취소</button>
+            <button class="btn btn-danger" onclick="confirmPlayerAction()">확인</button>
+        </div>
+    </div>
+</div>
 
 <script src="/js/main.js"></script>
 </body>
