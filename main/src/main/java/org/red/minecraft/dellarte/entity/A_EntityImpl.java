@@ -25,12 +25,12 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.red.minecraft.dellarte.CommediaDellartePlugin;
+import org.red.minecraft.dellarte.StaticValue;
 import org.red.minecraft.dellarte.library.CommediaDellarte;
 import org.red.minecraft.dellarte.library.entity.A_Entity;
 import org.red.minecraft.dellarte.library.entity.A_LivingEntity;
-import org.red.minecraft.dellarte.library.util.CoolTimeMap;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
-import org.red.minecraft.dellarte.CommediaDellartePlugin;
 
 import java.util.Arrays;
 import java.util.List;
@@ -572,13 +572,7 @@ public class A_EntityImpl implements A_Entity {
     @Override
     @NotNull
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "entity")).getDataMap(getUniqueIdStr());
-    }
-
-    @Override
-    @NotNull
-    public CoolTimeMap getCoolTime(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "entity")).getCoolTimeMap(getUniqueIdStr());
+        return CommediaDellartePlugin.manager.getDefaultTypeStorage(StaticValue.ENTITY_DATA_KEY).getDataMap(this.getUniqueIdStr());
     }
 
     @Override

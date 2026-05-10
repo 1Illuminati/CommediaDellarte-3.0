@@ -1,5 +1,6 @@
 package org.red.minecraft.dellarte;
 
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.TileState;
@@ -8,10 +9,15 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
-import org.red.minecraft.dellarte.data.serialize.*;
+import org.red.minecraft.dellarte.compatibility.papi.A_PapiPlayer;
+import org.red.minecraft.dellarte.compatibility.papi.A_PapiStorage;
+import org.red.minecraft.dellarte.compatibility.papi.A_PapiWorld;
+import org.red.minecraft.dellarte.compatibility.vault.A_Economy;
 import org.red.minecraft.dellarte.event.listener.InteractiveItemListener;
 import org.red.minecraft.dellarte.event.listener.InteractiveTileListener;
 import org.red.minecraft.dellarte.event.listener.InventoryEventListener;
@@ -25,6 +31,10 @@ import org.red.minecraft.dellarte.library.event.area.block.*;
 import org.red.minecraft.dellarte.library.event.area.entity.*;
 import org.red.minecraft.dellarte.library.event.area.player.*;
 import org.red.minecraft.dellarte.library.util.*;
+import org.red.minecraft.dellarte.library.util.map.CoolTimeMap;
+import org.red.minecraft.dellarte.library.util.map.NamespaceMap;
+import org.red.minecraft.dellarte.library.util.map.PairKeyMap;
+import org.red.minecraft.dellarte.library.util.map.UUIDMap;
 
 public class CommediaDellartePlugin extends JavaPlugin {
     public static CommediaDellartePlugin instance;
@@ -45,15 +55,14 @@ public class CommediaDellartePlugin extends JavaPlugin {
         this.saveDefaultConfig();
         getLogger().info("CommediaDellartePlugin enabled");
         config = this.getConfig();
-        Config.loadConfig(config);
+        PluginConfig.loadConfig(config);
 
         manager = new DellarteManager();
         manager.setInteractiveManager(ItemStack.class, new InteractiveManagerImpl<>(ItemStack.class));
         manager.setInteractiveManager(TileState.class, new InteractiveManagerImpl<>(TileState.class));
         CommediaDellarte.setDellarteManager(manager);
         this.setEventListener();
-
-
+        this.setSoftPluginCompatibility();
 
         Bukkit.getScheduler().runTaskLater(this, () -> {
             CommediaDellartePlugin.manager.getStorageManager().createDataStorages();
@@ -78,6 +87,19 @@ public class CommediaDellartePlugin extends JavaPlugin {
         manager.registerSerializableClass(new RegisterConfigSerializable<>(NamespaceMap.class));
         manager.registerSerializableClass(new RegisterConfigSerializable<>(CoolTimeMap.class));
         manager.registerSerializableClass(new RegisterConfigSerializable<>(UUIDMap.class));
+    }
+
+    public void setSoftPluginCompatibility() {
+        if (this.softPluginCheck("PlaceholderAPI")) {
+            new A_PapiPlayer().register();
+            new A_PapiWorld().register();
+            new A_PapiStorage().register();
+            CommediaDellartePlugin.sendLog("PlaceholderAPI Registered");
+        }
+
+        if (this.softPluginCheck("Vault")) {
+            getServer().getServicesManager().register(Economy.class, new A_Economy(), this, ServicePriority.Normal);
+        }
     }
 
     private boolean softPluginCheck(String plName) {

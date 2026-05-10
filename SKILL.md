@@ -64,9 +64,11 @@ CommediaDellarte.registerSerializableClass(MyClass.class, new MySerializable());
 ```
 A_DataHolder
   └── A_Entity        (Entity 래퍼, 데이터맵·쿨타임 포함)
-        └── A_LivingEntity
-              └── A_Player     (온라인 플레이어)
-                    └── A_NPC  (Citizen NPC 등, hasMetadata("NPC") 체크)
+  │     └── A_LivingEntity
+  │           └── A_Player     (온라인 플레이어)
+  │                 └── A_NPC  (Citizen NPC 등, hasMetadata("NPC") 체크)
+  └── A_OfflinePlayer (오프라인 포함, UUID 기반 캐싱)
+  └── A_World         (월드 래퍼)
 ```
 
 ### 2-2. `A_Entity` 주요 메서드
@@ -85,7 +87,31 @@ void dropNaturally(ItemStack... items);
 String getUniqueIdStr();                // UUID → String 편의 메서드
 ```
 
-### 2-3. `A_Player` 주요 추가 메서드
+### 2-3. `A_OfflinePlayer` 주요 메서드
+
+`org.red.minecraft.dellarte.library.user.A_OfflinePlayer` — `A_DataHolder` 구현
+
+```java
+A_OfflinePlayer aOffline = CommediaDellarte.getAOfflinePlayer(offlinePlayer);
+
+boolean online  = aOffline.isOnline();
+String name     = aOffline.getName();       // @Nullable
+UUID uuid       = aOffline.getUniqueId();
+
+@Nullable A_Player aPlayer = aOffline.getAPlayer();  // 온라인이면 반환
+@Nullable Player player    = aOffline.getPlayer();
+
+long first = aOffline.getFirstPlayed();
+long last  = aOffline.getLastPlayed();
+int kills  = aOffline.getStatistic(Statistic.PLAYER_KILLS);
+
+// A_DataHolder 상속 — 데이터맵·쿨타임 포함
+A_DataMap data  = aOffline.getDataMap(plugin);
+CoolTimeMap ct  = aOffline.getCoolTime(plugin);
+ItemStack skull = aOffline.getPlayerSkull();
+```
+
+### 2-4. `A_Player` 주요 추가 메서드
 
 `org.red.minecraft.dellarte.library.entity.A_Player`
 
@@ -137,7 +163,7 @@ BlockState lastPlaceBlock();
 
 ## 3. 데이터 스토리지 — `IDataStroage`
 
-`org.red.minecraft.dellarte.library.data.IDataStorage`
+`org.red.minecraft.dellarte.library.data.IDataAdapter`
 
 config.yml의 `data-storage` 섹션에서 플러그인:타입 키로 등록된 스토리지.
 기본으로 `plugin:player`, `plugin:entity`, `plugin:world` 타입이 자동 생성됩니다.
@@ -198,7 +224,7 @@ A_DataMap deserialized = A_DataMap.deserialize(dataMap);
 
 ### 4-2. `CoolTimeMap`
 
-`org.red.minecraft.dellarte.library.util.CoolTimeMap`
+`org.red.minecraft.dellarte.library.util.map.CoolTimeMap`
 
 ```java
 CoolTimeMap coolTime = player.getCoolTime();
@@ -225,7 +251,7 @@ coolTime.removeCoolTime("skill");
 
 ---
 
-## 5. GUI 시스템 — `CustomGui` / `Button`
+## 5. GUI 시스템 — `CustomGui` / `Button` / `CustomGuiBuilder`
 
 `org.red.minecraft.dellarte.library.inventory.CustomGui`
 
@@ -258,6 +284,21 @@ aPlayer.openInventory(gui);
 aPlayer.openInventory(gui, true);        // InventoryCloseEvent 무시
 aPlayer.delayOpenInventory(gui);         // 1틱 후 열기 (다른 인벤토리 닫는 이후)
 aPlayer.delayOpenInventory(gui, 5);      // 5틱 후 열기
+```
+
+### `CustomGuiBuilder` — 체이닝 빌더
+
+`org.red.minecraft.dellarte.library.inventory.CustomGuiBuilder`
+
+```java
+CustomGui gui = new CustomGuiBuilder(54, "§8메뉴")
+    .setAllClickCancel(true)
+    .setItem(0, someItem)
+    .setItem(26, closeItem, event -> event.getWhoClicked().closeInventory())
+    .setItems(borderItem, 0, 8, 45, 53)
+    .setButton(4, event -> { /* 버튼만 교체 */ })
+    .setContents(itemArray)
+    .build();
 ```
 
 ---
@@ -349,7 +390,17 @@ public class MySword implements InteractiveItem {
 | `LEFT_CLICK_BLOCK` | `PlayerInteractEvent` |
 | `RIGHT_CLICK_BLOCK` | `PlayerInteractEvent` |
 
-### 7-3. `InteractiveManager` 사용
+### 7-3. `InteractivePriority` — 우선순위
+
+`org.red.minecraft.dellarte.library.interactive.InteractivePriority`
+
+같은 아이템/타일에 여러 인터랙티브 오브젝트가 등록된 경우 실행 순서를 제어합니다.
+
+```java
+public enum InteractivePriority { LOWEST, LOW, NORMAL, HIGH, HIGHEST }
+```
+
+### 7-4. `InteractiveManager` 사용
 
 ```java
 // 매니저 획득 (플러그인 초기화 필요 없음, 이미 main에서 등록됨)
@@ -370,7 +421,7 @@ mySword.removeInteractive(itemStack);
 List<InteractiveObj<ItemStack>> objs = itemManager.getInteractiveObj(itemStack);
 ```
 
-### 7-4. 커스텀 `InteractiveManager` 등록
+### 7-5. 커스텀 `InteractiveManager` 등록
 
 ```java
 // 새로운 타입의 인터랙티브 매니저 등록 (최초 1회)
@@ -556,7 +607,9 @@ List<String> filtered = A_Util.removeStringNotStartWith(list, prefix);
 
 ---
 
-## 13. 이벤트 — `FirstLoadEvent`
+## 13. 이벤트
+
+### `FirstLoadEvent`
 
 플러그인이 모두 로드된 후(1틱 후) 발행되는 이벤트.
 
@@ -565,6 +618,35 @@ List<String> filtered = A_Util.removeStringNotStartWith(list, prefix);
 public void onFirstLoad(FirstLoadEvent event) {
     // 데이터 스토리지가 생성된 이후 실행됨
     // 다른 플러그인 의존성 초기화 여기서 수행
+}
+```
+
+### 플레이어 클릭 이벤트
+
+`PlayerInteractEvent`의 편의 래퍼. `A_PlayerEvent`를 상속하므로 `getAPlayer()` 사용 가능.
+
+```java
+@EventHandler
+public void onLeft(PlayerLeftClickEvent event) {
+    A_Player aPlayer = event.getAPlayer();
+    PlayerInteractEvent original = event.getEvent();
+}
+
+@EventHandler
+public void onRight(PlayerRightClickEvent event) { ... }
+```
+
+### `InteractiveRunEvent`
+
+인터랙티브 Act 실행 직전 발행. `Cancellable`이므로 차단 가능.
+
+```java
+@EventHandler
+public void onInteractiveRun(InteractiveRunEvent event) {
+    InteractiveObj<?> obj = event.getInteractiveObj();
+    Class<? extends InteractiveAct> act = event.getAct();
+    // 특정 조건에서 Act 차단:
+    event.setCancelled(true);
 }
 ```
 
@@ -612,15 +694,18 @@ org.red.minecraft.dellarte.library
 │   ├── area/entity/*         ← 에리어 엔티티 이벤트 (~50종)
 │   ├── area/player/*         ← 에리어 플레이어 이벤트 (~40종)
 │   ├── listener/A_Listener   ← 리스너 베이스
-│   └── player/               ← PlayerLeftClickEvent, PlayerRightClickEvent 등
+│   └── player/               ← PlayerLeftClickEvent, PlayerRightClickEvent,
+│                                InteractiveRunEvent (A_PlayerEvent 상속)
 ├── interactive/
 │   ├── InteractiveManager    ← 인터랙티브 매니저 인터페이스
 │   ├── InteractiveObj        ← 인터랙티브 오브젝트 인터페이스
 │   ├── InteractiveAct        ← 동작 인터페이스 + @ActAnnotation
+│   ├── InteractivePriority   ← 실행 우선순위 enum (LOWEST~HIGHEST)
 │   ├── InteractiveItem       ← ItemStack 인터랙티브
 │   └── InteractiveTile       ← TileState 인터랙티브
 ├── inventory/
 │   ├── CustomGui             ← 커스텀 GUI 컨테이너
+│   ├── CustomGuiBuilder      ← CustomGui 체이닝 빌더
 │   └── Button                ← GUI 버튼 (InventoryClickEvent → void)
 ├── item/
 │   └── ItemBuilder           ← 아이템 빌더 (체이닝 API)

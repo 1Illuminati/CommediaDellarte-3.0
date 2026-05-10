@@ -16,6 +16,7 @@
     <div class="header-right">
         <span id="uptime-label">—</span>
         <span id="version-label"></span>
+        <button class="btn btn-muted" id="logout-btn" onclick="doLogout()">로그아웃</button>
         <button class="btn btn-warn" onclick="serverAction('restart')">재시작</button>
         <button class="btn btn-danger" onclick="serverAction('shutdown')">종료</button>
     </div>
@@ -141,6 +142,23 @@
             <button class="btn btn-muted" onclick="closeActionModal()">취소</button>
             <button class="btn btn-danger" onclick="confirmPlayerAction()">확인</button>
         </div>
+    </div>
+</div>
+
+<!-- ── 로그인 오버레이 ── -->
+<div id="login-overlay" style="display:none">
+    <div class="login-card">
+        <div class="login-logo">⛏</div>
+        <div class="login-title">Server Dashboard</div>
+        <div class="login-sub">관리자 로그인</div>
+        <div id="login-error" class="login-error" style="display:none"></div>
+        <input type="text"     id="login-user" class="modal-input" placeholder="아이디"
+               autocomplete="username"
+               onkeydown="if(event.key==='Enter') document.getElementById('login-pass').focus()">
+        <input type="password" id="login-pass" class="modal-input" placeholder="비밀번호"
+               autocomplete="current-password"
+               onkeydown="if(event.key==='Enter') doLogin()">
+        <button class="btn btn-primary" id="login-btn" onclick="doLogin()">로그인</button>
     </div>
 </div>
 

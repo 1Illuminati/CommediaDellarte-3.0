@@ -4,6 +4,4 @@ import org.bukkit.plugin.Plugin;
 
 public interface A_DataHolder {
     A_DataMap getDataMap(Plugin plugin);
-
-    CoolTimeMap getCoolTime(Plugin plugin);
 }

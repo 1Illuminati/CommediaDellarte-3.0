@@ -3,11 +3,11 @@ package org.red.minecraft.dellarte.data.adapter;
 import java.util.HashMap;
 import java.util.Set;
 
-import org.red.library.data.adapter.IAdapter;
-import org.red.library.data.serialize.SerializeDataMap;
+import org.red.minecraft.dellarte.library.data.IDataAdapter;
+import org.red.minecraft.dellarte.library.util.A_DataMap;
 
-public class NoneAdapter implements IAdapter {
-    private final HashMap<String, SerializeDataMap> map = new HashMap<>();
+public class NoneAdapter implements IDataAdapter {
+    private final HashMap<String, A_DataMap> map = new HashMap<>();
 
     @Override
     public boolean containDataMap(String arg0) {
@@ -25,13 +25,12 @@ public class NoneAdapter implements IAdapter {
     }
 
     @Override
-    public SerializeDataMap loadDataMap(String arg0) {
-        return map.computeIfAbsent(arg0, getKey -> new SerializeDataMap());
+    public A_DataMap loadDataMap(String var1) {
+        return map.computeIfAbsent(var1, key -> new A_DataMap());
     }
 
     @Override
-    public void saveDataMap(String arg0, SerializeDataMap arg1) {
-        map.put(arg0, arg1);
+    public void saveDataMap(String var1, A_DataMap var2) {
+        map.put(var1, var2);
     }
-
 }

@@ -9,6 +9,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.red.minecraft.dellarte.library.data.AdapterFactory;
+import org.red.minecraft.dellarte.library.data.IDataAdapter;
 import org.red.minecraft.dellarte.library.data.IDataStorage;
 import org.red.minecraft.dellarte.library.data.serializable.RegisterSerializable;
 import org.red.minecraft.dellarte.library.entity.A_Entity;
@@ -33,12 +35,17 @@ public final class CommediaDellarte {
         CommediaDellarte.manager = manager;
     }
 
+    @Nullable
     public static IDataStorage getStorage(NamespacedKey key) {
         return manager.getStorage(key);
     }
 
     public static boolean containStorage(NamespacedKey key) {
         return manager.containStorage(key);
+    }
+
+    public static void registerAdapterFactory(AdapterFactory factory) {
+
     }
 
     public static @Nullable A_Player getAPlayer(String name) {

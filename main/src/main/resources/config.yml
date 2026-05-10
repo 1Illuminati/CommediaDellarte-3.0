@@ -1,17 +1,14 @@
 config-version: 1.0
 debug: false
-enable-vault: false
-vault-format: "원"
 
-# 데이터 베이스 설정
-database: 
+# vault 플러그인 지원
+# bank 시스템은 지원하지 않는다
+# 주의! 매우 단순하게 구현되어 있음
+vault:
   enable: false
-  type: "mysql" 
-  host: "localhost"
-  port: 3306
-  username: "root"
-  password: "password"
-  name: "minecraft"
+  format: "원"
+  fractional-digits: -1
+
 
 # 각 플러그인별 추가적인 타입 및 데이터 저장방식을 설정하는 설정
 #
@@ -21,10 +18,7 @@ database:
 # enable:true
 # saveType:"file"
 # autoSave:300
-# saveEvent:
-# - "ONDISABLE"
-# loadEvent:
-# - "FIRSTLOADEVENT"
+# %type_name%, %plugin_name%
 #
 # 데이터를 넣지 않을 경우 기본값으로 진행하며 enable이 false일 경우 타입 데이터를 불러올 수 는 있으나 저장은 하지 않는다
 # 해당 설정에서 만들지 않은 타입들을 불러올 경우 에러가 발생하게 된다.
@@ -46,36 +40,16 @@ data-storage:
       # 자동 저장 설정 설정 된 초 마다 저장한다
       # -1로 할 경우 작동하지 않는다
       autoSave: 300
-      # 데이터를 저장하는 시점을 이벤트로 지정하는 설정
-      # 각 이벤트를 대문자로 적으면되며 각 이벤트가 발생할때 저장한다.
-      # ONDISABLE를 적을 경우 플러그인이 OnDisable될때 데이터를 저장한다.
-      saveEvent:
-      - "ONDISABLE"
-      # 데이터를 불러오는 시점을 이벤트로 지정하는 설정
-      # 각 이벤트를 대문자로 적으면되며 각 이벤트가 발생할때 불러온다.
-      # 서버가 켜질때 따로 데이터를 로드하지 않으며 사용자가 따로 데이터를 로드해줘야한다.
-      # ONENABLE를 적을경우 서버가 켜지고 FirstLoadEvent이전에 데이터를 로드한다.
-      # 이외에는 사용자가 직접 데이터를 로드해야한다.
-      loadEvent:
-      - "FIRSTLOADEVENT"
     # world타입의 기본값
     world:
       enable: true
       saveType: "file"
       autoSave: 300
-      saveEvent:
-      - "ONDISABLE"
-      loadEvent:
-      - "FIRSTLOADEVENT"
     # entity타입의 기본값
     entity:
       enable: true
       saveType: "file"
       autoSave: 300
-      saveEvent:
-      - "ONDISABLE"
-      loadEvent:
-      - "FIRSTLOADEVENT"
   
 
 # area-event의 경우 설정 값을 변경하고 싶다면 서버를 껏다 켜야합니다.

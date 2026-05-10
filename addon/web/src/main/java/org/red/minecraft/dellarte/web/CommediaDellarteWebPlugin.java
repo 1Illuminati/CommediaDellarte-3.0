@@ -53,7 +53,10 @@ public class CommediaDellarteWebPlugin extends JavaPlugin implements Listener {
             httpServer.createContext("/api/player/info", api);
             httpServer.createContext("/api/player/kick", api);
             httpServer.createContext("/api/player/ban",  api);
-            httpServer.createContext("/api/plugins",     api);
+            httpServer.createContext("/api/plugins",      api);
+            httpServer.createContext("/api/auth/login",  api);
+            httpServer.createContext("/api/auth/status", api);
+            httpServer.createContext("/api/auth/logout", api);
 
             httpServer.createContext("/", new StaticFileHandler(siteDir, getLogger()));
             httpServer.setExecutor(Executors.newFixedThreadPool(4));

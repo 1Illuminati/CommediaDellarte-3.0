@@ -21,12 +21,12 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.red.minecraft.dellarte.CommediaDellartePlugin;
+import org.red.minecraft.dellarte.StaticValue;
 import org.red.minecraft.dellarte.library.CommediaDellarte;
-import org.red.minecraft.dellarte.library.util.CoolTimeMap;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
 import org.red.minecraft.dellarte.library.world.A_World;
 import org.red.minecraft.dellarte.library.world.Area;
-import org.red.minecraft.dellarte.CommediaDellartePlugin;
 
 import java.io.File;
 import java.util.*;
@@ -1319,11 +1319,6 @@ public final class A_WorldImpl implements A_World {
 
     @Override
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "world")).getDataMap(getName());
-    }
-
-    @Override
-    public CoolTimeMap getCoolTime(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "world")).getCoolTimeMap(getName());
+        return CommediaDellartePlugin.manager.getDefaultTypeStorage(StaticValue.WORLD_DATA_KEY).getDataMap(this.getName());
     }
 }

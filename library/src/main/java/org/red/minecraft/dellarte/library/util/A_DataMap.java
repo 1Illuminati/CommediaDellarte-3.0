@@ -9,6 +9,7 @@ import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.red.minecraft.dellarte.library.util.map.CoolTimeMap;
 
 import java.util.*;
 
@@ -202,9 +203,17 @@ public class A_DataMap implements ConfigurationSerializable {
         return (BoundingBox) this.get(key, nullValue);
     }
 
+    public CoolTimeMap getCoolTimeMap(String key) {
+        return this.getCoolTimeMap(key, new CoolTimeMap());
+    }
+
+    public CoolTimeMap getCoolTimeMap(String key, CoolTimeMap nullValue) {
+        return (CoolTimeMap) this.get(key, nullValue);
+    }
+
     @Nullable
     public Object finder(String path) {
-        String[] strs = path.split("\\.");
+        String[] strs = path.split("/");
         Object current = this.map;
         Object result = null;
 

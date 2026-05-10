@@ -36,14 +36,13 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.red.minecraft.dellarte.library.CommediaDellarte;
 import org.red.minecraft.dellarte.library.entity.A_Player;
 import org.red.minecraft.dellarte.library.inventory.CustomGui;
 import org.red.minecraft.dellarte.library.user.A_OfflinePlayer;
 import org.red.minecraft.dellarte.CommediaDellartePlugin;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
-import org.red.minecraft.dellarte.library.util.CoolTimeMap;
-import org.red.minecraft.dellarte.library.util.NamespaceMap;
+import org.red.minecraft.dellarte.library.util.map.CoolTimeMap;
+import org.red.minecraft.dellarte.library.util.map.NamespaceMap;
 import org.red.minecraft.dellarte.library.util.PairData;
 import org.red.minecraft.dellarte.user.A_OfflinePlayerImpl;
 
@@ -73,12 +72,6 @@ public class A_PlayerImpl extends A_LivingEntityImpl implements A_Player {
     @NotNull
     public A_DataMap getDataMap(Plugin plugin) {
         return offlinePlayer.getDataMap(plugin);
-    }
-
-    @Override
-    @NotNull
-    public CoolTimeMap getCoolTime(Plugin plugin) {
-        return offlinePlayer.getCoolTime(plugin);
     }
 
     @Override

@@ -1,4 +1,8 @@
 web:
-  enable: true
   port: 8080
 
+  # 로그인 인증 설정
+  auth:
+    enabled: false       # true 시 아이디/비밀번호 요구
+    username: admin
+    password: changeme

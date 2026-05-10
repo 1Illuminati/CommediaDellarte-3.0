@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn clean:*)",
+      "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2024.2.4/plugins/maven/lib/maven3/bin/mvn\" clean:*)"
+    ]
+  }
+}

@@ -7,10 +7,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.red.minecraft.dellarte.StaticValue;
 import org.red.minecraft.dellarte.library.CommediaDellarte;
 import org.red.minecraft.dellarte.library.entity.A_Player;
 import org.red.minecraft.dellarte.library.user.A_OfflinePlayer;
-import org.red.minecraft.dellarte.library.util.CoolTimeMap;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
 import org.red.minecraft.dellarte.CommediaDellartePlugin;
 
@@ -200,13 +200,7 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer {
     @Override
     @NotNull
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "player")).getDataMap(getUniqueIdStr());
-    }
-
-    @Override
-    @NotNull
-    public CoolTimeMap getCoolTime(Plugin plugin) {
-        return CommediaDellarte.getStorage(new NamespacedKey(plugin, "player")).getCoolTimeMap(getUniqueIdStr());
+        return CommediaDellartePlugin.manager.getDefaultTypeStorage(StaticValue.PLAYER_DATA_KEY).getDataMap(this.getUniqueIdStr());
     }
 
     @Override

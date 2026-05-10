@@ -1,114 +1,105 @@
 package org.red.minecraft.dellarte.data;
 
+import org.bukkit.NamespacedKey;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.red.minecraft.dellarte.library.data.IDataAdapter;
+import org.red.minecraft.dellarte.library.data.IDataStorage;import org.red.minecraft.dellarte.library.data.SaveConfig;
+import org.red.minecraft.dellarte.library.util.A_DataMap;
+
 import java.util.HashMap;
 
-import org.bukkit.NamespacedKey;
-import org.red.library.data.DataMapManager;
-import org.red.library.data.adapter.FileAdapter;
-import org.red.library.data.adapter.IAdapter;
-import org.red.library.data.serialize.RegisterSerializable;
-import org.red.minecraft.dellarte.library.data.IDataStorage;
-import org.red.minecraft.dellarte.library.util.A_DataMap;
-import org.red.minecraft.dellarte.library.util.CoolTimeMap;
-import org.red.minecraft.dellarte.util.A_File;
-import org.red.minecraft.dellarte.util.ConvertUtil;
-
-public class DataStorage extends DataMapManager implements IDataStorage {
-    public static DataStorage createDefaultDataStorage(NamespacedKey key) {
-        return new DataStorage(SaveConfig.createDefaultConfig(key), new FileAdapter(new A_File(key.getNamespace() + "/" + key.getKey())));
-    }
-
-    private static final HashMap<Class<?>, RegisterSerializable<?>> REG_SERIALIZE_MAP = new HashMap<>();
-    private final HashMap<String, A_DataMap> dataMaps = new HashMap<>();
+public final class DataStorage implements IDataStorage {
     private final SaveConfig config;
+    private final IDataAdapter adapter;
+    private final HashMap<String, A_DataMap> dataMap = new HashMap<>();
 
-    public DataStorage(SaveConfig config, IAdapter adapter) {
-        super(adapter);
+    public DataStorage(SaveConfig config, IDataAdapter adapter) {
         this.config = config;
-    }
-
-    public static <T> void regSerializableClass(Class<T> clazz, RegisterSerializable<T> registerSerializable) {
-        DataStorage.REG_SERIALIZE_MAP.put(clazz, registerSerializable);
+        this.adapter = adapter;
     }
 
     @Override
-    public <T> void registerSerializableClass(Class<T> clazz, RegisterSerializable<T> registerSerializable) {
-        DataStorage.REG_SERIALIZE_MAP.put(clazz, registerSerializable);
-    }
-
-    @Override
-    public <T> RegisterSerializable<T> getSerializableClass(Class<T> clazz) {
-        return (RegisterSerializable<T>) DataStorage.REG_SERIALIZE_MAP.getOrDefault(clazz, null);
-    }
-
-    @Override
-    public boolean containSerializableClass(Class<?> clazz) {
-        return DataStorage.REG_SERIALIZE_MAP.containsKey(clazz);
-    }
-
     public SaveConfig config() {
         return this.config;
     }
-    
-    @Override
-    public NamespacedKey getKey() {
-        return config.getKey();
-    }
 
+    /**
+     * 데이터 맵 불러오기
+     * 데이터가 존재하지 않을경우 null을 반환한다
+     */
+    @Nullable
     @Override
     public A_DataMap getDataMap(String key) {
-        return getData(key).getDataMap("data");
-    }
-
-    @Override
-    public CoolTimeMap getCoolTimeMap(String key) {
-        return getData(key).getClass("cool", CoolTimeMap.class);
-    }
-
-    public A_DataMap getData(String key) {
         if (loadedData(key)) {
-            return dataMaps.get(key);
+            return dataMap.get(key);
         }
-        else if (containDataMap(key)) {
+        else if (containData(key)) {
             loadData(key);
         }
-        else dataMaps.put(key, new A_DataMap());
+        else dataMap.put(key, new A_DataMap());
 
-        return getData(key);
+        return dataMap.get(key);
     }
 
+    /**
+     * 현재 이 데이터가 로드가 완료되어 데이터가 저장상태로 존재하는게 아닌 메모리상에 존재하는지 확인할때 사용
+     */
     @Override
     public boolean loadedData(String key) {
-        return dataMaps.containsKey(key);
+        return this.dataMap.containsKey(key);
     }
 
+    /**
+     * 저장된 데이터가 존재하는지 확인할때 사용
+     */
     @Override
     public boolean containData(String key) {
-        return super.containDataMap(key);
+        return this.adapter.containDataMap(key);
     }
 
+    /**
+     * 데이터 저장
+     */
     @Override
     public void saveData(String key) {
-        super.saveDataMap(key, ConvertUtil.convertADataMap(getData(key)));
+        this.adapter.saveDataMap(key, this.getDataMap(key));
     }
 
+    /**
+     * 데이터 로드
+     */
     @Override
     public void loadData(String key) {
-        dataMaps.put(key, ConvertUtil.convertDataMap(super.loadDataMap(key)));
+        dataMap.put(key, this.adapter.loadDataMap(key));
     }
 
+    /**
+     * 데이터 삭제
+     */
     @Override
     public void deleteData(String key) {
-        super.deleteDataMap(key);
+        this.adapter.deleteDataMap(key);
     }
 
-    @Override
-    public void loadAll() {
-        super.getAdapter().loadAllKey().forEach(key -> loadData(key));
-    }
-
+    /**
+     * 모든 데이터 저장
+     */
     @Override
     public void saveAll() {
-        this.dataMaps.keySet().forEach(key -> saveData(key));
+        this.dataMap.keySet().forEach(this::saveData);
+    }
+
+    /**
+     * 모든 데이터 로드
+     */
+    @Override
+    public void loadAll() {
+        this.dataMap.keySet().forEach(this::loadData);
+    }
+
+    @Override
+    public @NotNull NamespacedKey getKey() {
+        return this.config.getKey();
     }
 }

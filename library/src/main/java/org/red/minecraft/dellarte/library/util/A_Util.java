@@ -1,5 +1,6 @@
 package org.red.minecraft.dellarte.library.util;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.util.ArrayList;
@@ -19,6 +20,11 @@ public final class A_Util {
         return copyList;
     }
 
+    /**
+     *
+     * @param map
+     * @return
+     */
     public static Map<String, Object> deserializeAll(Map<String, Object> map) {
         Map<String, Object> result = new LinkedHashMap<>();
 
@@ -42,6 +48,19 @@ public final class A_Util {
             }
         }
         return result;
+    }
+
+    public static A_DataMap configSectionToADataMap(ConfigurationSection section) {
+        A_DataMap map = new A_DataMap();
+
+        for (String key : section.getKeys(false)) {
+            Object value = section.get(key);
+
+            if (value instanceof ConfigurationSection section1) map.put(key, configSectionToADataMap(section1));
+            else map.put(key, value);
+        }
+
+        return map;
     }
 
 }

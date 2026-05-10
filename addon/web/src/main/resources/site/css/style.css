@@ -345,3 +345,43 @@ header {
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ── Login Overlay ── */
+#login-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 2.2rem 2.5rem;
+    width: 340px;
+    max-width: 94vw;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+    text-align: center;
+    box-shadow: 0 12px 48px rgba(0,0,0,.9);
+}
+.login-logo  { font-size: 2.2rem; line-height: 1; }
+.login-title { color: var(--accent2); font-size: 1.1rem; font-weight: 700; }
+.login-sub   { color: var(--muted); font-size: .78rem; margin-top: -.4rem; }
+.login-error {
+    background: rgba(196,26,26,.18);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    color: var(--accent2);
+    font-size: .82rem;
+    padding: .5rem .8rem;
+    text-align: left;
+}
+.login-card .modal-input { text-align: left; }
+.login-card .btn-primary { padding: .6rem; font-size: .9rem; }
+#logout-btn { display: none; }

@@ -9,6 +9,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.red.minecraft.dellarte.library.data.AdapterFactory;
+import org.red.minecraft.dellarte.library.data.IDataAdapter;
 import org.red.minecraft.dellarte.library.data.IDataStorage;
 import org.red.minecraft.dellarte.library.data.serializable.RegisterSerializable;
 import org.red.minecraft.dellarte.library.entity.A_Entity;
@@ -26,9 +28,12 @@ public interface IDellarteManager {
 
     <T> void registerSerializableClass(RegisterSerializable<T> registerSerializable);
 
+    @Nullable
     IDataStorage getStorage(NamespacedKey key);
 
     boolean containStorage(NamespacedKey key);
+
+    void registerAdapterFactory(AdapterFactory factory);
     
     @Nullable
     A_Player getAPlayer(String name);

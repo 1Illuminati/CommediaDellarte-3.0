@@ -1,5 +1,123 @@
 'use strict';
 
+// ── 인증 ──────────────────────────────────────────────────────────────────
+const TOKEN_KEY = 'mc_dash_token';
+function getToken()     { return localStorage.getItem(TOKEN_KEY); }
+function setToken(t)    { localStorage.setItem(TOKEN_KEY, t); }
+function clearToken()   { localStorage.removeItem(TOKEN_KEY); }
+
+/** 모든 API 호출에 Authorization 헤더를 붙이는 래퍼 */
+async function apiFetch(url, options = {}) {
+    const token = getToken();
+    if (token) {
+        options.headers = Object.assign({ 'Authorization': 'Bearer ' + token }, options.headers || {});
+    }
+    const res = await fetch(url, options);
+    if (res.status === 401) {
+        showLoginOverlay();
+        throw new Error('unauthorized');
+    }
+    return res;
+}
+
+// ── 로그인 / 로그아웃 ─────────────────────────────────────────────────────
+function showLoginOverlay() {
+    document.getElementById('login-overlay').style.display = 'flex';
+    document.getElementById('logout-btn').style.display    = 'none';
+    document.getElementById('login-error').style.display   = 'none';
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+    setTimeout(() => document.getElementById('login-user').focus(), 50);
+}
+
+function hideLoginOverlay() {
+    document.getElementById('login-overlay').style.display = 'none';
+}
+
+async function doLogin() {
+    const username = document.getElementById('login-user').value.trim();
+    const password = document.getElementById('login-pass').value;
+    const errEl    = document.getElementById('login-error');
+    const btn      = document.getElementById('login-btn');
+
+    if (!username || !password) {
+        errEl.textContent = '아이디와 비밀번호를 입력하세요.';
+        errEl.style.display = 'block';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '로그인 중...';
+    errEl.style.display = 'none';
+
+    try {
+        const res  = await fetch('/api/auth/login', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            if (data.token) setToken(data.token);
+            hideLoginOverlay();
+            document.getElementById('logout-btn').style.display = 'inline-flex';
+            startDashboard();
+        } else {
+            errEl.textContent = data.error || '로그인 실패';
+            errEl.style.display = 'block';
+        }
+    } catch (e) {
+        errEl.textContent = '서버에 연결할 수 없습니다.';
+        errEl.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '로그인';
+    }
+}
+
+async function doLogout() {
+    try { await apiFetch('/api/auth/logout', { method: 'POST' }); } catch (_) {}
+    clearToken();
+    document.getElementById('logout-btn').style.display = 'none';
+    showLoginOverlay();
+}
+
+/** 페이지 초기화: 인증 상태 확인 후 대시보드 또는 로그인 표시 */
+async function initAuth() {
+    try {
+        const token = getToken();
+        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+        const data = await fetch('/api/auth/status', { headers }).then(r => r.json());
+
+        if (!data.enabled) {
+            // 인증 비활성화: 로그아웃 버튼 숨기고 바로 시작
+            hideLoginOverlay();
+            startDashboard();
+        } else if (data.authenticated) {
+            // 유효한 세션 존재
+            hideLoginOverlay();
+            document.getElementById('logout-btn').style.display = 'inline-flex';
+            startDashboard();
+        } else {
+            showLoginOverlay();
+        }
+    } catch (e) {
+        showLoginOverlay();
+    }
+}
+
+function startDashboard() {
+    fetchStats();
+    fetchConsole();
+    loadFiles('');
+    fetchPlugins();
+    setInterval(fetchStats,   3000);
+    setInterval(fetchConsole, 1500);
+    setInterval(() => loadFiles(), 10000);
+    setInterval(fetchPlugins,  30000);
+}
+
 // ── 상태 ──────────────────────────────────────────────────────────────────
 let filePath = '';
 let consolePaused = false;
@@ -38,7 +156,7 @@ function tpsClass(v) {
 // ── /api/stats 갱신 ───────────────────────────────────────────────────────
 async function fetchStats() {
     try {
-        const d = await fetch('/api/stats').then(r => r.json());
+        const d = await apiFetch('/api/stats').then(r => r.json());
 
         document.getElementById('uptime-label').textContent = '⏱ ' + fmtUptime(d.uptime);
         document.getElementById('version-label').textContent = d.version || '';
@@ -143,7 +261,7 @@ async function showPlayerInfo(name) {
     document.getElementById('info-modal').style.display = 'flex';
 
     try {
-        const p = await fetch('/api/player/info?name=' + encodeURIComponent(name)).then(r => r.json());
+        const p = await apiFetch('/api/player/info?name=' + encodeURIComponent(name)).then(r => r.json());
         if (p.error) {
             document.getElementById('info-modal-body').innerHTML = `<p class="empty">${esc(p.error)}</p>`;
             return;
@@ -204,7 +322,7 @@ async function confirmPlayerAction() {
     closeActionModal();
 
     try {
-        await fetch('/api/player/' + type, {
+        await apiFetch('/api/player/' + type, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: player, reason })
@@ -223,7 +341,7 @@ document.getElementById('action-reason').addEventListener('keydown', e => {
 async function fetchConsole() {
     if (consolePaused) return;
     try {
-        const lines = await fetch('/api/console').then(r => r.json());
+        const lines = await apiFetch('/api/console').then(r => r.json());
         const el = document.getElementById('console-output');
         const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
 
@@ -250,7 +368,7 @@ async function sendCommand() {
     const cmd = input.value.trim();
     if (!cmd) return;
     try {
-        await fetch('/api/command', {
+        await apiFetch('/api/command', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ command: cmd })
@@ -265,13 +383,13 @@ async function sendCommand() {
 async function serverAction(action) {
     const label = action === 'shutdown' ? '서버를 종료' : '서버를 재시작';
     if (!confirm(`정말 ${label}하시겠습니까?`)) return;
-    await fetch('/api/' + action, { method: 'POST' });
+    await apiFetch('/api/' + action, { method: 'POST' });
 }
 
 // ── /api/plugins 플러그인 목록 ─────────────────────────────────────────────
 async function fetchPlugins() {
     try {
-        const plugins = await fetch('/api/plugins').then(r => r.json());
+        const plugins = await apiFetch('/api/plugins').then(r => r.json());
         document.getElementById('plugin-count').textContent = plugins.length;
 
         const el = document.getElementById('plugin-list');
@@ -315,7 +433,7 @@ async function loadFiles(path) {
 
     try {
         const url = '/api/files' + (filePath ? '?path=' + encodeURIComponent(filePath) : '');
-        const data = await fetch(url).then(r => r.json());
+        const data = await apiFetch(url).then(r => r.json());
         const el = document.getElementById('file-list');
 
         if (!data.items || data.items.length === 0) {
@@ -361,13 +479,5 @@ function fileIcon(name) {
     return map[ext] ?? '📄';
 }
 
-// ── 초기 로드 & 폴링 루프 ─────────────────────────────────────────────────
-fetchStats();
-fetchConsole();
-loadFiles('');
-fetchPlugins();
-
-setInterval(fetchStats,   3000);
-setInterval(fetchConsole, 1500);
-setInterval(() => loadFiles(), 10000);
-setInterval(fetchPlugins,  30000);
+// ── 초기 진입점 ───────────────────────────────────────────────────────────
+initAuth();

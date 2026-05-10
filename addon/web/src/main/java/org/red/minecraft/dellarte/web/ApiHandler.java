@@ -19,17 +19,29 @@ import java.lang.management.ManagementFactory;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ApiHandler implements HttpHandler {
 
     private final CommediaDellarteWebPlugin plugin;
     private final ConsoleCapture consoleCapture;
 
-    private static final long START_TIME = ManagementFactory.getRuntimeMXBean().getStartTime();
+    private static final long START_TIME   = ManagementFactory.getRuntimeMXBean().getStartTime();
+    private static final long SESSION_TTL  = 24 * 60 * 60 * 1000L; // 24시간
+
+    // ── 인증 ─────────────────────────────────────────────────────────────
+    private final boolean authEnabled;
+    private final String  authUsername;
+    private final String  authPassword;
+    /** token → 만료 시각(ms) */
+    private final Map<String, Long> sessions = new ConcurrentHashMap<>();
 
     public ApiHandler(CommediaDellarteWebPlugin plugin, ConsoleCapture consoleCapture) {
         this.plugin = plugin;
         this.consoleCapture = consoleCapture;
+        this.authEnabled  = plugin.getConfig().getBoolean("web.auth.enabled",  false);
+        this.authUsername = plugin.getConfig().getString ("web.auth.username", "admin");
+        this.authPassword = plugin.getConfig().getString ("web.auth.password", "changeme");
     }
 
     @Override
@@ -39,6 +51,13 @@ public class ApiHandler implements HttpHandler {
 
         if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
             exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        // 인증이 필요한 경로인지 판별 (auth 관련 엔드포인트는 항상 통과)
+        boolean isAuthPath = path.startsWith("/api/auth/");
+        if (authEnabled && !isAuthPath && !isAuthenticated(exchange)) {
+            sendJson(exchange, 401, "{\"error\":\"unauthorized\"}");
             return;
         }
 
@@ -53,12 +72,60 @@ public class ApiHandler implements HttpHandler {
             case "/api/player/kick":  handlePlayerKick(exchange);  break;
             case "/api/player/ban":   handlePlayerBan(exchange);   break;
             case "/api/plugins":      handlePlugins(exchange);     break;
+            case "/api/auth/login":   handleAuthLogin(exchange);   break;
+            case "/api/auth/status":  handleAuthStatus(exchange);  break;
+            case "/api/auth/logout":  handleAuthLogout(exchange);  break;
             default:
                 sendJson(exchange, 404, "{\"error\":\"not found\"}");
         }
     }
 
-    // ── /api/stats ─────────────────────────────────────────────────────────
+    // ── /api/auth/login ───────────────────────────────────────────────────
+
+    private void handleAuthLogin(HttpExchange exchange) throws IOException {
+        if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+            sendJson(exchange, 405, "{\"error\":\"POST required\"}"); return;
+        }
+        if (!authEnabled) {
+            sendJson(exchange, 200, "{\"ok\":true,\"token\":\"\"}"); return;
+        }
+
+        String body     = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        String username = extractJsonString(body, "username");
+        String password = extractJsonString(body, "password");
+
+        if (authUsername.equals(username) && authPassword.equals(password)) {
+            String token = UUID.randomUUID().toString().replace("-", "");
+            sessions.put(token, System.currentTimeMillis() + SESSION_TTL);
+            // 만료된 세션 정리 (lazy cleanup)
+            sessions.entrySet().removeIf(e -> System.currentTimeMillis() > e.getValue());
+            sendJson(exchange, 200, "{\"ok\":true,\"token\":\"" + token + "\"}");
+        } else {
+            sendJson(exchange, 401, "{\"ok\":false,\"error\":\"아이디 또는 비밀번호가 올바르지 않습니다.\"}");
+        }
+    }
+
+    // ── /api/auth/status ──────────────────────────────────────────────────
+
+    private void handleAuthStatus(HttpExchange exchange) throws IOException {
+        if (!authEnabled) {
+            sendJson(exchange, 200, "{\"enabled\":false,\"authenticated\":true}"); return;
+        }
+        sendJson(exchange, 200,
+                "{\"enabled\":true,\"authenticated\":" + isAuthenticated(exchange) + "}");
+    }
+
+    // ── /api/auth/logout ──────────────────────────────────────────────────
+
+    private void handleAuthLogout(HttpExchange exchange) throws IOException {
+        String header = exchange.getRequestHeaders().getFirst("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            sessions.remove(header.substring(7));
+        }
+        sendJson(exchange, 200, "{\"ok\":true}");
+    }
+
+    // ── /api/stats ────────────────────────────────────────────────────────
 
     private void handleStats(HttpExchange exchange) throws IOException {
         double tps1s = -1, tps5m = -1, tps15m = -1;
@@ -160,14 +227,12 @@ public class ApiHandler implements HttpHandler {
 
     private void handleCommand(HttpExchange exchange) throws IOException {
         if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-            sendJson(exchange, 405, "{\"error\":\"POST required\"}");
-            return;
+            sendJson(exchange, 405, "{\"error\":\"POST required\"}"); return;
         }
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         String cmd = extractJsonString(body, "command");
         if (cmd == null || cmd.isBlank()) {
-            sendJson(exchange, 400, "{\"error\":\"command required\"}");
-            return;
+            sendJson(exchange, 400, "{\"error\":\"command required\"}"); return;
         }
         final String finalCmd = cmd.trim();
         Bukkit.getScheduler().runTask(plugin, () ->
@@ -188,12 +253,10 @@ public class ApiHandler implements HttpHandler {
         File target = new File(serverRoot, relPath).getCanonicalFile();
 
         if (!target.getPath().startsWith(serverRoot.getCanonicalPath())) {
-            sendJson(exchange, 403, "{\"error\":\"forbidden\"}");
-            return;
+            sendJson(exchange, 403, "{\"error\":\"forbidden\"}"); return;
         }
         if (!target.exists()) {
-            sendJson(exchange, 404, "{\"error\":\"not found\"}");
-            return;
+            sendJson(exchange, 404, "{\"error\":\"not found\"}"); return;
         }
 
         if (target.isDirectory()) {
@@ -215,7 +278,6 @@ public class ApiHandler implements HttpHandler {
             }
             sendJson(exchange, 200, sb.append("]}").toString());
         } else {
-            // 스트리밍 다운로드 (메모리에 전부 올리지 않음)
             long fileSize = target.length();
             exchange.getResponseHeaders().set("Content-Type", "application/octet-stream");
             exchange.getResponseHeaders().set("Content-Disposition",
@@ -261,8 +323,7 @@ public class ApiHandler implements HttpHandler {
 
         Player player = Bukkit.getPlayerExact(name);
         if (player == null) {
-            sendJson(exchange, 404, "{\"error\":\"플레이어를 찾을 수 없습니다.\"}");
-            return;
+            sendJson(exchange, 404, "{\"error\":\"플레이어를 찾을 수 없습니다.\"}"); return;
         }
 
         String ip = (player.getAddress() != null) ? player.getAddress().getHostString() : "unknown";
@@ -281,21 +342,12 @@ public class ApiHandler implements HttpHandler {
                 "\"health\":%.1f,\"maxHealth\":%.1f,\"foodLevel\":%d," +
                 "\"gameMode\":\"%s\",\"level\":%d," +
                 "\"firstPlayed\":%d,\"sessionSeconds\":%d,\"ping\":%d}",
-                esc(player.getName()),
-                player.getUniqueId().toString(),
-                esc(ip),
+                esc(player.getName()), player.getUniqueId().toString(), esc(ip),
                 esc(player.getWorld().getName()),
-                player.getLocation().getX(),
-                player.getLocation().getY(),
-                player.getLocation().getZ(),
-                player.getHealth(),
-                maxHealth,
-                player.getFoodLevel(),
-                esc(player.getGameMode().name()),
-                player.getLevel(),
-                player.getFirstPlayed(),
-                sessionSec,
-                player.getPing());
+                player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(),
+                player.getHealth(), maxHealth, player.getFoodLevel(),
+                esc(player.getGameMode().name()), player.getLevel(),
+                player.getFirstPlayed(), sessionSec, player.getPing());
 
         sendJson(exchange, 200, json);
     }
@@ -306,16 +358,14 @@ public class ApiHandler implements HttpHandler {
         if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
             sendJson(exchange, 405, "{\"error\":\"POST required\"}"); return;
         }
-        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        String body   = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         String name   = extractJsonString(body, "name");
         String reason = extractJsonString(body, "reason");
         if (reason == null || reason.isBlank()) reason = "웹 대시보드에서 추방되었습니다.";
         if (name == null || name.isBlank()) {
             sendJson(exchange, 400, "{\"error\":\"name required\"}"); return;
         }
-
-        final String fName = name;
-        final String fReason = reason;
+        final String fName = name, fReason = reason;
         Bukkit.getScheduler().runTask(plugin, () -> {
             Player p = Bukkit.getPlayerExact(fName);
             if (p != null) p.kickPlayer(fReason);
@@ -329,19 +379,16 @@ public class ApiHandler implements HttpHandler {
         if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
             sendJson(exchange, 405, "{\"error\":\"POST required\"}"); return;
         }
-        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        String body   = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         String name   = extractJsonString(body, "name");
         String reason = extractJsonString(body, "reason");
         if (reason == null || reason.isBlank()) reason = "웹 대시보드에서 밴되었습니다.";
         if (name == null || name.isBlank()) {
             sendJson(exchange, 400, "{\"error\":\"name required\"}"); return;
         }
-
-        final String fName = name;
-        final String fReason = reason;
+        final String fName = name, fReason = reason;
         Bukkit.getScheduler().runTask(plugin, () -> {
-            Bukkit.getBanList(org.bukkit.BanList.Type.NAME)
-                    .addBan(fName, fReason, null, null);
+            Bukkit.getBanList(org.bukkit.BanList.Type.NAME).addBan(fName, fReason, null, null);
             Player p = Bukkit.getPlayerExact(fName);
             if (p != null) p.kickPlayer(fReason);
         });
@@ -358,12 +405,22 @@ public class ApiHandler implements HttpHandler {
             if (!first) sb.append(",");
             sb.append(String.format(
                     "{\"name\":\"%s\",\"version\":\"%s\",\"enabled\":%b}",
-                    esc(pl.getName()),
-                    esc(pl.getDescription().getVersion()),
-                    pl.isEnabled()));
+                    esc(pl.getName()), esc(pl.getDescription().getVersion()), pl.isEnabled()));
             first = false;
         }
         sendJson(exchange, 200, sb.append("]").toString());
+    }
+
+    // ── 인증 유틸 ─────────────────────────────────────────────────────────
+
+    private boolean isAuthenticated(HttpExchange exchange) {
+        String header = exchange.getRequestHeaders().getFirst("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) return false;
+        String token = header.substring(7);
+        Long expiry = sessions.get(token);
+        if (expiry == null) return false;
+        if (System.currentTimeMillis() > expiry) { sessions.remove(token); return false; }
+        return true;
     }
 
     // ── 유틸 ──────────────────────────────────────────────────────────────
@@ -405,7 +462,7 @@ public class ApiHandler implements HttpHandler {
     private void addCorsHeaders(HttpExchange ex) {
         ex.getResponseHeaders().set("Access-Control-Allow-Origin",  "*");
         ex.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        ex.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+        ex.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type, Authorization");
     }
 
     private void sendJson(HttpExchange ex, int code, String body) throws IOException {

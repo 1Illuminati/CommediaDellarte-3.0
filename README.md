@@ -14,16 +14,16 @@
 - [빠른 시작](#빠른-시작)
 - [핵심 API](#핵심-api)
   - [진입점 — CommediaDellarte](#1-진입점--commediadellartejavasingleentry)
-  - [엔티티 래퍼 — A_Player / A_Entity](#2-엔티티-래퍼)
+  - [엔티티 래퍼 — A_Player / A_Entity / A_OfflinePlayer](#2-엔티티-래퍼)
   - [데이터 스토리지 — IDataStroage](#3-데이터-스토리지)
   - [데이터 컨테이너 — A_DataMap / CoolTimeMap](#4-데이터-컨테이너)
-  - [GUI 시스템 — CustomGui / Button](#5-gui-시스템)
+  - [GUI 시스템 — CustomGui / CustomGuiBuilder](#5-gui-시스템)
   - [아이템 빌더 — ItemBuilder](#6-아이템-빌더)
   - [인터랙티브 시스템](#7-인터랙티브-시스템)
   - [월드 및 에리어 시스템](#8-월드-및-에리어-시스템)
   - [타이머 — Timer / BossBarTimer](#9-타이머)
   - [커맨드 — AbstractCommand](#10-커맨드)
-  - [이벤트 — FirstLoadEvent](#11-이벤트--firstloadevent)
+  - [이벤트 — FirstLoadEvent / 플레이어 이벤트](#11-이벤트)
   - [직렬화 — RegisterSerializable](#12-직렬화)
 - [패키지 구조](#패키지-구조)
 - [라이선스](#라이선스)
@@ -95,7 +95,7 @@ depend:
 ```java
 import org.red.minecraft.dellarte.library.CommediaDellarte;
 import org.red.minecraft.dellarte.library.entity.A_Player;
-import org.red.minecraft.dellarte.library.util.CoolTimeMap;
+import org.red.minecraft.dellarte.library.util.map.CoolTimeMap;
 
 @EventHandler
 public void onPlayerInteract(PlayerInteractEvent event) {
@@ -185,6 +185,39 @@ void dropNaturally(ItemStack... items);
 String getUniqueIdStr();                  // UUID → String 편의 메서드
 ```
 
+#### `A_OfflinePlayer`
+
+`org.red.minecraft.dellarte.library.user.A_OfflinePlayer` — `A_DataHolder` 구현체
+
+UUID 기반으로 캐싱되는 오프라인 플레이어 래퍼입니다. 데이터맵·쿨타임을 포함합니다.
+
+```java
+A_OfflinePlayer aOffline = CommediaDellarte.getAOfflinePlayer(offlinePlayer);
+
+boolean online = aOffline.isOnline();
+String name    = aOffline.getName();          // @Nullable
+UUID uuid      = aOffline.getUniqueId();
+String uuidStr = aOffline.getUniqueIdStr();
+
+// 온라인이면 A_Player 반환, 오프라인이면 null
+@Nullable A_Player aPlayer = aOffline.getAPlayer();
+@Nullable Player player    = aOffline.getPlayer();
+
+// 통계
+long firstPlayed = aOffline.getFirstPlayed();
+long lastPlayed  = aOffline.getLastPlayed();
+int kills = aOffline.getStatistic(Statistic.PLAYER_KILLS);
+
+// A_DataHolder — 데이터맵·쿨타임
+A_DataMap data = aOffline.getDataMap(plugin);
+CoolTimeMap ct = aOffline.getCoolTime(plugin);
+
+// 두상 아이템
+ItemStack skull = aOffline.getPlayerSkull();
+```
+
+---
+
 #### `A_Player` 추가 메서드
 
 ```java
@@ -224,7 +257,7 @@ BlockState lastPlaceBlock();
 
 ### 3. 데이터 스토리지
 
-`org.red.minecraft.dellarte.library.data.IDataStorage`
+`org.red.minecraft.dellarte.library.data.IDataAdapter`
 
 `config.yml`의 `data-storage` 섹션에 `plugin:type` 키로 등록된 스토리지입니다.
 기본으로 `plugin:player`, `plugin:entity`, `plugin:world` 타입이 자동 생성됩니다.
@@ -279,7 +312,7 @@ Object value = map.finder("nested.location.x");
 
 #### `CoolTimeMap`
 
-`org.red.minecraft.dellarte.library.util.CoolTimeMap`
+`org.red.minecraft.dellarte.library.util.map.CoolTimeMap`
 
 ```java
 CoolTimeMap coolTime = aPlayer.getCoolTime(plugin);
@@ -334,6 +367,22 @@ CustomGui gui = new CustomGui(54, "제목") {
 aPlayer.openInventory(gui);
 aPlayer.openInventory(gui, true);   // InventoryCloseEvent 무시
 aPlayer.delayOpenInventory(gui);    // 1틱 후 열기
+```
+
+#### `CustomGuiBuilder` — 빌더 패턴
+
+`org.red.minecraft.dellarte.library.inventory.CustomGuiBuilder`
+
+`CustomGui`를 체이닝 방식으로 구성하는 빌더입니다.
+
+```java
+CustomGui gui = new CustomGuiBuilder(54, "§8메뉴")
+    .setAllClickCancel(true)
+    .setItem(0, someItem)
+    .setItem(26, closeItem, event -> event.getWhoClicked().closeInventory())
+    .setItems(borderItem, 0, 8, 45, 53)
+    .setContents(itemArray)
+    .build();
 ```
 
 ---
@@ -431,6 +480,18 @@ itemManager.registerInteractiveObj(mySword);
 mySword.setInteractiveInObj(itemStack);
 boolean has = mySword.isHasInteractive(itemStack);
 mySword.removeInteractive(itemStack);
+```
+
+#### `InteractivePriority` — 실행 우선순위
+
+`org.red.minecraft.dellarte.library.interactive.InteractivePriority`
+
+여러 인터랙티브 오브젝트가 같은 아이템/타일에 등록된 경우 실행 순서를 제어합니다.
+
+```java
+public enum InteractivePriority {
+    LOWEST, LOW, NORMAL, HIGH, HIGHEST
+}
 ```
 
 ---
@@ -548,7 +609,9 @@ public class MyPlayerCommand extends AbstractPlayerCommand {
 
 ---
 
-### 11. 이벤트 — `FirstLoadEvent`
+### 11. 이벤트
+
+#### `FirstLoadEvent`
 
 플러그인이 모두 로드된 후 1틱 뒤에 발행되는 이벤트입니다.
 다른 플러그인 의존성 초기화나 데이터 스토리지 접근은 여기서 수행하는 것이 안전합니다.
@@ -558,6 +621,39 @@ public class MyPlayerCommand extends AbstractPlayerCommand {
 public void onFirstLoad(FirstLoadEvent event) {
     // 이 시점에 데이터 스토리지가 모두 생성되어 있음
     IDataStroage storage = CommediaDellarte.getStorage(myKey);
+}
+```
+
+#### 플레이어 클릭 이벤트
+
+`PlayerInteractEvent` 대신 사용할 수 있는 단순화된 클릭 이벤트입니다. 둘 다 `A_PlayerEvent`를 상속하므로 `getAPlayer()`로 래퍼를 바로 얻을 수 있습니다.
+
+| 이벤트 | 설명 |
+|---|---|
+| `PlayerLeftClickEvent` | 왼쪽 클릭 (공기/블록 모두 포함) |
+| `PlayerRightClickEvent` | 오른쪽 클릭 (공기/블록 모두 포함) |
+
+```java
+@EventHandler
+public void onLeftClick(PlayerLeftClickEvent event) {
+    A_Player aPlayer = event.getAPlayer();
+    PlayerInteractEvent original = event.getEvent();
+}
+```
+
+#### `InteractiveRunEvent`
+
+인터랙티브 Act가 실행되기 직전에 발행되는 취소 가능한 이벤트입니다.
+
+```java
+@EventHandler
+public void onInteractiveRun(InteractiveRunEvent event) {
+    InteractiveObj<?> obj = event.getInteractiveObj();
+    Class<? extends InteractiveAct> act = event.getAct();
+    A_Player player = event.getAPlayer();
+
+    // 특정 조건에서 Act 실행 차단
+    event.setCancelled(true);
 }
 ```
 
@@ -637,6 +733,25 @@ org.red.minecraft.dellarte.library
     ├── Area
     └── InstanceArea
 ```
+
+---
+
+## 애드온 — Web UI
+
+`addon/web` 모듈은 선택적으로 설치할 수 있는 웹 서버 애드온입니다.
+HTTP 포트(기본 8080)를 열고 아래 기능을 REST API + 정적 파일로 제공합니다.
+
+| 엔드포인트 | 설명 |
+|---|---|
+| `GET /api/stats` | 서버 통계 |
+| `GET /api/console` | 콘솔 로그 스트림 |
+| `POST /api/command` | 명령어 실행 |
+| `GET /api/files` | 파일 브라우저 |
+| `GET /api/plugins` | 플러그인 목록 |
+| `POST /api/player/kick` | 플레이어 킥 |
+| `POST /api/player/ban` | 플레이어 밴 |
+| `POST /api/shutdown` | 서버 종료 |
+| `POST /api/restart` | 서버 재시작 |
 
 ---
 

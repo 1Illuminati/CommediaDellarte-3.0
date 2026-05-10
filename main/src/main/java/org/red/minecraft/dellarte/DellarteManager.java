@@ -10,7 +10,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.red.minecraft.dellarte.data.DataStorage;
 import org.red.minecraft.dellarte.data.StorageManager;
 import org.red.minecraft.dellarte.data.serialize.A_RegisterSerializable;
 import org.red.minecraft.dellarte.entity.A_EntityImpl;
@@ -18,7 +17,9 @@ import org.red.minecraft.dellarte.entity.A_LivingEntityImpl;
 import org.red.minecraft.dellarte.entity.A_NPCImpl;
 import org.red.minecraft.dellarte.entity.A_PlayerImpl;
 import org.red.minecraft.dellarte.library.IDellarteManager;
+import org.red.minecraft.dellarte.library.data.AdapterFactory;
 import org.red.minecraft.dellarte.library.data.IDataStorage;
+import org.red.minecraft.dellarte.library.exception.DataStorageNullException;
 import org.red.minecraft.dellarte.library.interactive.InteractiveManager;
 import org.red.minecraft.dellarte.library.util.BossBarTimer;
 import org.red.minecraft.dellarte.library.util.Timer;
@@ -42,13 +43,39 @@ public class DellarteManager implements IDellarteManager {
     private final StorageManager storageManager = new StorageManager();
 
     @Override
+    @Nullable
     public IDataStorage getStorage(NamespacedKey key) {
-        return this.storageManager.getStorage(key);
+        try {
+            return this.storageManager.getStorage(key);
+        } catch (DataStorageNullException e) {
+            return null;
+        }
+    }
+
+    /**
+     * player, entity, world타입을 불러올때만 사용하는 함수
+     * 굳이 델라테 콘피그에 등록하지 않아도 편하게 사용하기 위해서 만들었다
+     * 단 저장은 되지 않는다
+     * 만약 등록되어있을 경우 등록된 스토리지를 반환한다
+     * @param key 불러올 스토리지 키
+     * @return 스토리지
+     */
+    public IDataStorage getDefaultTypeStorage(NamespacedKey key) {
+        try {
+            return getStorage(key);
+        } catch (DataStorageNullException exception) {
+            return this.storageManager.getTempStorage(key);
+        }
     }
 
     @Override
     public boolean containStorage(NamespacedKey key) {
         return this.storageManager.containStorage(key);
+    }
+
+    @Override
+    public void registerAdapterFactory(AdapterFactory factory) {
+        this.storageManager.setFactory(factory);
     }
 
     public StorageManager getStorageManager() {
@@ -167,6 +194,6 @@ public class DellarteManager implements IDellarteManager {
 
     @Override
     public <T> void registerSerializableClass(RegisterSerializable<T> registerSerializable) {
-        DataStorage.regSerializableClass(registerSerializable.getType(), new A_RegisterSerializable<>(registerSerializable));
+        this.storageManager.registerSerializableClass(registerSerializable.getType(), new A_RegisterSerializable<>(registerSerializable));
     }
 }

@@ -2,20 +2,20 @@ package org.red.minecraft.dellarte.compatibility.papi;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.red.minecraft.dellarte.PluginConfig;
 import org.red.minecraft.dellarte.library.CommediaDellarte;
 import org.red.minecraft.dellarte.library.data.IDataStorage;
-import org.red.minecraft.dellarte.library.user.A_OfflinePlayer;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
 
 import java.util.Arrays;
 
-public class A_PapiPlayer extends PlaceholderExpansion {
+public class A_PapiWorld extends PlaceholderExpansion {
     @Override
     public @NotNull String getIdentifier() {
-        return "aplayer";
+        return "aworld";
     }
 
     @Override
@@ -30,21 +30,22 @@ public class A_PapiPlayer extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, @NotNull String identifier) {
-        // %aplayer_pluginname/data/path% → identifier = "pluginname/data/path"
+        // 온라인 상태 체크 (월드 위치는 온라인 플레이어만 가능)
+        if (player == null) return null;
+
+        World world = player.getWorld();
+
         String[] split = identifier.split("/");
         if (split.length < 2) return null;
 
         String pluginName = split[0];
-        // split[0] 이후의 나머지를 "/" 로 재조합해 finder 경로로 사용
         String dataPath = String.join("/", Arrays.copyOfRange(split, 1, split.length));
 
-        IDataStorage storage = CommediaDellarte.getStorage(new NamespacedKey(pluginName, "player"));
+        IDataStorage storage = CommediaDellarte.getStorage(new NamespacedKey(pluginName, "world"));
         if (storage == null) return null;
 
-        A_OfflinePlayer aOfflinePlayer = CommediaDellarte.getAOfflinePlayer(player);
-        A_DataMap map = storage.getDataMap(aOfflinePlayer.getUniqueIdStr());
-        if (map == null) return null;
-
+        // 월드 식별자로 월드 이름 사용
+        A_DataMap map = storage.getDataMap(world.getName());
         Object value = map.finder(dataPath);
         return value != null ? value.toString() : null;
     }

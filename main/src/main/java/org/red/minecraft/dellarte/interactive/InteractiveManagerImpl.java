@@ -5,9 +5,9 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.minecraft.dellarte.library.interactive.*;
-import org.red.minecraft.dellarte.library.util.PairKeyMap;
+import org.red.minecraft.dellarte.library.util.map.PairKeyMap;
 import org.red.minecraft.dellarte.CommediaDellartePlugin;
-import org.red.minecraft.dellarte.exception.InteractiveException;
+import org.red.minecraft.dellarte.library.exception.InteractiveException;
 import org.red.minecraft.dellarte.library.interactive.InteractiveManager;
 
 import java.lang.reflect.InvocationTargetException;
