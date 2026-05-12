@@ -70,4 +70,10 @@ public class Config {
     public Boolean getDataBoolean(String key) {
         return configData.getBoolean(key);
     }
+
+    public void setData(String key, Object data) {
+        if (!configData.containsKey(key)) throw new ConfigException.ConfigDataNotFoundException(key);
+
+        configData.set(key, data);
+    }
 }

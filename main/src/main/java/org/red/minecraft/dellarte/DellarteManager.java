@@ -195,5 +195,6 @@ public class DellarteManager implements IDellarteManager {
     @Override
     public <T> void registerSerializableClass(RegisterSerializable<T> registerSerializable) {
         this.storageManager.registerSerializableClass(registerSerializable.getType(), new A_RegisterSerializable<>(registerSerializable));
+        CommediaDellartePlugin.sendDebugLog(String.format("Registered Serializable Type: %s", registerSerializable.getType().getName()));
     }
 }

@@ -18,6 +18,9 @@ import org.red.minecraft.dellarte.compatibility.papi.A_PapiPlayer;
 import org.red.minecraft.dellarte.compatibility.papi.A_PapiStorage;
 import org.red.minecraft.dellarte.compatibility.papi.A_PapiWorld;
 import org.red.minecraft.dellarte.compatibility.vault.A_Economy;
+import org.red.minecraft.dellarte.data.adapter.FileAdapterFactory;
+import org.red.minecraft.dellarte.data.adapter.MySqlAdapterFactory;
+import org.red.minecraft.dellarte.data.adapter.NoneAdapterFactory;
 import org.red.minecraft.dellarte.event.listener.InteractiveItemListener;
 import org.red.minecraft.dellarte.event.listener.InteractiveTileListener;
 import org.red.minecraft.dellarte.event.listener.InventoryEventListener;
@@ -63,6 +66,8 @@ public class CommediaDellartePlugin extends JavaPlugin {
         CommediaDellarte.setDellarteManager(manager);
         this.setEventListener();
         this.setSoftPluginCompatibility();
+        this.setSerializableClasses();
+        this.setAdapterFactory();
 
         Bukkit.getScheduler().runTaskLater(this, () -> {
             CommediaDellartePlugin.manager.getStorageManager().createDataStorages();
@@ -75,6 +80,12 @@ public class CommediaDellartePlugin extends JavaPlugin {
     public void onDisable() {
         manager.allDataSave();
         getLogger().info("CommediaDellartePlugin disabled");
+    }
+
+    public void setAdapterFactory() {
+        manager.registerAdapterFactory(new FileAdapterFactory());
+        manager.registerAdapterFactory(new MySqlAdapterFactory());
+        manager.registerAdapterFactory(new NoneAdapterFactory());
     }
 
     public void setSerializableClasses() {
@@ -99,6 +110,7 @@ public class CommediaDellartePlugin extends JavaPlugin {
 
         if (this.softPluginCheck("Vault")) {
             getServer().getServicesManager().register(Economy.class, new A_Economy(), this, ServicePriority.Normal);
+            CommediaDellartePlugin.sendLog("Vault Registered");
         }
     }
 

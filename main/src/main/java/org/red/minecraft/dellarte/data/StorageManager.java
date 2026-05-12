@@ -4,9 +4,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.red.library.data.adapter.FileAdapter;
-import org.red.library.data.serialize.*;
+import org.red.library.data.serialize.RegisterSerializable;
+import org.red.library.data.serialize.RegisterSerializableHolder;
 import org.red.minecraft.dellarte.CommediaDellartePlugin;
 import org.red.minecraft.dellarte.data.adapter.*;
 import org.red.minecraft.dellarte.library.data.AdapterFactory;
@@ -15,7 +16,6 @@ import org.red.minecraft.dellarte.library.data.IDataAdapter;
 import org.red.minecraft.dellarte.library.data.IDataStorage;
 import org.red.minecraft.dellarte.library.data.SaveConfig;
 import org.red.minecraft.dellarte.library.exception.NonAdapterException;
-import org.red.minecraft.dellarte.library.util.A_DataMap;
 import org.red.minecraft.dellarte.library.util.PairData;
 import org.red.minecraft.dellarte.library.util.config.Config;
 import org.red.minecraft.dellarte.library.util.config.IConfigSchema;
@@ -76,22 +76,19 @@ public final class StorageManager implements RegisterSerializableHolder {
         ConfigurationSection storageSections = CommediaDellartePlugin.config.getConfigurationSection("data-storage");
 
         storageSections.getKeys(false).forEach(pluginName -> {
+            String lowerPluginName = pluginName.toLowerCase();
             ConfigurationSection pluginSection = storageSections.getConfigurationSection(pluginName);
             pluginSection.getKeys(false).forEach(type -> {
-                NamespacedKey key = new NamespacedKey(pluginName.toLowerCase(), type);
+                NamespacedKey key = new NamespacedKey(lowerPluginName, type);
                 ConfigurationSection storageConfig = pluginSection.getConfigurationSection(type);
 
-                SaveConfig saveConfig = this.createSaveConfig(key, storageConfig);
-                IDataStorage storage = this.createDataStorage(saveConfig);
-
-                this.setStorageAutoSave(storage);
-                this.map.put(key, storage);
+                this.createDataStorage(this.createSaveConfig(key, storageConfig));
             });
 
 
-            createDefaultStorage(pluginName, "player");
-            createDefaultStorage(pluginName, "entity");
-            createDefaultStorage(pluginName, "world");
+            createDefaultStorage(lowerPluginName, "player");
+            createDefaultStorage(lowerPluginName, "entity");
+            createDefaultStorage(lowerPluginName, "world");
         });
     }
 
@@ -100,13 +97,16 @@ public final class StorageManager implements RegisterSerializableHolder {
      * @param config
      * @return
      */
-    public IDataStorage createDataStorage(SaveConfig config) {
+    public void createDataStorage(SaveConfig config) {
         NamespacedKey adapterKey = config.saveType();
         if (!this.factoryManager.contain(adapterKey))
             throw new NonAdapterException(adapterKey);
 
         IDataAdapter adapter = this.factoryManager.createAdapter(adapterKey, config.adapterConfig());
-        return new DataStorage(config, adapter);
+        IDataStorage storage = new DataStorage(config, adapter);
+        this.map.put(config.getKey(), storage);
+        this.setStorageAutoSave(storage);
+        CommediaDellartePlugin.sendDebugLog(String.format("Created DataStorage for %s", config.getKey()));
     }
 
     /**
@@ -116,12 +116,10 @@ public final class StorageManager implements RegisterSerializableHolder {
      * @param type 타입
      */
     private void createDefaultStorage(String pluginName, String type) {
-        NamespacedKey key = new NamespacedKey(pluginName.toLowerCase(), type);
+        NamespacedKey key = new NamespacedKey(pluginName, type);
 
         if (!map.containsKey(key)) {
-            IDataStorage storage = new DataStorage(createSaveConfig(key, null), new A_DataAdapter(new FileAdapter(pluginName + "/" + type)));
-            this.map.put(key, storage);
-            this.setStorageAutoSave(storage);
+            this.createDataStorage(this.createSaveConfig(key, null));
         }
     }
 
@@ -145,8 +143,10 @@ public final class StorageManager implements RegisterSerializableHolder {
      * @return 완성된 saveConfig값
      */
     public SaveConfig createSaveConfig(NamespacedKey nameSpace, @Nullable ConfigurationSection storageConfig) {
-        if (storageConfig == null)
-            return new SaveConfig(nameSpace, true, FileAdapterFactory.KEY, 300, new Config(this.factoryManager.get(FileAdapterFactory.KEY).getConfigSchema(), new A_DataMap()));
+        if (storageConfig == null) {
+            Config config = this.createAdapterConfig(nameSpace, null, this.factoryManager.get(FileAdapterFactory.KEY).getConfigSchema());
+            return new SaveConfig(nameSpace, true, FileAdapterFactory.KEY, 300, config);
+        }
 
         boolean enable = storageConfig.getBoolean("enable", true);
         String saveTypeStr = storageConfig.contains("saveType") ? storageConfig.getString("saveType") : "file";
@@ -167,19 +167,29 @@ public final class StorageManager implements RegisterSerializableHolder {
 
         IConfigSchema schema = this.factoryManager.getFactorySchema(saveType);
         ConfigurationSection adapterSection = storageConfig.getConfigurationSection("config");
-
-        //%type% 같은 특수한 데이터들을 사전 처리
-        for (String key : adapterSection.getKeys(false)) {
-            switch (adapterSection.getString(key)) {
-                case "%type%" -> adapterSection.set(key, nameSpace.getKey());
-                case "%plugin_name%" -> adapterSection.set(key, nameSpace.getNamespace());
-            }
-        }
-
-        // 만약 config가 null로 존재하지 않을 경우 기본 디폴트 설정으로 적용한다
-        Config adapterConfig = adapterSection == null ? new Config(schema) : new Config(schema, adapterSection);
+        Config adapterConfig = createAdapterConfig(nameSpace, adapterSection, schema);
 
         return new SaveConfig(nameSpace, enable, saveType, autoSaveTime, adapterConfig);
+    }
+
+    private @NotNull Config createAdapterConfig(NamespacedKey nameSpace, ConfigurationSection adapterSection, IConfigSchema schema) {
+        Config adapterConfig = adapterSection == null ? new Config(schema) : new Config(schema, adapterSection);
+
+        //%type% 같은 특수한 데이터들을 사전 처리
+        for (PairData<String, Class<?>> key : schema.getField()) {
+            String fieldName = key.dataA();
+
+            Object data = adapterConfig.getData(fieldName);
+
+            if (data instanceof String strData) {
+                strData = strData
+                        .replace("%type%", nameSpace.getKey())
+                        .replace("%plugin_name%", nameSpace.getNamespace());
+
+                adapterConfig.setData(fieldName, strData);
+            }
+        }
+        return adapterConfig;
     }
 
     @Override

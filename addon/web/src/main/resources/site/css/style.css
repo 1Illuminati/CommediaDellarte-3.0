@@ -352,7 +352,7 @@ header {
     inset: 0;
     background: var(--bg);
     z-index: 1000;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
 }
@@ -385,3 +385,311 @@ header {
 .login-card .modal-input { text-align: left; }
 .login-card .btn-primary { padding: .6rem; font-size: .9rem; }
 #logout-btn { display: none; }
+
+/* ── Tab Nav (헤더 내 탭) ── */
+.tab-nav {
+    display: flex;
+    gap: 0;
+    margin-left: 1.2rem;
+    border-left: 1px solid var(--border);
+    padding-left: 1.2rem;
+}
+.tab-nav-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: .82rem;
+    font-weight: 600;
+    font-family: inherit;
+    padding: .3rem .9rem;
+    transition: color .15s, border-color .15s;
+    white-space: nowrap;
+}
+.tab-nav-btn:hover  { color: var(--text); }
+.tab-nav-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+/* ── Storage Layout ── */
+.storage-layout {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+}
+
+.storage-toolbar {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: .7rem 1.2rem;
+}
+.storage-toolbar-title {
+    flex: 1;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+#storage-tree {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+
+/* ── Storage Node (스토리지 단위) ── */
+.snode {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+.snode-header {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    background: var(--surface2);
+    padding: .65rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+.snode-toggle {
+    font-size: .72rem;
+    color: var(--muted);
+    cursor: pointer;
+    width: .9rem;
+    user-select: none;
+    flex-shrink: 0;
+}
+.snode-key {
+    flex: 1;
+    font-size: .88rem;
+    font-weight: 700;
+    font-family: 'Consolas', monospace;
+    color: var(--text);
+}
+.snode-actions { display: flex; gap: .4rem; flex-shrink: 0; }
+
+.snode-body { display: none; padding: .6rem .8rem; }
+.snode-body.open { display: block; }
+
+/* ── Entry Node (데이터 엔트리 단위) ── */
+.enode { margin-bottom: .4rem; }
+.enode-header {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .4rem .6rem;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    background: rgba(0,0,0,.15);
+    transition: background .12s;
+}
+.enode-header:hover { background: rgba(255,255,255,.04); }
+.enode-toggle { font-size: .68rem; color: var(--muted); width: .8rem; flex-shrink: 0; }
+.enode-key {
+    flex: 1;
+    font-size: .78rem;
+    font-weight: 600;
+    font-family: 'Consolas', monospace;
+    color: var(--text);
+    word-break: break-all;
+}
+.enode-body { display: none; padding-left: 1rem; margin-top: .2rem; }
+.enode-body.open { display: block; }
+
+/* ── Field Node (필드 한 줄) ── */
+.fnode {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .28rem .4rem;
+    border-radius: 4px;
+    transition: background .1s;
+    min-height: 26px;
+}
+.fnode:hover { background: rgba(255,255,255,.03); }
+
+/* 중첩 A_DataMap */
+.fnode-nested { flex-direction: column; align-items: stretch; padding: 0; }
+.fnode-nested-header {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .28rem .4rem;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .1s;
+}
+.fnode-nested-header:hover { background: rgba(255,255,255,.04); }
+.fnested-toggle { font-size: .68rem; color: var(--muted); width: .8rem; flex-shrink: 0; }
+.fnested-body { display: none; padding-left: 1rem; }
+.fnested-body.open { display: block; }
+
+/* ── Type Badge ── */
+.tbadge {
+    font-size: .62rem;
+    font-weight: 700;
+    padding: .1rem .38rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-family: 'Consolas', monospace;
+    letter-spacing: .02em;
+}
+.tbadge-int    { background: #0e1f3a; color: #60a5fa; }
+.tbadge-float  { background: #0e1f3a; color: #93c5fd; }
+.tbadge-bool   { background: #0e2a1a; color: #34d399; }
+.tbadge-str    { background: #251f0a; color: #fbbf24; }
+.tbadge-uuid   { background: #1e0e3a; color: #c084fc; }
+.tbadge-datamap{ background: #0e0e2a; color: #818cf8; }
+.tbadge-cs     { background: #0e2020; color: #2dd4bf; }
+.tbadge-null   { background: #1f0f0f; color: var(--muted); }
+.tbadge-other  { background: #1a1010; color: #9a7a7a; }
+
+/* ── Field Key / Value ── */
+.fkey {
+    flex-shrink: 0;
+    min-width: 70px;
+    font-size: .76rem;
+    font-weight: 600;
+    font-family: 'Consolas', monospace;
+    color: var(--text);
+}
+.fval {
+    flex: 1;
+    font-size: .76rem;
+    font-family: 'Consolas', monospace;
+    word-break: break-all;
+    color: var(--muted);
+}
+.fval.editable {
+    color: var(--text);
+    cursor: pointer;
+    border-bottom: 1px dashed #3d1212;
+}
+.fval.editable:hover { color: var(--accent2); border-bottom-color: var(--accent); }
+.fval.readonly  { cursor: default; }
+.fval.error     { color: var(--red); }
+
+.fedit-input {
+    flex: 1;
+    background: #0a0404;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: var(--text);
+    padding: .15rem .4rem;
+    font-size: .76rem;
+    font-family: 'Consolas', monospace;
+    outline: none;
+    min-width: 0;
+}
+
+/* ── Button sizes ── */
+.btn-xs { padding: .2rem .55rem; font-size: .72rem; }
+
+/* ── Storage Load Modal ── */
+.sl-error {
+    background: rgba(196,26,26,.15);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    color: var(--accent2);
+    font-size: .8rem;
+    padding: .45rem .7rem;
+    margin-top: .6rem;
+}
+
+/* ── Toast ── */
+.toast {
+    position: fixed;
+    bottom: 1.4rem;
+    right: 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: .82rem;
+    padding: .55rem 1rem;
+    z-index: 600;
+    box-shadow: 0 4px 24px rgba(0,0,0,.7);
+    pointer-events: none;
+}
+.toast-ok  { border-color: var(--green); color: var(--green); }
+.toast-err { border-color: var(--red);   color: var(--red); }
+
+/* ── Storage Action Buttons (+ and ×) ── */
+.btn-action-field {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; height: 16px;
+    border: none;
+    border-radius: 3px;
+    font-size: .7rem;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity .15s, background .1s;
+    padding: 0;
+}
+.fnode:hover .btn-action-field,
+.fnode-nested-header:hover .btn-action-field,
+.enode-header:hover .btn-action-field { opacity: 1; }
+
+.btn-add-field    { background: rgba(52,211,153,.18); color: var(--green); }
+.btn-add-field:hover { background: rgba(52,211,153,.35); }
+.btn-delete-field { background: rgba(255,107,107,.15); color: var(--red); }
+.btn-delete-field:hover { background: rgba(255,107,107,.32); }
+
+/* ── fnode actions wrapper (right-side buttons in expandable header) ── */
+.fnode-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: .2rem;
+    flex-shrink: 0;
+}
+
+/* ── Clickable type badge ── */
+.tbadge.type-btn { cursor: pointer; }
+.tbadge.type-btn:hover { filter: brightness(1.4); }
+
+/* ── Type select dropdown ── */
+.type-select {
+    background: #0e0808;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: .62rem;
+    font-family: 'Consolas', monospace;
+    padding: .05rem .2rem;
+    cursor: pointer;
+    outline: none;
+    flex-shrink: 0;
+}
+
+/* ── Add row (inline key-input at bottom of container) ── */
+.add-row {
+    border-top: 1px dashed var(--border);
+    margin-top: .15rem;
+    padding-top: .25rem;
+    gap: .35rem;
+    opacity: 1 !important;
+}
+.add-row .btn-action-field { opacity: 1 !important; }
+
+/* ── Misc ── */
+.empty.small { font-size: .78rem; padding: .5rem 0; }

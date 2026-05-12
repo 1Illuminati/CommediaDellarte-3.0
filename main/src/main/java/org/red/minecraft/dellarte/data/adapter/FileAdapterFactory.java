@@ -9,13 +9,14 @@ import org.red.minecraft.dellarte.library.util.PairData;
 import org.red.minecraft.dellarte.library.util.config.A_ConfigSchema;
 import org.red.minecraft.dellarte.library.util.config.Config;
 import org.red.minecraft.dellarte.library.util.config.IConfigSchema;
+import org.red.minecraft.dellarte.util.A_File;
 
 public class FileAdapterFactory implements AdapterFactory {
     public static final NamespacedKey KEY = new NamespacedKey(CommediaDellartePlugin.instance, "file");
     @Override
     public IDataAdapter createAdapter(Config configData) {
         String directory = configData.getDataString("directory");
-        return new A_DataAdapter(new FileAdapter(directory));
+        return new A_DataAdapter(new FileAdapter(new A_File(directory)));
     }
 
     @Override
@@ -26,6 +27,6 @@ public class FileAdapterFactory implements AdapterFactory {
     @Override
     public IConfigSchema getConfigSchema() {
         return new A_ConfigSchema(new PairData[]{new PairData<>("directory", String.class)},
-                new PairData[]{new PairData<>("directory", "%type_name%")});
+                new PairData[]{new PairData<>("directory", "%plugin_name%/%type%")});
     }
 }

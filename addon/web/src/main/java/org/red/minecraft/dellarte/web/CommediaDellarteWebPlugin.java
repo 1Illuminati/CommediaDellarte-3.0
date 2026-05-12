@@ -33,9 +33,9 @@ public class CommediaDellarteWebPlugin extends JavaPlugin implements Listener {
         consoleCapture = new ConsoleCapture();
         consoleCapture.install();
 
-        saveResourceIfAbsent("site/index.html");
-        saveResourceIfAbsent("site/css/style.css");
-        saveResourceIfAbsent("site/js/main.js");
+        saveDefaultSiteResource("site/index.html");
+        saveDefaultSiteResource("site/css/style.css");
+        saveDefaultSiteResource("site/js/main.js");
 
         File siteDir = new File(getDataFolder(), "site");
         int port = getConfig().getInt("web.port", 8080);
@@ -54,9 +54,14 @@ public class CommediaDellarteWebPlugin extends JavaPlugin implements Listener {
             httpServer.createContext("/api/player/kick", api);
             httpServer.createContext("/api/player/ban",  api);
             httpServer.createContext("/api/plugins",      api);
-            httpServer.createContext("/api/auth/login",  api);
-            httpServer.createContext("/api/auth/status", api);
-            httpServer.createContext("/api/auth/logout", api);
+            httpServer.createContext("/api/auth/login",   api);
+            httpServer.createContext("/api/auth/status",  api);
+            httpServer.createContext("/api/auth/logout",  api);
+            httpServer.createContext("/api/storage/load",   api);
+            httpServer.createContext("/api/storage/set",    api);
+            httpServer.createContext("/api/storage/save",   api);
+            httpServer.createContext("/api/storage/add",    api);
+            httpServer.createContext("/api/storage/delete", api);
 
             httpServer.createContext("/", new StaticFileHandler(siteDir, getLogger()));
             httpServer.setExecutor(Executors.newFixedThreadPool(4));
@@ -101,11 +106,10 @@ public class CommediaDellarteWebPlugin extends JavaPlugin implements Listener {
 
     // ── 유틸 ────────────────────────────────────────────────────────────
 
-    private void saveResourceIfAbsent(String resourcePath) {
+    /** 항상 최신 리소스를 덮어씁니다 (플러그인 업데이트 시 정적 파일도 갱신) */
+    private void saveDefaultSiteResource(String resourcePath) {
         File outFile = new File(getDataFolder(), resourcePath);
-        if (!outFile.exists()) {
-            outFile.getParentFile().mkdirs();
-            saveResource(resourcePath, false);
-        }
+        outFile.getParentFile().mkdirs();
+        saveResource(resourcePath, true);
     }
 }
