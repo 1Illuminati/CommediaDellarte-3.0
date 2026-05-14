@@ -1,791 +1,704 @@
-# CommediaDellarte Library — Agent Skill Reference
+# CommediaDellarte Library — Claude Code Skill Reference
 
-이 문서는 **CommediaDellarte** 라이브러리를 코드에서 활용하기 위한 에이전트용 참조 문서입니다.
-
----
-
-## 개요
-
-CommediaDellarte는 **Bukkit/Paper 기반 Minecraft 플러그인 개발을 위한 프레임워크 라이브러리**입니다.
-플레이어·엔티티·월드 래퍼, 데이터 스토리지, GUI, 인터랙티브 오브젝트, 에리어 이벤트, 타이머 등 반복되는 작업을 추상화합니다.
-
-- **library 모듈** — 인터페이스와 공개 API 정의 (컴파일 의존성으로 참조)
-- **main 모듈** — 구현체. CommediaDellarte 플러그인 자체
+이 문서는 CommediaDellarte 라이브러리를 사용하는 Minecraft 플러그인 코드를 작성할 때 Claude Code가 참조하는 에이전트용 문서다.
 
 ---
 
-## 1. 진입점 — `CommediaDellarte` 정적 클래스
+## 패키지 구조
 
-`org.red.minecraft.dellarte.library.CommediaDellarte`
-
-모든 기능에 접근하는 단일 진입점입니다. 내부적으로 `IDellarteManager`에 위임합니다.
-
-```java
-// 플레이어 래퍼 획득
-A_Player aPlayer = CommediaDellarte.getAPlayer(player);
-A_Player aPlayer = CommediaDellarte.getAPlayer(uuid);      // @Nullable
-A_Player aPlayer = CommediaDellarte.getAPlayer(name);      // @Nullable
-A_Player aPlayer = CommediaDellarte.getAPlayer(offlinePlayer); // @Nullable (온라인만 반환)
-
-// 오프라인 플레이어 래퍼 (항상 반환, UUID 기반 캐싱)
-A_OfflinePlayer aOffline = CommediaDellarte.getAOfflinePlayer(offlinePlayer);
-
-// 엔티티 래퍼
-A_Entity aEntity = CommediaDellarte.getAEntity(entity);
-A_LivingEntity aLiving = CommediaDellarte.getALivingEntity(livingEntity);
-
-// 월드 래퍼
-A_World aWorld = CommediaDellarte.getAWorld(world);
-A_World aWorld = CommediaDellarte.getAWorld(worldName);    // @Nullable
-A_World aWorld = CommediaDellarte.getAWorld(worldUUID);    // @Nullable
-
-// 데이터 스토리지
-IDataStroage storage = CommediaDellarte.getStorage(namespacedKey);
-boolean exists = CommediaDellarte.containStorage(namespacedKey);
-
-// 인터랙티브 매니저
-InteractiveManager<ItemStack> manager = CommediaDellarte.getInteractiveManager(ItemStack.class);
-InteractiveManager<TileState> manager = CommediaDellarte.getInteractiveManager(TileState.class);
-
-// 타이머 생성
-Timer timer = CommediaDellarte.createTimer(key, maxTimeTicks, onEndRunnable);
-BossBarTimer bossBarTimer = CommediaDellarte.createBossBarTimer(key, maxTimeTicks, runnable, bossBar);
-
-// 직렬화 클래스 등록 (플러그인 초기화 시 한 번)
-CommediaDellarte.registerSerializableClass(MyClass.class, new MySerializable());
+```
+org.red.minecraft.dellarte.library
+├── CommediaDellarte          (정적 진입점, 모든 기능의 시작점)
+├── IDellarteManager          (CommediaDellarte 백엔드 인터페이스)
+├── command/
+│   ├── AbstractCommand        (CommandExecutor + TabCompleter)
+│   └── AbstractPlayerCommand  (Player에게만 실행)
+├── data/
+│   ├── IDataStorage           (데이터 저장소 인터페이스)
+│   ├── IDataAdapter           (실제 저장 어댑터)
+│   ├── AdapterFactory         (어댑터 팩토리)
+│   └── SaveConfig             (스토리지 설정 record)
+├── data/serializable/
+│   ├── RegisterSerializable<T>
+│   └── RegisterConfigSerializable<T>
+├── entity/
+│   ├── A_Entity               (Entity 래퍼, A_DataHolder 구현)
+│   ├── A_LivingEntity         (LivingEntity 래퍼)
+│   ├── A_Player               (Player 래퍼)
+│   └── A_NPC                  (NPC 래퍼)
+├── event/
+│   ├── FirstLoadEvent         (플러그인 초기화 완료 이벤트)
+│   ├── TimerEndEvent          (타이머 종료 이벤트)
+│   ├── area/block/            (30+개 블록 Area 이벤트)
+│   ├── area/entity/           (70+개 엔티티 Area 이벤트)
+│   ├── area/player/           (50+개 플레이어 Area 이벤트)
+│   └── listener/A_Listener    (이벤트 리스너 베이스 클래스)
+├── interactive/
+│   ├── InteractiveItem        (아이템 상호작용 바인딩)
+│   ├── InteractiveTile        (블록 TileState 상호작용 바인딩)
+│   ├── InteractiveObj<T>      (상호작용 객체 베이스)
+│   ├── InteractiveAct<T>      (액션 인터페이스)
+│   └── InteractiveManager<T>  (매니저)
+├── inventory/
+│   ├── CustomGui              (커스텀 인벤토리 GUI)
+│   ├── CustomGuiBuilder       (빌더 패턴)
+│   └── Button                 (클릭 핸들러 인터페이스)
+├── item/
+│   └── ItemBuilder            (ItemStack 빌더)
+├── user/
+│   └── A_OfflinePlayer        (OfflinePlayer 래퍼)
+├── util/
+│   ├── A_DataHolder           (데이터 보유자 인터페이스)
+│   ├── A_DataMap              (Key→Value 데이터 컨테이너)
+│   ├── Timer                  (틱 기반 타이머)
+│   ├── BossBarTimer           (BossBar 연동 타이머)
+│   └── map/CoolTimeMap        (쿨타임 관리)
+└── world/
+    ├── A_World                (World 래퍼, A_DataHolder 구현)
+    ├── Area                   (영역 인터페이스)
+    └── InstanceArea           (BoundingBox 기반 영역 구현체)
 ```
 
 ---
 
-## 2. 엔티티 시스템
-
-### 2-1. 계층 구조
-
-```
-A_DataHolder
-  └── A_Entity        (Entity 래퍼, 데이터맵·쿨타임 포함)
-  │     └── A_LivingEntity
-  │           └── A_Player     (온라인 플레이어)
-  │                 └── A_NPC  (Citizen NPC 등, hasMetadata("NPC") 체크)
-  └── A_OfflinePlayer (오프라인 포함, UUID 기반 캐싱)
-  └── A_World         (월드 래퍼)
-```
-
-### 2-2. `A_Entity` 주요 메서드
-
-`org.red.minecraft.dellarte.library.entity.A_Entity`
+## CommediaDellarte 정적 API (전체)
 
 ```java
-Entity getEntity();                     // 원본 Bukkit Entity
-A_DataMap getDataMap();                 // 전역 데이터맵
-A_DataMap getDataMap(Plugin plugin);    // 플러그인 범위 데이터맵
-CoolTimeMap getCoolTime();              // 전역 쿨타임맵
-CoolTimeMap getCoolTime(Plugin plugin); // 플러그인 범위 쿨타임맵
-void dropNaturally(ItemStack... items);
-@Nullable LivingEntity getLivingEntity();
-@Nullable A_LivingEntity getALivingEntity();
-String getUniqueIdStr();                // UUID → String 편의 메서드
+// 직렬화 등록
+CommediaDellarte.registerSerializableClass(RegisterSerializable<T>)
+
+// 스토리지
+@Nullable IDataStorage CommediaDellarte.getStorage(NamespacedKey key)
+boolean               CommediaDellarte.containStorage(NamespacedKey key)
+
+// 플레이어
+A_Player              CommediaDellarte.getAPlayer(@NotNull Player player)
+@Nullable A_Player    CommediaDellarte.getAPlayer(UUID uuid)
+@Nullable A_Player    CommediaDellarte.getAPlayer(String name)
+@Nullable A_Player    CommediaDellarte.getAPlayer(@NotNull OfflinePlayer player)
+A_OfflinePlayer       CommediaDellarte.getAOfflinePlayer(@NotNull OfflinePlayer player)
+
+// 엔티티·월드
+A_Entity              CommediaDellarte.getAEntity(@NotNull Entity entity)
+A_LivingEntity        CommediaDellarte.getALivingEntity(@NotNull LivingEntity entity)
+A_World               CommediaDellarte.getAWorld(@NotNull World world)
+@Nullable A_World     CommediaDellarte.getAWorld(String worldName)
+@Nullable A_World     CommediaDellarte.getAWorld(UUID worldUUID)
+
+// 상호작용 매니저
+<T> InteractiveManager<T>  CommediaDellarte.getInteractiveManager(@NotNull Class<T> managerType)
+<T> boolean                CommediaDellarte.setInteractiveManager(@NotNull Class<T> clazz, @NotNull InteractiveManager<T> manager)
+
+// 타이머
+Timer        CommediaDellarte.createTimer(@NotNull NamespacedKey key, int maxTime, @Nullable Runnable runnable)
+BossBarTimer CommediaDellarte.createBossBarTimer(NamespacedKey key, int maxTime, @Nullable Runnable runnable, BossBar... bossBars)
 ```
 
-### 2-3. `A_OfflinePlayer` 주요 메서드
+---
 
-`org.red.minecraft.dellarte.library.user.A_OfflinePlayer` — `A_DataHolder` 구현
+## A_DataMap 전체 API
 
 ```java
-A_OfflinePlayer aOffline = CommediaDellarte.getAOfflinePlayer(offlinePlayer);
+// 생성
+new A_DataMap()
+new A_DataMap(Map<String, Object> map)
 
-boolean online  = aOffline.isOnline();
-String name     = aOffline.getName();       // @Nullable
-UUID uuid       = aOffline.getUniqueId();
+// 읽기 — 없으면 defaultValue를 저장한 뒤 반환
+int          getInt(String key)                              // 기본값 0
+int          getInt(String key, int nullValue)
+double       getDouble(String key)                           // 기본값 0.0
+double       getDouble(String key, double nullValue)
+String       getString(String key)                           // 기본값 ""
+String       getString(String key, String nullValue)
+boolean      getBoolean(String key)                          // 기본값 false
+boolean      getBoolean(String key, boolean nullValue)
+Object       get(String key)                                 // 기본값 null
+Object       get(String key, Object nullValue)
+<T> T        getClass(String key, Class<T> clazz)
+<T> T        getClass(String key, Class<T> clazz, Object nullValue)
+<T> List<T>  getList(String key)
+<T> List<T>  getList(String key, List<T> nullValue)
+UUID         getUUID(String key)
+UUID         getUUID(String key, UUID nullValue)
+ItemStack    getItemStack(String key)
+ItemStack    getItemStack(String key, ItemStack nullValue)
+Location     getLocation(String key)
+Location     getLocation(String key, Location nullValue)
+Vector       getVector(String key)
+Vector       getVector(String key, Vector nullValue)
+BoundingBox  getBoundingBox(String key)
+BoundingBox  getBoundingBox(String key, BoundingBox nullValue)
+CoolTimeMap  getCoolTimeMap(String key)
+CoolTimeMap  getCoolTimeMap(String key, CoolTimeMap nullValue)
+A_DataMap    getDataMap(String key)
+A_DataMap    getDataMap(String key, A_DataMap nullValue)
+@Nullable Object finder(String path)                         // "/" 구분 중첩 경로
 
-@Nullable A_Player aPlayer = aOffline.getAPlayer();  // 온라인이면 반환
-@Nullable Player player    = aOffline.getPlayer();
+// 쓰기
+void      put(String key, Object value)
+A_DataMap set(String key, Object value)   // 체이닝 가능
+void      addInt(String key, int value)
+void      addDouble(String key, double value)
 
-long first = aOffline.getFirstPlayed();
-long last  = aOffline.getLastPlayed();
-int kills  = aOffline.getStatistic(Statistic.PLAYER_KILLS);
+// 상태
+boolean              containsKey(String key)
+Set<String>          keySet()
+Collection<Object>   values()
+Set<Map.Entry<...>>  entrySet()
+Map<String, Object>  getMap()
 
-// A_DataHolder 상속 — 데이터맵·쿨타임 포함
-A_DataMap data  = aOffline.getDataMap(plugin);
-CoolTimeMap ct  = aOffline.getCoolTime(plugin);
-ItemStack skull = aOffline.getPlayerSkull();
+// 관리
+void remove(String key)
+void clear()
+void copy(A_DataMap dataMap)
+void copy(Map<String, Object> map)
 ```
 
-### 2-4. `A_Player` 주요 추가 메서드
+키에 `.`(점) 사용 불가. `finder()`는 `/` 구분자 사용.
 
-`org.red.minecraft.dellarte.library.entity.A_Player`
+---
+
+## IDataStorage API
 
 ```java
-// 플레이어 비교
-boolean comparePlayer(Player player);
-boolean comparePlayer(UUID uuid);
-boolean comparePlayer(String name);
+A_DataMap getDataMap(String key)       // 없으면 새 빈 맵 생성
+boolean   loadedData(String key)       // 메모리에 로드 여부
+boolean   containData(String key)      // 저장된 데이터 존재 여부
+void      saveData(String key)
+void      loadData(String key)
+void      deleteData(String key)
+void      saveAll()
+void      loadAll()
+SaveConfig config()
+```
 
-// 인벤토리 (이벤트 무시 옵션 포함)
-void delayOpenInventory(Inventory inv);
-void delayOpenInventory(CustomGui gui);
-void delayOpenInventory(Inventory inv, boolean ignoreInvCloseEvent);
-InventoryView openInventory(CustomGui gui);
-InventoryView openInventory(CustomGui gui, boolean ignoreEvent);
+---
 
-// 커스텀 Runnable 관리 (반복 태스크)
-void addPlayerRunnable(NamespacedKey key, Runnable runnable, int delay);
-void removePlayerRunnable(NamespacedKey key);
-boolean hasPlayerRunnable(NamespacedKey key);
+## A_Player API (주요)
 
-// 채팅 이벤트 훅
-void setPlayerChatRunnable(PlayerChatRunnable runnable, NamespacedKey key);
-void setPlayerChatRunnable(PlayerChatRunnable runnable, NamespacedKey key, boolean sync);
-// PlayerChatRunnable: void run(AsyncPlayerChatEvent event)
+```java
+// 비교
+boolean comparePlayer(String name)
+boolean comparePlayer(UUID uuid)
+boolean comparePlayer(Player player)
+boolean comparePlayer(OfflinePlayer player)
+boolean comparePlayer(A_Player player)
+boolean comparePlayer(A_OfflinePlayer player)
 
-// 플레이어 상태 플래그
-boolean getPlayerStatus(PlayerStatus status);
-void setPlayerStatus(PlayerStatus status, boolean bool);
-void switchPlayerStatus(PlayerStatus status);
+// 데이터 (A_DataHolder)
+A_DataMap getDataMap(Plugin plugin)
+void      saveData()
+void      loadData()
+
+// 인벤토리
+InventoryView openInventory(@NotNull CustomGui var1)
+InventoryView openInventory(@NotNull CustomGui var1, boolean ignoreEvent)
+InventoryView openInventory(@NotNull Inventory var1)
+InventoryView openInventory(@NotNull Inventory var1, boolean ignoreEvent)
+void          closeInventory()
+void          closeInventory(boolean ignoreInventoryEvent)
+void          delayOpenInventory(Inventory inv)
+void          delayOpenInventory(Inventory inv, int delay)
+void          delayOpenInventory(CustomGui inv)
+void          delayOpenInventory(CustomGui inv, int delay)
+void          delayOpenInventory(Inventory inv, boolean ignoreInvCloseEvent)
+void          delayOpenInventory(CustomGui inv, boolean ignoreInvCloseEvent)
+void          delayOpenInventory(CustomGui inv, int delay, boolean ignoreInvCloseEvent)
+
+// 아이템
+HashMap<Integer, ItemStack> addItem(ItemStack... itemStacks)
+void addItemNature(ItemStack... itemStacks)   // 넘치면 바닥에 드롭
+void addItemNature(ItemStack itemStack, int amount)
+
+// 스킨
+void    setSkin(String skin, String signature)
+void    setSkin(OfflinePlayer player)
+void    resetSkin()
+boolean isChangedSkin()
+
+// 플레이어 상태
+boolean getPlayerStatus(A_Player.PlayerStatus status)
+void    setPlayerStatus(A_Player.PlayerStatus status, boolean bool)
+void    switchPlayerStatus(A_Player.PlayerStatus status)
 // PlayerStatus enum: IgnoreInvClose, ChatEvent
 
-// 스킨 변경
-void setSkin(String skin, String signature);
-void setSkin(OfflinePlayer player);
-void resetSkin();
-boolean isChangedSkin();
+// 예약 Runnable
+void    addPlayerRunnable(NamespacedKey key, Runnable runnable, int delay)
+void    removePlayerRunnable(NamespacedKey key)
+boolean hasPlayerRunnable(NamespacedKey key)
 
-// 기타 편의 메서드
-ItemStack getPlayerSkull();
-void addItemNature(ItemStack... items);  // 자연스러운 아이템 추가 (넘치면 드롭)
-boolean isNPC();
-A_OfflinePlayer getAOfflinePlayer();
-BlockState lastBreakBlock();
-BlockState lastPlaceBlock();
+// 채팅 콜백
+void setPlayerChatRunnable(PlayerChatRunnable runnable, NamespacedKey key)
+void setPlayerChatRunnable(PlayerChatRunnable runnable, NamespacedKey key, boolean sync)
+
+// 엔티티 가시성
+void    hideEntity(Entity entity)
+void    showEntity(Entity entity)
+boolean isHiddenEntity(Entity entity)
+
+// 기타
+ItemStack  getPlayerSkull()
+void       sendActionBar(@NotNull String message)
+boolean    isNPC()
+boolean    isOnline()
+boolean    isBanned()
+boolean    isWhitelisted()
+BlockState lastBreakBlock()
+BlockState lastPlaceBlock()
+Player     getEntity()      // 원본 Bukkit Player
 ```
 
 ---
 
-## 3. 데이터 스토리지 — `IDataStroage`
-
-`org.red.minecraft.dellarte.library.data.IDataAdapter`
-
-config.yml의 `data-storage` 섹션에서 플러그인:타입 키로 등록된 스토리지.
-기본으로 `plugin:player`, `plugin:entity`, `plugin:world` 타입이 자동 생성됩니다.
+## A_World API (주요)
 
 ```java
-NamespacedKey key = new NamespacedKey("myplugin", "player");
-IDataStroage storage = CommediaDellarte.getStorage(key);
+// 비교
+boolean compareWorld(@NotNull String world)
+boolean compareWorld(@NotNull UUID worldUUID)
+boolean compareWorld(@NotNull World world)
+boolean compareWorld(@NotNull Location location)
+boolean compareWorld(@NotNull A_World world)
 
-// UUID 문자열을 키로 사용하는 것이 관례
-String id = player.getUniqueId().toString();
+// 데이터 (A_DataHolder)
+A_DataMap getDataMap(Plugin plugin)
 
-A_DataMap data = storage.getDataMap(id);
-CoolTimeMap coolTime = storage.getCoolTimeMap(id);
+// 엔티티
+List<Entity>       getEntities()
+List<LivingEntity> getLivingEntities()
+List<Player>       getPlayers()
+<T extends Entity> Collection<T> getEntitiesByClass(@NotNull Class<T> var1)
 
-boolean isLoaded = storage.loadedData(id);  // 메모리에 올라와 있는지
-boolean hasSaved = storage.containData(id); // 저장된 데이터가 있는지
+// 영역
+boolean     putArea(Plugin plugin, Area area)
+boolean     containArea(Plugin plugin, Area area)
+boolean     removeArea(Plugin plugin, Area area)
+List<Area>  getAllArea(Plugin plugin)
+List<Area>  getAreas(Plugin plugin, Location location)
 
-storage.loadData(id);    // 비동기 로드
-storage.saveData(id);    // 비동기 저장
-storage.deleteData(id);  // 삭제
-storage.saveAll();       // 전체 저장
-storage.loadAll();       // 전체 로드
+// 원본
+World getWorld()
+String getName()
+UUID  getUID()
 ```
 
 ---
 
-## 4. 데이터 컨테이너 — `A_DataMap` / `CoolTimeMap`
-
-### 4-1. `A_DataMap`
-
-`org.red.minecraft.dellarte.library.util.A_DataMap`
-`DataMap`의 Minecraft 확장. 체이닝 API 지원.
+## InstanceArea API
 
 ```java
-A_DataMap map = entity.getDataMap();
+// 생성자
+new InstanceArea(String name, Plugin plugin, World world, Vector start, Vector end)
 
-// 읽기
-String name = map.getString("key");
-int count = map.getInt("count");
-double val = map.getDouble("val");
-boolean flag = map.getBoolean("flag");
-ItemStack item = map.getItemStack("item");
-Location loc = map.getLocation("loc");
-Vector vec = map.getVector("vec");
-BoundingBox box = map.getBoundingBox("box");
-A_DataMap sub = map.getDataMap("nested");
+// 포함 여부
+boolean contain(Vector vec)
+boolean contain(Vector start, Vector end)
+boolean contain(Location vec)
+boolean contain(Location start, Location end)
+boolean contain(Area area)
+boolean contain(BoundingBox boundingBox)
 
-// 쓰기 (체이닝 가능)
-map.set("key", value);
+// 겹침 여부
+boolean overlap(Vector start, Vector end)
+boolean overlap(Location start, Location end)
+boolean overlap(Area area)
+boolean overlap(BoundingBox boundingBox)
 
-// 점 표기법으로 중첩 값 탐색
-Object value = map.finder("nested.location.x");
+// 엔티티
+@NotNull List<Entity>       getEntities()
+@NotNull List<LivingEntity> getLivingEntities()
 
-// DataMap → A_DataMap 변환
-A_DataMap converted = A_DataMap.convert(dataMap);
-A_DataMap deserialized = A_DataMap.deserialize(dataMap);
-```
+// 데이터 (월드 DataMap 하위에 "area--name" 키로 저장됨)
+A_DataMap getDataMap()
 
-### 4-2. `CoolTimeMap`
-
-`org.red.minecraft.dellarte.library.util.map.CoolTimeMap`
-
-```java
-CoolTimeMap coolTime = player.getCoolTime();
-
-// 쿨타임 설정 (기본 단위: 초)
-coolTime.setCoolTime("skill", 5.0);
-coolTime.setCoolTime("skill", 3, CoolTimeMap.TimeType.MINUTE);
-
-// 쿨타임 확인 (완료되었으면 true, 남아있으면 false)
-boolean ready = coolTime.checkCoolTime("skill");
-
-// 남은 시간 조회 (초 단위)
-double remaining = coolTime.getLessCoolTime("skill");
-double remaining = coolTime.getLessCoolTime("skill", CoolTimeMap.TimeType.MILLISECOND);
-
-// 쿨타임 감소
-coolTime.reduceCoolTime("skill", 1.0);
-
-// 제거
-coolTime.removeCoolTime("skill");
-
-// TimeType: SECOND, MINUTE, HOUR, DAY, WEEK, YEAR, MILLISECOND
+// 기타
+@NotNull World   getWorld()
+@NotNull A_World getAWorld()
+@NotNull NamespacedKey getKey()
+@Nullable BoundingBox  getBoundingBox()
+boolean isEventEnable()   // 항상 true
 ```
 
 ---
 
-## 5. GUI 시스템 — `CustomGui` / `Button` / `CustomGuiBuilder`
-
-`org.red.minecraft.dellarte.library.inventory.CustomGui`
+## CoolTimeMap API
 
 ```java
-// 생성 (size는 9의 배수)
-CustomGui gui = new CustomGui(54, "제목");
-CustomGui gui = new CustomGui(InventoryType.CHEST);
+// 설정
+void setCoolTime(String name, double time)                           // 초 단위
+void setCoolTime(String name, double time, TimeType type)
 
-// 아이템 + 버튼 설정
-Button button = event -> {
-    event.setCancelled(true);
-    // 클릭 처리
-};
-gui.setItem(0, itemStack, button);
-gui.setItems(itemStack, button, 0, 1, 2); // 여러 슬롯
-gui.fillItem(0, 8, itemStack, button);    // 범위 채우기
+// 확인 (완료 시 true + 자동 제거)
+boolean checkCoolTime(String name)
 
-// 클릭 전체 취소 (UI 전용 인벤토리)
-gui.setAllClickCancel(true);
+// 조회
+long   getCoolTime(String name)                                      // 만료 절대 시간 (ms)
+double getLessCoolTime(String name)                                  // 남은 시간 (초)
+double getLessCoolTime(String name, TimeType type)
 
-// 이벤트 훅 오버라이드
-CustomGui gui = new CustomGui(54, "제목") {
-    @Override public void onClick(InventoryClickEvent e) { }
-    @Override public void onClose(InventoryCloseEvent e) { }
-    @Override public void onOpen(InventoryOpenEvent e) { }
-};
+// 수정
+void reduceCoolTime(String name, double reduceSecond)
+void reduceCoolTime(String name, double reduceSecond, TimeType type)
+void removeCoolTime(String name)
+void clear()
 
-// 플레이어에게 열기
-aPlayer.openInventory(gui);
-aPlayer.openInventory(gui, true);        // InventoryCloseEvent 무시
-aPlayer.delayOpenInventory(gui);         // 1틱 후 열기 (다른 인벤토리 닫는 이후)
-aPlayer.delayOpenInventory(gui, 5);      // 5틱 후 열기
-```
-
-### `CustomGuiBuilder` — 체이닝 빌더
-
-`org.red.minecraft.dellarte.library.inventory.CustomGuiBuilder`
-
-```java
-CustomGui gui = new CustomGuiBuilder(54, "§8메뉴")
-    .setAllClickCancel(true)
-    .setItem(0, someItem)
-    .setItem(26, closeItem, event -> event.getWhoClicked().closeInventory())
-    .setItems(borderItem, 0, 8, 45, 53)
-    .setButton(4, event -> { /* 버튼만 교체 */ })
-    .setContents(itemArray)
-    .build();
+// TimeType enum
+MILLISECOND, SECOND, MINUTE, HOUR, DAY, WEEK, YEAR
 ```
 
 ---
 
-## 6. 아이템 빌더 — `ItemBuilder`
-
-`org.red.minecraft.dellarte.library.item.ItemBuilder`
+## InteractiveItem 구현 패턴
 
 ```java
-// 체이닝 빌더
-ItemStack item = new ItemBuilder(Material.DIAMOND_SWORD)
-    .setDisplayName("§6검")
-    .setLore("첫째 줄", "둘째 줄")
-    .setCustomModelData(1001)
-    .setUnbreakable(true)
-    .addEnchant(Enchantment.DAMAGE_ALL, 5, true)
-    .addAttribute(Attribute.GENERIC_ATTACK_DAMAGE, 10, AttributeModifier.Operation.ADD_NUMBER)
-    .addAttribute(Attribute.GENERIC_ATTACK_DAMAGE, 10, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND)
-    .addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
-    .setPersistentDataContainer(key, PersistentDataType.STRING, "value")
-    .build();
-
-// 정적 팩토리
-ItemStack item = ItemBuilder.createItem("이름", Material.STONE);
-ItemStack item = ItemBuilder.createItem("이름", Material.STONE, "로어");
-ItemStack item = ItemBuilder.createItem("이름", Material.STONE, List.of("l1","l2"));
-ItemStack item = ItemBuilder.createItem("이름", Material.STONE, "로어", 1001);
-ItemStack item = ItemBuilder.createItem("이름", Material.STONE, "로어", 1001, 5);
-ItemStack air  = ItemBuilder.air();
-
-// 두상 아이템
-ItemStack skull = ItemBuilder.getSkull(offlinePlayer);
-ItemStack skull = ItemBuilder.getSkullByUrl("https://textures.minecraft.net/...");
-```
-
----
-
-## 7. 인터랙티브 시스템
-
-아이템이나 타일(블록 TileState)에 동작(Act)을 바인딩하는 시스템입니다.
-
-### 7-1. `InteractiveItem` 구현
-
-`org.red.minecraft.dellarte.library.interactive.InteractiveItem`
-
-```java
-public class MySword implements InteractiveItem {
+public class MyItem implements InteractiveItem {
+    private final Plugin plugin;
+    public MyItem(Plugin plugin) { this.plugin = plugin; }
 
     @Override
     public NamespacedKey getKey() {
-        return new NamespacedKey(plugin, "my_sword");
+        return new NamespacedKey(plugin, "unique_key");
     }
 
-    // Act 클래스를 재정의하여 동작 구현
-    public class OnHit implements InteractiveItem.InteractiveItemAct {
-        @Override
-        public void run(ItemStack item, Event event) {
-            EntityDamageByEntityEvent dmg = (EntityDamageByEntityEvent) event;
-            // 처리
-        }
+    // 각 액션별 메서드 — InteractiveManager가 리플렉션으로 호출
+    // 첫 번째 파라미터가 액션 타입, 나머지는 컨텍스트
+    public void run(InteractiveItem.LEFT_CLICK_AIR     act, ItemStack item, A_Player player, PlayerInteractEvent event) { }
+    public void run(InteractiveItem.RIGHT_CLICK_AIR    act, ItemStack item, A_Player player, PlayerInteractEvent event) { }
+    public void run(InteractiveItem.LEFT_CLICK_BLOCK   act, ItemStack item, A_Player player, PlayerInteractEvent event) { }
+    public void run(InteractiveItem.RIGHT_CLICK_BLOCK  act, ItemStack item, A_Player player, PlayerInteractEvent event) { }
+    public void run(InteractiveItem.PHYSICAL           act, ItemStack item, A_Player player, PlayerInteractEvent event) { }
+    public void run(InteractiveItem.BREAK              act, ItemStack item, A_Player player, BlockBreakEvent event)     { }
+    public void run(InteractiveItem.FISH               act, ItemStack item, A_Player player, PlayerFishEvent event)     { }
+    public void run(InteractiveItem.HIT                act, ItemStack item, A_Player player, EntityDamageByEntityEvent event) { }
+    public void run(InteractiveItem.DAMAGED            act, ItemStack item, A_Player player, EntityDamageByEntityEvent event) { }
+    public void run(InteractiveItem.DROP               act, ItemStack item, A_Player player, PlayerDropItemEvent event) { }
+    public void run(InteractiveItem.SWAP_HAND          act, ItemStack item, A_Player player, PlayerSwapHandItemsEvent event) { }
+    public void run(InteractiveItem.DEATH              act, ItemStack item, A_Player player, PlayerDeathEvent event)    { }
+}
+
+// 등록
+CommediaDellarte.getInteractiveManager(ItemStack.class).register(myItem);
+
+// 아이템에 바인딩
+myItem.setInteractiveInObj(itemStack);    // AIR이면 RuntimeException
+
+// 상태 확인·제거
+myItem.isHasInteractive(itemStack);
+myItem.removeInteractive(itemStack);
+```
+
+---
+
+## InteractiveTile 구현 패턴
+
+```java
+public class MyTile implements InteractiveTile {
+    @Override
+    public NamespacedKey getKey() { return new NamespacedKey(plugin, "unique_key"); }
+
+    public void run(InteractiveTile.BREAK             act, TileState tile, A_Player player, BlockBreakEvent event)   { }
+    public void run(InteractiveTile.LEFT_CLICK_BLOCK  act, TileState tile, A_Player player, PlayerInteractEvent event) { }
+    public void run(InteractiveTile.RIGHT_CLICK_BLOCK act, TileState tile, A_Player player, PlayerInteractEvent event) { }
+}
+
+// 등록
+CommediaDellarte.getInteractiveManager(TileState.class).register(myTile);
+
+// 바인딩 (Chest, Furnace 등 TileEntity 블록만 가능)
+TileState tile = (TileState) block.getState();
+myTile.setInteractiveInObj(tile);
+tile.update();  // 필수
+```
+
+---
+
+## CustomGui API
+
+```java
+// 생성자
+new CustomGui(int size)
+new CustomGui(int size, @NotNull String title)
+new CustomGui(@NotNull InventoryType type)
+new CustomGui(@NotNull InventoryType type, @NotNull String title)
+
+// 버튼
+void   setButton(int slot, Button button)
+Button getButton(int slot)        // 없으면 null
+boolean hasButton(int slot)
+void   removeButton(int slot)
+
+// 아이템
+ItemStack setItem(int i, ItemStack itemStack)
+ItemStack setItem(int i, ItemStack itemStack, Button button)
+ItemStack fillItem(int startSlot, int endSlot, ItemStack itemStack)
+ItemStack fillItem(int startSlot, int endSlot, ItemStack itemStack, Button button)
+Map<Integer, ItemStack> setItems(ItemStack itemStack, Integer... slots)
+Map<Integer, ItemStack> setItems(ItemStack itemStack, Button button, Integer... slots)
+ItemStack getItem(int i)
+
+// 설정
+void    setAllClickCancel(boolean allClickCancel)
+boolean getAllClickCancel()
+
+// 이벤트 훅 (오버라이드)
+void onClick(InventoryClickEvent event)
+void onClose(InventoryCloseEvent event)
+void onOpen(InventoryOpenEvent event)
+
+// Inventory 위임
+int             getSize()
+Inventory       getInventory()
+void            clear()
+List<HumanEntity> getViewers()
+```
+
+Button 인터페이스: `void run(InventoryClickEvent event)` — 람다로 구현 가능.
+
+---
+
+## Timer / BossBarTimer API
+
+```java
+// Timer
+void      start()
+void      stop()
+boolean   isRunning()
+void      addTime(int time)
+void      addMaxTime(int maxTime)
+void      setTime(int time)
+void      setMaxTime(int maxTime)
+int       getTime()
+int       getMaxTime()
+NamespacedKey getKey()
+@Nullable Runnable getRunnable()
+
+// BossBarTimer — Timer를 상속하며 BossBar 진행률 연동
+```
+
+---
+
+## ItemBuilder API
+
+```java
+// 생성자
+new ItemBuilder(Material material)
+new ItemBuilder(ItemStack itemStack)
+
+// 메서드 체이닝 (모두 ItemBuilder 반환)
+setDisplayName(String arg0)
+setLore(List<String> arg0)
+setLore(String... lore)
+setCustomModelData(Integer data)
+setUnbreakable(boolean arg0)
+setAmount(int amount)
+setType(Material type)
+setDurability(short durability)
+addEnchantment(Enchantment ench, int level)
+addEnchant(Enchantment arg0, int arg1, boolean arg2)
+addUnsafeEnchantment(Enchantment ench, int level)
+addItemFlags(ItemFlag... arg0)
+addAttribute(Attribute attribute, double amount, AttributeModifier.Operation operation)
+addAttribute(Attribute attribute, double amount, AttributeModifier.Operation operation, EquipmentSlot slot)
+addAttribute(Attribute attribute, AttributeModifier attributeModifier)
+setPersistentDataContainer(NamespacedKey key, PersistentDataType<T,Z> type, Z value)
+removePersistentDataContainer(NamespacedKey key)
+
+// 빌드
+ItemStack build()
+
+// 정적 팩토리
+static ItemStack createItem(String display, Material material)
+static ItemStack createItem(String display, Material material, String lore)
+static ItemStack createItem(String display, Material material, List<String> lore)
+static ItemStack createItem(String display, Material material, String lore, int customModelData)
+static ItemStack createItem(String display, Material material, String lore, int customModelData, int amount)
+static ItemStack createItem(String display, Material material, List<String> lore, int customModelData)
+static ItemStack createItem(String display, Material material, List<String> lore, int customModelData, int amount)
+static ItemStack getSkull(OfflinePlayer player)
+static ItemStack getSkullByUrl(String url)
+static ItemStack air()
+```
+
+---
+
+## RegisterSerializable 구현 패턴
+
+```java
+public class MySerializer implements RegisterSerializable<MyData> {
+    @Override public Class<MyData> getType() { return MyData.class; }
+
+    @Override
+    public A_DataMap serialize(MyData data) {
+        A_DataMap map = new A_DataMap();
+        map.put("hp", data.getHp());
+        map.put("name", data.getName());
+        return map;
+    }
+
+    @Override
+    public MyData deserialize(A_DataMap map) {
+        return new MyData(map.getInt("hp", 100), map.getString("name", ""));
     }
 }
-```
 
-**InteractiveItem.Act 종류:**
-
-| 내부 클래스 | 트리거 이벤트 |
-|---|---|
-| `LEFT_CLICK_AIR` | `PlayerInteractEvent` |
-| `RIGHT_CLICK_AIR` | `PlayerInteractEvent` |
-| `LEFT_CLICK_BLOCK` | `PlayerInteractEvent` |
-| `RIGHT_CLICK_BLOCK` | `PlayerInteractEvent` |
-| `PHYSICAL` | `PlayerInteractEvent` |
-| `BREAK` | `BlockBreakEvent` |
-| `FISH` | `PlayerFishEvent` |
-| `HIT` | `EntityDamageByEntityEvent` |
-| `DAMAGED` | `EntityDamageByEntityEvent` |
-| `DROP` | `PlayerDropItemEvent` |
-| `SWAP_HAND` | `PlayerSwapHandItemsEvent` |
-| `DEATH` | `PlayerDeathEvent` |
-
-### 7-2. `InteractiveTile` 구현
-
-`org.red.minecraft.dellarte.library.interactive.InteractiveTile`
-
-| 내부 클래스 | 트리거 이벤트 |
-|---|---|
-| `BREAK` | `BlockBreakEvent` |
-| `LEFT_CLICK_BLOCK` | `PlayerInteractEvent` |
-| `RIGHT_CLICK_BLOCK` | `PlayerInteractEvent` |
-
-### 7-3. `InteractivePriority` — 우선순위
-
-`org.red.minecraft.dellarte.library.interactive.InteractivePriority`
-
-같은 아이템/타일에 여러 인터랙티브 오브젝트가 등록된 경우 실행 순서를 제어합니다.
-
-```java
-public enum InteractivePriority { LOWEST, LOW, NORMAL, HIGH, HIGHEST }
-```
-
-### 7-4. `InteractiveManager` 사용
-
-```java
-// 매니저 획득 (플러그인 초기화 필요 없음, 이미 main에서 등록됨)
-InteractiveManager<ItemStack> itemManager =
-    CommediaDellarte.getInteractiveManager(ItemStack.class);
-InteractiveManager<TileState> tileManager =
-    CommediaDellarte.getInteractiveManager(TileState.class);
-
-// 인터랙티브 오브젝트 등록
-itemManager.registerInteractiveObj(mySword);
-
-// 아이템에 인터랙티브 마킹 (PersistentData 저장)
-mySword.setInteractiveInObj(itemStack);
-boolean has = mySword.isHasInteractive(itemStack);
-mySword.removeInteractive(itemStack);
-
-// 등록된 오브젝트 조회
-List<InteractiveObj<ItemStack>> objs = itemManager.getInteractiveObj(itemStack);
-```
-
-### 7-5. 커스텀 `InteractiveManager` 등록
-
-```java
-// 새로운 타입의 인터랙티브 매니저 등록 (최초 1회)
-CommediaDellarte.setInteractiveManager(MyType.class, new InteractiveManagerImpl<>(MyType.class));
+// onEnable에서 반드시 호출
+CommediaDellarte.registerSerializableClass(new MySerializer());
 ```
 
 ---
 
-## 8. 월드 및 에리어 시스템
-
-### 8-1. `A_World`
-
-`org.red.minecraft.dellarte.library.world.A_World` — `A_DataHolder` + Bukkit `World` 전체 API 래핑
-
-```java
-A_World aWorld = CommediaDellarte.getAWorld(world);
-
-// 월드 비교
-aWorld.compareWorld(worldName);
-aWorld.compareWorld(location);
-
-// 에리어 관리
-Area area = new InstanceArea("spawn", plugin, world, start, end);
-aWorld.putArea(plugin, area);
-aWorld.removeArea(plugin, area);
-List<Area> areas = aWorld.getAllArea(plugin);
-List<Area> areasAtLoc = aWorld.getAreas(plugin, location);
-```
-
-### 8-2. `InstanceArea`
-
-`org.red.minecraft.dellarte.library.world.InstanceArea`
-
-```java
-// BoundingBox 기반 사각형 영역
-InstanceArea area = new InstanceArea(
-    "my_area",     // 이름 (NamespacedKey key에 사용)
-    plugin,
-    world,
-    new Vector(x1, y1, z1),
-    new Vector(x2, y2, z2)
-);
-
-// 좌표 포함 여부 확인
-area.contain(location);
-area.contain(vector);
-area.overlap(otherArea);
-area.getBoundingBox();
-List<Entity> entities = area.getEntities();
-List<LivingEntity> living = area.getLivingEntities();
-```
-
-### 8-3. 에리어 이벤트
-
-에리어 내에서 발생하는 이벤트를 구독할 수 있습니다.
-패키지: `org.red.minecraft.dellarte.library.event.area.*`
-
-```java
-// 예시: 특정 에리어 내 블록 파괴 이벤트
-@EventHandler
-public void onAreaBlockBreak(AreaBlockBreakEvent event) {
-    Area area = event.getArea();
-    BlockBreakEvent original = event.getEvent();
-}
-
-// 에리어 이벤트는 original Bukkit 이벤트를 래핑하며
-// getArea()로 발생한 에리어, getEvent()로 원본 이벤트를 반환
-```
-
-**지원 에리어 이벤트 종류 (패키지별):**
-
-- `event.area.block.*` — 블록 관련 이벤트 (AreaBlockBreakEvent 등 약 25종)
-- `event.area.player.*` — 플레이어 관련 이벤트 (AreaPlayerMoveEvent 등 약 40종)
-- `event.area.entity.*` — 엔티티 관련 이벤트 (AreaEntityDamageEvent 등 약 50종)
-
----
-
-## 9. 타이머 — `Timer` / `BossBarTimer`
-
-`org.red.minecraft.dellarte.library.util.Timer`
-
-```java
-NamespacedKey key = new NamespacedKey(plugin, "my_timer");
-
-// 타이머 생성 (maxTime: 틱 단위)
-Timer timer = CommediaDellarte.createTimer(key, 200, () -> {
-    // 타이머 종료 시 실행
-});
-
-timer.start();
-timer.stop();
-timer.isRunning();
-timer.getTime();       // 현재 경과 틱
-timer.getMaxTime();    // 최대 틱
-timer.setTime(ticks);
-timer.addTime(ticks);
-timer.setMaxTime(ticks);
-timer.addMaxTime(ticks);
-
-// BossBar 타이머 (진행 바 자동 업데이트)
-BossBar bar = Bukkit.createBossBar("타이머", BarColor.GREEN, BarStyle.SOLID);
-BossBarTimer bossTimer = CommediaDellarte.createBossBarTimer(key, 200, runnable, bar);
-```
-
----
-
-## 10. 커맨드 — `AbstractCommand` / `AbstractPlayerCommand`
-
-`org.red.minecraft.dellarte.library.command.AbstractCommand`
+## AbstractCommand 구현 패턴
 
 ```java
 public class MyCommand extends AbstractCommand {
+    @Override
+    public String getName() { return "mycommand"; }   // plugin.yml command 이름과 일치
 
     @Override
-    public String getName() {
-        return "mycommand";
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, String label, String[] args) {
-        // 처리
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull String label, String[] args) {
+        // 처리 후 true 반환
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, String label, String[] args) {
-        return List.of("option1", "option2");
-        // A_Util.removeStringNotStartWith() 자동 처리됨
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String label, String[] args) {
+        // 반환 목록은 자동으로 현재 입력 기준 필터링됨
+        return List.of("sub1", "sub2");
     }
 }
 
 // 등록
-plugin.getCommand("mycommand").setExecutor(new MyCommand());
-plugin.getCommand("mycommand").setTabCompleter(new MyCommand());
+MyCommand cmd = new MyCommand();
+plugin.getCommand(cmd.getName()).setExecutor(cmd);
+plugin.getCommand(cmd.getName()).setTabCompleter(cmd);
 ```
 
 ---
 
-## 11. 리스너 — `A_Listener`
-
-`org.red.minecraft.dellarte.library.event.listener.A_Listener`
+## A_Listener 사용
 
 ```java
 public class MyListener extends A_Listener {
-    // Bukkit @EventHandler 메서드 정의
+    @EventHandler
+    public void onAreaPlayerJoin(AreaPlayerJoinEvent event) {
+        Area area      = event.getArea();
+        A_Player player = event.getAPlayer();
+    }
 }
 
-// 등록
 new MyListener().register(plugin);
 ```
 
 ---
 
-## 12. 유틸리티 클래스
+## config.yml 데이터 저장 설정 방법
 
-### `PairData<T, V>`
+다른 플러그인이 데이터를 영속 저장하려면 CommediaDellarte의 `config.yml`에 항목을 추가해야 한다.
 
-```java
-PairData<String, Integer> pair = new PairData<>("key", 42);
-pair.dataA();  // "key"
-pair.dataB();  // 42
-pair.equalsDataA("key"); // true
+```yaml
+data-storage:
+  PluginName:           # 사용할 플러그인 이름 (정확한 대소문자)
+    player:             # 타입 이름 — player/world/entity는 A_Player/A_World/A_Entity와 자동 연결
+      autoSaveEnable: true
+      autoSaveTime: 300
+      saveType: "file"  # file | mysql | none
+      config:
+        directory: "%plugin_name%/%type%"
+    custom:
+      saveType: "none"
 ```
 
-### `NamespaceMap<V>`
-
-`NamespacedKey`를 키로 사용하는 Map 구현체.
-
-### `UUIDMap<V>`
-
-`UUID`를 키로 사용하는 Map 구현체.
-
-### `PairKeyMap<K1, K2, V>`
-
-두 개의 키 조합으로 값을 관리하는 Map.
-
-### `A_Util`
+### 저장소 키 (NamespacedKey) 규칙
 
 ```java
-// 탭 완성 필터링 (이미 AbstractCommand에서 자동 처리)
-List<String> filtered = A_Util.removeStringNotStartWith(list, prefix);
+// player/world/entity 타입은 NamespacedKey(pluginName, typeName) 형태
+NamespacedKey playerKey = new NamespacedKey("MyPlugin", "player");
+IDataStorage storage = CommediaDellarte.getStorage(playerKey);
 ```
 
 ---
 
-## 13. 이벤트
+## 자주 쓰는 패턴
 
-### `FirstLoadEvent`
-
-플러그인이 모두 로드된 후(1틱 후) 발행되는 이벤트.
+### 플레이어 데이터 읽고 저장하기
 
 ```java
-@EventHandler
-public void onFirstLoad(FirstLoadEvent event) {
-    // 데이터 스토리지가 생성된 이후 실행됨
-    // 다른 플러그인 의존성 초기화 여기서 수행
+A_Player ap = CommediaDellarte.getAPlayer(player);
+A_DataMap data = ap.getDataMap(plugin);
+
+int level = data.getInt("level", 1);
+data.put("level", level + 1);
+ap.saveData();  // 즉시 저장 (자동저장과 별개)
+```
+
+### 영역 등록 및 이벤트 처리
+
+```java
+// onEnable
+InstanceArea zone = new InstanceArea("combat_zone", plugin, world,
+    new Vector(0, 60, 0), new Vector(100, 120, 100));
+CommediaDellarte.getAWorld(world).putArea(plugin, zone);
+
+// @EventHandler
+public void onAreaDeath(AreaEntityDeathEvent event) {
+    if (event.getArea().getKey().equals(new NamespacedKey(plugin, "combat_zone"))) {
+        // 전투 구역 내 사망 처리
+    }
 }
 ```
 
-### 플레이어 클릭 이벤트
-
-`PlayerInteractEvent`의 편의 래퍼. `A_PlayerEvent`를 상속하므로 `getAPlayer()` 사용 가능.
+### 쿨타임이 있는 스킬 아이템
 
 ```java
-@EventHandler
-public void onLeft(PlayerLeftClickEvent event) {
-    A_Player aPlayer = event.getAPlayer();
-    PlayerInteractEvent original = event.getEvent();
-}
+// InteractiveItem 구현
+public void run(InteractiveItem.RIGHT_CLICK_AIR act, ItemStack item, A_Player player, PlayerInteractEvent event) {
+    A_DataMap data = player.getDataMap(plugin);
+    CoolTimeMap ct = data.getCoolTimeMap("cooltime");
 
-@EventHandler
-public void onRight(PlayerRightClickEvent event) { ... }
-```
+    if (!ct.checkCoolTime("skill")) {
+        player.sendMessage("쿨타임: " + String.format("%.1f", ct.getLessCoolTime("skill")) + "초");
+        return;
+    }
 
-### `InteractiveRunEvent`
-
-인터랙티브 Act 실행 직전 발행. `Cancellable`이므로 차단 가능.
-
-```java
-@EventHandler
-public void onInteractiveRun(InteractiveRunEvent event) {
-    InteractiveObj<?> obj = event.getInteractiveObj();
-    Class<? extends InteractiveAct> act = event.getAct();
-    // 특정 조건에서 Act 차단:
-    event.setCancelled(true);
+    // 스킬 실행
+    player.sendMessage("스킬 발동!");
+    ct.setCoolTime("skill", 10.0);  // 10초 쿨타임
 }
 ```
 
----
-
-## 14. 직렬화 — `RegisterSerializable`
-
-커스텀 클래스를 `A_DataMap`에 저장/로드할 수 있도록 등록합니다.
+### GUI에서 데이터 편집
 
 ```java
-// 기본 등록 클래스 (main 모듈에서 자동 등록):
-// ItemStack, Location, BoundingBox, Vector
-
-// 추가 등록
-CommediaDellarte.registerSerializableClass(MyClass.class, new RegisterSerializable<MyClass>() {
-    @Override
-    public DataMap serialize(MyClass obj) { /* ... */ }
-    @Override
-    public MyClass deserialize(DataMap map) { /* ... */ }
-});
-```
-
----
-
-## 15. 패키지 구조 요약
-
-```
-org.red.minecraft.dellarte.library
-├── CommediaDellarte          ← 진입점 (정적 API)
-├── IDellarteManager          ← 매니저 인터페이스
-├── command/
-│   ├── AbstractCommand       ← 커맨드 베이스
-│   └── AbstractPlayerCommand ← 플레이어 전용 커맨드 베이스
-├── data/
-│   └── IDataStroage          ← 데이터 스토리지 인터페이스
-├── entity/
-│   ├── A_Entity              ← 엔티티 래퍼 (+ A_DataHolder)
-│   ├── A_LivingEntity        ← 살아있는 엔티티 래퍼
-│   ├── A_NPC                 ← NPC 래퍼
-│   └── A_Player              ← 플레이어 래퍼
-├── event/
-│   ├── FirstLoadEvent        ← 초기 로드 완료 이벤트
-│   ├── TimerEndEvent         ← 타이머 종료 이벤트
-│   ├── area/block/*          ← 에리어 블록 이벤트 (~25종)
-│   ├── area/entity/*         ← 에리어 엔티티 이벤트 (~50종)
-│   ├── area/player/*         ← 에리어 플레이어 이벤트 (~40종)
-│   ├── listener/A_Listener   ← 리스너 베이스
-│   └── player/               ← PlayerLeftClickEvent, PlayerRightClickEvent,
-│                                InteractiveRunEvent (A_PlayerEvent 상속)
-├── interactive/
-│   ├── InteractiveManager    ← 인터랙티브 매니저 인터페이스
-│   ├── InteractiveObj        ← 인터랙티브 오브젝트 인터페이스
-│   ├── InteractiveAct        ← 동작 인터페이스 + @ActAnnotation
-│   ├── InteractivePriority   ← 실행 우선순위 enum (LOWEST~HIGHEST)
-│   ├── InteractiveItem       ← ItemStack 인터랙티브
-│   └── InteractiveTile       ← TileState 인터랙티브
-├── inventory/
-│   ├── CustomGui             ← 커스텀 GUI 컨테이너
-│   ├── CustomGuiBuilder      ← CustomGui 체이닝 빌더
-│   └── Button                ← GUI 버튼 (InventoryClickEvent → void)
-├── item/
-│   └── ItemBuilder           ← 아이템 빌더 (체이닝 API)
-├── user/
-│   └── A_OfflinePlayer       ← 오프라인 플레이어 래퍼
-├── util/
-│   ├── A_DataHolder          ← getDataMap() / getCoolTime() 인터페이스
-│   ├── A_DataMap             ← DataMap + Minecraft 타입 확장
-│   ├── A_Util                ← 정적 유틸리티
-│   ├── BossBarTimer          ← BossBar 타이머 인터페이스
-│   ├── CoolTimeMap           ← 쿨타임 관리
-│   ├── NamespaceMap          ← NamespacedKey → Value Map
-│   ├── PairData<T,V>         ← 쌍 데이터 레코드
-│   ├── PairKeyMap            ← 2중 키 Map
-│   ├── Timer                 ← 타이머 인터페이스
-│   └── UUIDMap               ← UUID → Value Map
-└── world/
-    ├── A_World               ← 월드 래퍼 (+ A_DataHolder + Area 관리)
-    ├── Area                  ← 에리어 인터페이스
-    └── InstanceArea          ← BoundingBox 기반 에리어 구현체
-```
-
----
-
-## 16. 일반적인 사용 패턴
-
-### 플레이어 데이터 읽기/쓰기
-
-```java
-// 플러그인의 player 스토리지에서 플레이어 데이터 조작
-NamespacedKey storageKey = new NamespacedKey("myplugin", "player");
-IDataStroage storage = CommediaDellarte.getStorage(storageKey);
-
-String playerId = player.getUniqueId().toString();
-A_DataMap data = storage.getDataMap(playerId);
-
-int level = data.getInt("level");
-data.set("level", level + 1);
-storage.saveData(playerId);
-```
-
-### 플레이어 래퍼로 쿨타임 처리
-
-```java
-A_Player aPlayer = CommediaDellarte.getAPlayer(player);
-CoolTimeMap coolTime = aPlayer.getCoolTime(plugin);
-
-if (!coolTime.checkCoolTime("skill")) {
-    double left = coolTime.getLessCoolTime("skill");
-    player.sendMessage("쿨타임 " + left + "초 남음");
-    return;
-}
-coolTime.setCoolTime("skill", 10.0);
-// 스킬 실행
-```
-
-### 커스텀 GUI 열기
-
-```java
-CustomGui gui = new CustomGui(27, "§8메뉴");
+CustomGui gui = new CustomGui(27, "§6설정");
 gui.setAllClickCancel(true);
 
-ItemStack closeBtn = ItemBuilder.createItem("§c닫기", Material.BARRIER);
-gui.setItem(26, closeBtn, event -> {
-    event.getWhoClicked().closeInventory();
-});
+A_DataMap data = aPlayer.getDataMap(plugin);
+int level = data.getInt("level", 1);
 
-A_Player aPlayer = CommediaDellarte.getAPlayer(player);
+gui.setItem(13,
+    new ItemBuilder(Material.EXPERIENCE_BOTTLE)
+        .setDisplayName("§e레벨: " + level)
+        .setLore("§7클릭하면 레벨 증가")
+        .build(),
+    event -> {
+        data.addInt("level", 1);
+        aPlayer.saveData();
+        aPlayer.closeInventory();
+        aPlayer.sendMessage("레벨 업!");
+    }
+);
+
 aPlayer.openInventory(gui);
 ```
 
-### 채팅 입력 대기
+---
 
-```java
-A_Player aPlayer = CommediaDellarte.getAPlayer(player);
-aPlayer.setPlayerStatus(A_Player.PlayerStatus.ChatEvent, true);
-aPlayer.setPlayerChatRunnable(event -> {
-    String input = event.getMessage();
-    event.setCancelled(true);
-    // 입력 처리
-    aPlayer.setPlayerStatus(A_Player.PlayerStatus.ChatEvent, false);
-}, new NamespacedKey(plugin, "chat_input"));
-```
+## 주의사항
+
+1. **A_DataMap 키에 `.` 불가** — 점이 들어간 키는 `IllegalArgumentException` 발생
+2. **InteractiveTile 바인딩 후 `tile.update()` 필수** — 호출하지 않으면 PersistentData가 반영되지 않음
+3. **InteractiveItem에 AIR 바인딩 불가** — `setInteractiveInObj(air item)`은 RuntimeException
+4. **스토리지 미설정 시 임시 저장소 반환** — `getDataMap(plugin)` 호출은 가능하지만 서버 재시작 시 사라짐
+5. **FirstLoadEvent 이후 스토리지 사용** — `onEnable`에서 즉시 `getStorage()`를 호출하면 null 가능성 있음
+6. **area-event 설정 변경은 서버 재시작 필요** — 런타임 중 변경 불가
+7. **CoolTimeMap은 A_DataMap에 저장하면 자동 직렬화됨** — 별도 RegisterSerializable 불필요

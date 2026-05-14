@@ -108,7 +108,7 @@ public class CommediaDellartePlugin extends JavaPlugin {
             CommediaDellartePlugin.sendLog("PlaceholderAPI Registered");
         }
 
-        if (this.softPluginCheck("Vault")) {
+        if (this.softPluginCheck("Vault") && PluginConfig.VAULT_ENABLE.asBooleanValue()) {
             getServer().getServicesManager().register(Economy.class, new A_Economy(), this, ServicePriority.Normal);
             CommediaDellartePlugin.sendLog("Vault Registered");
         }

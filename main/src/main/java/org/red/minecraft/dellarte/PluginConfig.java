@@ -6,8 +6,9 @@ import java.util.Arrays;
 
 public enum PluginConfig {
     VERSION("config-version"),
-    ENABLE_VAULT("enable-vault"),
-    VAULT_FORMAT("vault-format"),
+    VAULT_ENABLE("vault.enable"),
+    VAULT_FORMAT("vault.format"),
+    VAULT_FRACTIONAL("vault.fractional-digits"),
     DEBUG("debug");
 
     private final String path;
@@ -18,7 +19,7 @@ public enum PluginConfig {
     }
 
     public String asStringValue() {
-        return (String) value;
+        return value.toString();
     }
 
     public int asIntValue() {

@@ -42,6 +42,6 @@ public class MySqlAdapterFactory implements AdapterFactory {
     public IConfigSchema getConfigSchema() {
         return new A_ConfigSchema(new PairData[]{new PairData<>("host", String.class), new PairData<>("port", Integer.class), new PairData<>("database", String.class),
                  new PairData<>("username", String.class), new PairData<>("password", String.class), new PairData<>("table", String.class)},
-                new PairData[]{new PairData<>("port", 3306), new PairData<>("table", "%type%")});
+                new PairData[]{new PairData<>("port", 3306), new PairData<>("table", "%plugin_name%_%type%")});
     }
 }

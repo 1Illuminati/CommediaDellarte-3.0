@@ -5,51 +5,70 @@ debug: false
 # bank 시스템은 지원하지 않는다
 # 주의! 매우 단순하게 구현되어 있음
 vault:
-  enable: false
+  enable: true
   format: "원"
   fractional-digits: -1
 
 
-# 각 플러그인별 추가적인 타입 및 데이터 저장방식을 설정하는 설정
+# 데이터 저장 시스템 커스텀 기능
+# 해당 콘피그 설정을 통하여 저장 시스템을 설정한다
+# 설정된 플러그인이 로드되지 않은 플러그인을 경우 데이터를 로드하지 않고 넘어간다
 #
-# 플러그인 이름:
-#   타입이름:
-# 위 같은 구조로 설정하며 각각 적용가능한 데이터 및 기본값은 다음과 같다
-# enable:true
-# saveType:"file"
-# autoSave:300
-# %type_name%, %plugin_name%
+# 모든 로딩되는 플러그인들은 기본적으로 player, world, entity를 설정하지 않아도
+# 기본값으로 로딩된다 만약 로딩되지 않는 데이터 스토리지를 호출할 경우 exception을 발생시킨다
+# 단 예외적으로 A_Player, A_World, A_Entity에서 getDataMap을 통해 호출 할 경우
+# tempStorage를 만들어 일시적인 데이터맵을 제공한다 이는 저장되지 않는다
 #
-# 데이터를 넣지 않을 경우 기본값으로 진행하며 enable이 false일 경우 타입 데이터를 불러올 수 는 있으나 저장은 하지 않는다
-# 해당 설정에서 만들지 않은 타입들을 불러올 경우 에러가 발생하게 된다.
+# - 가장 기본적인 구조
+# data-storage
+#   플러그인 이름: - 해당 플러그인을 사용할 플러그인의 이름을 적는다
+#     타입이름: - 저장할 타입을 적는 따로제한이 존재하지는 않으나
+#                player, world, entity는 각각 A_Player, A_World, A_Entity와 연결된다
+#       기본공통설정: 값 - 기본 데이터 스토리지들의 공통설정으로 자동저장 및 저장방식을 설정한다
+#                        기본공통설정은 적지 않아도 기본값으로 활성화 된다
+#       autoSaveEnable: true(기본값) - 자동저장 활성화 여부
+#       autoSaveTime: 300(기본값) - 초 단위 이며 설정한 시간 마다 저장한다
+#       saveType: file(기본값) - 기본적으로 file,mysql,none제공
+#                               저장방식마다 하단 config의 값이 바뀐다
+#       config: - 각 저장방식별 추가 설정 저장 방식마다 다르며 확장 및 커스텀이 가능하다
+#                 %plugin_name%, %type%은 각각 플러그인 네임 및 타입 이름으로 변환해준다
+#                 마찬가지로 기본값이 존재하며 file, none의 경우 config를 만들지 않아도 기본값으로 설정 가능하다
+#       ex) file
+#       config:
+#         directory: %plugin_name%/%type%(기본값) - 저장될 파일 위치
+#                    CommediaDellarte폴더 하위에 설정한 디렉토리로 저장된다
+#       ex) mysql
+#       config:
+#         host: - mysql 서버 호스트 ex) 127.0.0.1
+#         port: 3306(기본값) - mysql서버 포트
+#         database: - 접속할 데이터베이스 이름
+#         username: - 계정 이름
+#         password: - 계정 패스워드
+#         table: %plugin_name%_%type%(기본값) - 저장할 테이블 이름
+#       mysql의 경우 기본값을 제공하는 table, port를 제외하고 전원 입력해줘야 한다
 #
-# 설정된 플러그인이 로드 되지 않을 경우 무시하고 진행한다
+#       ex) none
+#       none은 config를 입력하지 않아도 된다 애초에 저장하지 않는다
 #
-# 해당 CommediaDellarte의 설정은 예시이며 수정 가능하다
-#
-# 기본적으로 모든 적용되는 플러그인에는 player,world,entity 기본으로 적용된다. 
-# 각 기본 타입별로 적용되는 기본값이 다르다
-# 만약 해당 타입을 적고 설정을 수정할 경우 해당 설정대로 적용된다.
-data-storage: 
+# 델라테 자체 데이터 스토리지 및 기본 설정값
+data-storage:
+  # 플러그인 이름
+  # 델라테 데이터 스토리지 또한 해당 방식으로 로딩하기에 CommediaDellarte:는 지우면 안된다
+  # 단 밑에 각 타입들은 지워도 문제 없다
   CommediaDellarte:
     # player타입의 기본값
-    player: 
-      enable: true
-      # 데이터 저장방식 설정 file, mysql이 있으며 그 외는 아직 개발중
+    player:
+      # 자동저장 활성화 여부 설정
+      autoSaveEnable: true
+      # 자동저장 시간 설정 (초)
+      autoSaveTime: 300
+      # 데이터 저장방식 설정 file, mysql, none존재
       saveType: "file"
-      # 자동 저장 설정 설정 된 초 마다 저장한다
-      # -1로 할 경우 작동하지 않는다
-      autoSave: 300
-    # world타입의 기본값
+      config:
+        directory: "%plugin_name%/%type%"
+    # 이하 나머지 타입도 동일한 기본값을 가진다
     world:
-      enable: true
-      saveType: "file"
-      autoSave: 300
-    # entity타입의 기본값
     entity:
-      enable: true
-      saveType: "file"
-      autoSave: 300
   
 
 # area-event의 경우 설정 값을 변경하고 싶다면 서버를 껏다 켜야합니다.

@@ -148,7 +148,7 @@ public final class StorageManager implements RegisterSerializableHolder {
             return new SaveConfig(nameSpace, true, FileAdapterFactory.KEY, 300, config);
         }
 
-        boolean enable = storageConfig.getBoolean("enable", true);
+        boolean enable = storageConfig.getBoolean("autoSaveEnable", true);
         String saveTypeStr = storageConfig.contains("saveType") ? storageConfig.getString("saveType") : "file";
         int autoSaveTime = storageConfig.getInt("autoSaveTime", 300);
 
