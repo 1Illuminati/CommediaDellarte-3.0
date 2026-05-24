@@ -10,6 +10,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.red.minecraft.dellarte.compatibility.dataServer.A_DataClient;
 import org.red.minecraft.dellarte.data.StorageManager;
 import org.red.minecraft.dellarte.data.serialize.A_RegisterSerializable;
 import org.red.minecraft.dellarte.entity.A_EntityImpl;
@@ -41,6 +42,7 @@ public class DellarteManager implements IDellarteManager {
     private final HashMap<UUID, A_EntityImpl> entities = new HashMap<>(); 
     private final HashMap<Class<?>, InteractiveManager> interactiveManagerHashMap = new HashMap<>();
     private final StorageManager storageManager = new StorageManager();
+    private A_DataClient client;
 
     @Override
     @Nullable
@@ -196,5 +198,20 @@ public class DellarteManager implements IDellarteManager {
     public <T> void registerSerializableClass(RegisterSerializable<T> registerSerializable) {
         this.storageManager.registerSerializableClass(registerSerializable.getType(), new A_RegisterSerializable<>(registerSerializable));
         CommediaDellartePlugin.sendDebugLog(String.format("Registered Serializable Type: %s", registerSerializable.getType().getName()));
+    }
+
+    public void connectDataServer() {
+        CommediaDellartePlugin.sendLog("DataServer Enabled Start DataServer Connection");
+        try {
+            this.client = new A_DataClient(PluginConfig.DATA_SERVER_HOST.asStringValue(), PluginConfig.DATA_SERVER_PORT.asIntValue());
+            this.client.startClient();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Nullable
+    public A_DataClient getClient() {
+        return client;
     }
 }

@@ -9,6 +9,14 @@ vault:
   format: "원"
   fractional-digits: -1
 
+# 다중 서버 데이터 호환 지원
+# CommediaDellarteDataServer 사용 필요
+# 어댑터 확장은 미구현
+data-server:
+  enable: false
+  host: "localhost"
+  port: 9090
+
 
 # 데이터 저장 시스템 커스텀 기능
 # 해당 콘피그 설정을 통하여 저장 시스템을 설정한다

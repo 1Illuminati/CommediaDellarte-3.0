@@ -9,6 +9,9 @@ public enum PluginConfig {
     VAULT_ENABLE("vault.enable"),
     VAULT_FORMAT("vault.format"),
     VAULT_FRACTIONAL("vault.fractional-digits"),
+    DATA_SERVER_ENABLE("data-server.enable"),
+    DATA_SERVER_HOST("data-server.host"),
+    DATA_SERVER_PORT("data-server.port"),
     DEBUG("debug");
 
     private final String path;

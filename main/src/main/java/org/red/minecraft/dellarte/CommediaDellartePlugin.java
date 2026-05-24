@@ -9,7 +9,6 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.BoundingBox;
@@ -52,6 +51,10 @@ public class CommediaDellartePlugin extends JavaPlugin {
         Bukkit.getLogger().info("[ CommediaDellarte Debug ]: " + message.toString());
     }
 
+    public static void sendErrorLog(Object message) {
+        Bukkit.getLogger().info("[ CommediaDellarte Error ]:" + message.toString());
+    }
+
     @Override
     public void onEnable() {
         instance = this;
@@ -65,7 +68,7 @@ public class CommediaDellartePlugin extends JavaPlugin {
         manager.setInteractiveManager(TileState.class, new InteractiveManagerImpl<>(TileState.class));
         CommediaDellarte.setDellarteManager(manager);
         this.setEventListener();
-        this.setSoftPluginCompatibility();
+        this.setCompatibility();
         this.setSerializableClasses();
         this.setAdapterFactory();
 
@@ -100,7 +103,11 @@ public class CommediaDellartePlugin extends JavaPlugin {
         manager.registerSerializableClass(new RegisterConfigSerializable<>(UUIDMap.class));
     }
 
-    public void setSoftPluginCompatibility() {
+    public void setCompatibility() {
+        if (PluginConfig.DATA_SERVER_ENABLE.asBooleanValue()) {
+            //manager.connectDataServer();
+        }
+
         if (this.softPluginCheck("PlaceholderAPI")) {
             new A_PapiPlayer().register();
             new A_PapiWorld().register();

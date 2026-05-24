@@ -14,7 +14,7 @@ import java.util.List;
 public class A_Economy implements Economy {
     @Override
     public boolean isEnabled() {
-        return PluginConfig.ENABLE_VAULT.asBooleanValue();
+        return PluginConfig.VAULT_ENABLE.asBooleanValue();
     }
 
     @Override
