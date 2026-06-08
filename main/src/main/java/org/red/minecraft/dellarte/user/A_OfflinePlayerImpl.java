@@ -200,7 +200,7 @@ public final class A_OfflinePlayerImpl implements A_OfflinePlayer {
     @Override
     @NotNull
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellartePlugin.manager.getDefaultTypeStorage(StaticValue.PLAYER_DATA_KEY).getDataMap(this.getUniqueIdStr());
+        return CommediaDellartePlugin.manager.getDefaultTypeStorage(StaticValue.getPlayerDataKey(plugin)).getDataMap(this.getUniqueIdStr());
     }
 
     @Override

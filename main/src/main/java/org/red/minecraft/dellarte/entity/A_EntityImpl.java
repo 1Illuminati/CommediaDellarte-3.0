@@ -572,7 +572,7 @@ public class A_EntityImpl implements A_Entity {
     @Override
     @NotNull
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellartePlugin.manager.getDefaultTypeStorage(StaticValue.ENTITY_DATA_KEY).getDataMap(this.getUniqueIdStr());
+        return CommediaDellartePlugin.manager.getDefaultTypeStorage(StaticValue.getEntityDataKey(plugin)).getDataMap(this.getUniqueIdStr());
     }
 
     @Override

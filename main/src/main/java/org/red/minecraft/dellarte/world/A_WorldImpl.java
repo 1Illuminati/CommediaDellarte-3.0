@@ -1319,6 +1319,6 @@ public final class A_WorldImpl implements A_World {
 
     @Override
     public A_DataMap getDataMap(Plugin plugin) {
-        return CommediaDellartePlugin.manager.getDefaultTypeStorage(StaticValue.WORLD_DATA_KEY).getDataMap(this.getName());
+        return CommediaDellartePlugin.manager.getDefaultTypeStorage(StaticValue.getWorldDataKey(plugin)).getDataMap(this.getName());
     }
 }
