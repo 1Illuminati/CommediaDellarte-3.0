@@ -7,6 +7,7 @@ description: Final Dellarte
 
 softdepend:
   - Vault
+  - PlaceholderAPI
 
 commands:
   a_economy:
