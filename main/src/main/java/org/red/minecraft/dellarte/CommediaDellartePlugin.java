@@ -16,14 +16,13 @@ import org.bukkit.util.Vector;
 import org.red.minecraft.dellarte.compatibility.papi.A_PapiPlayer;
 import org.red.minecraft.dellarte.compatibility.papi.A_PapiStorage;
 import org.red.minecraft.dellarte.compatibility.papi.A_PapiWorld;
+import org.red.minecraft.dellarte.command.EconomyCommand;
+import org.red.minecraft.dellarte.command.MoneyCommand;
 import org.red.minecraft.dellarte.compatibility.vault.A_Economy;
 import org.red.minecraft.dellarte.data.adapter.FileAdapterFactory;
 import org.red.minecraft.dellarte.data.adapter.MySqlAdapterFactory;
 import org.red.minecraft.dellarte.data.adapter.NoneAdapterFactory;
-import org.red.minecraft.dellarte.event.listener.InteractiveItemListener;
-import org.red.minecraft.dellarte.event.listener.InteractiveTileListener;
-import org.red.minecraft.dellarte.event.listener.InventoryEventListener;
-import org.red.minecraft.dellarte.event.listener.PlayerChatListener;
+import org.red.minecraft.dellarte.event.listener.*;
 import org.red.minecraft.dellarte.event.listener.area.*;
 import org.red.minecraft.dellarte.interactive.*;
 import org.red.minecraft.dellarte.library.CommediaDellarte;
@@ -37,6 +36,7 @@ import org.red.minecraft.dellarte.library.util.map.CoolTimeMap;
 import org.red.minecraft.dellarte.library.util.map.NamespaceMap;
 import org.red.minecraft.dellarte.library.util.map.PairKeyMap;
 import org.red.minecraft.dellarte.library.util.map.UUIDMap;
+import org.red.minecraft.dellarte.util.Util;
 
 public class CommediaDellartePlugin extends JavaPlugin {
     public static CommediaDellartePlugin instance;
@@ -93,6 +93,7 @@ public class CommediaDellartePlugin extends JavaPlugin {
 
     public void setSerializableClasses() {
         manager.registerSerializableClass(new RegisterConfigSerializable<>(ItemStack.class));
+        Util.registerCraftItemStack();
         manager.registerSerializableClass(new RegisterConfigSerializable<>(Location.class));
         manager.registerSerializableClass(new RegisterConfigSerializable<>(Vector.class));
         manager.registerSerializableClass(new RegisterConfigSerializable<>(BoundingBox.class));
@@ -118,6 +119,8 @@ public class CommediaDellartePlugin extends JavaPlugin {
         if (this.softPluginCheck("Vault") && PluginConfig.VAULT_ENABLE.asBooleanValue()) {
             getServer().getServicesManager().register(Economy.class, new A_Economy(), this, ServicePriority.Normal);
             CommediaDellartePlugin.sendLog("Vault Registered");
+            new EconomyCommand().register(this);
+            new MoneyCommand().register(this);
         }
     }
 
@@ -131,6 +134,7 @@ public class CommediaDellartePlugin extends JavaPlugin {
         new InteractiveTileListener().register();
         new InventoryEventListener().register();
         new PlayerChatListener().register();
+        new PlayerSessionListener().register();
 
         // Register Area Block Event
         new AllBlockEventListener<>(AreaBlockBreakEvent.class, BlockBreakEvent.class);

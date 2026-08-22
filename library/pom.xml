@@ -47,11 +47,5 @@
             <version>20.1.0</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.red.library</groupId>
-            <artifactId>data</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 </project>

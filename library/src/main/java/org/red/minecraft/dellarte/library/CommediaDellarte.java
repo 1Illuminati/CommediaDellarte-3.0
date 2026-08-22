@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.red.minecraft.dellarte.library.data.AdapterFactory;
-import org.red.minecraft.dellarte.library.data.IDataAdapter;
 import org.red.minecraft.dellarte.library.data.IDataStorage;
 import org.red.minecraft.dellarte.library.data.serializable.RegisterSerializable;
 import org.red.minecraft.dellarte.library.entity.A_Entity;

@@ -1,9 +1,7 @@
 package org.red.minecraft.dellarte.library.command;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.red.minecraft.dellarte.library.util.A_Util;
 
@@ -26,4 +24,10 @@ public abstract class AbstractCommand implements CommandExecutor, TabCompleter {
     }
 
     public abstract List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String label, String[] args);
+
+    public void register(JavaPlugin plugin) {
+        PluginCommand command = plugin.getCommand(getName());
+        command.setExecutor(this);
+        command.setTabCompleter(this);
+    }
 }

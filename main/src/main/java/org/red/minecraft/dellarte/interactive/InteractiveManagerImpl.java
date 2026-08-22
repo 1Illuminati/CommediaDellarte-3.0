@@ -123,7 +123,7 @@ public class InteractiveManagerImpl<T> implements InteractiveManager<T> {
             List<Class<? extends InteractiveAct<T>>> acts = getAct(obj, method);
             Class<?>[] classes = method.getParameterTypes();
 
-            if (classes.length <= 2)
+            if (classes.length > 2)
                 continue;
 
             for (Class<? extends InteractiveAct<T>> act : acts) {

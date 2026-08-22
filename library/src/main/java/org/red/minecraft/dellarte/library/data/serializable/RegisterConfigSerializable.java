@@ -28,7 +28,7 @@ public class RegisterConfigSerializable<T extends ConfigurationSerializable> imp
     public T deserialize(A_DataMap var1) {
         T result;
         try {
-            Method method = clazz.getDeclaredMethod("deserialize", Map.class);
+            Method method = clazz.getMethod("deserialize", Map.class);
             result = (T) method.invoke(null, var1.getMap());
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);

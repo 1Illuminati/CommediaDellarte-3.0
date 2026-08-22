@@ -7,7 +7,7 @@ import org.red.library.data.serialize.DataMapConverter;
 import org.red.minecraft.dellarte.CommediaDellartePlugin;
 import org.red.minecraft.dellarte.library.data.IDataAdapter;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
-import org.red.minecraft.dellarte.util.ConvertUtil;
+import org.red.minecraft.dellarte.util.Util;
 
 import java.util.Set;
 
@@ -22,7 +22,7 @@ public class A_DataAdapter implements IDataAdapter {
     @Override
     public A_DataMap loadDataMap(String var1) {
         try {
-            return ConvertUtil.convertDataMap((DataMap) converter.deserializeObject(adapter.loadDataMap(var1)));
+            return Util.convertDataMap((DataMap) converter.deserializeObject(adapter.loadDataMap(var1)));
         } catch (KeyNotFoundException e) {
             throw new org.red.minecraft.dellarte.library.exception.KeyNotFoundException(var1);
         }
@@ -30,7 +30,7 @@ public class A_DataAdapter implements IDataAdapter {
 
     @Override
     public void saveDataMap(String var1, A_DataMap var2) {
-        adapter.saveDataMap(var1, converter.serializeObject(ConvertUtil.convertADataMap(var2)));
+        adapter.saveDataMap(var1, converter.serializeObject(Util.convertADataMap(var2)));
     }
 
     @Override

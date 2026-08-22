@@ -17,6 +17,32 @@ data-server:
   host: "localhost"
   port: 9090
 
+# Redis Command 기능
+# CommediaDellarte를 쓰는 각 서버끼리의 커맨드 통신 지원
+#
+#
+multiServerCommand:
+  id: "Lobby_Ch1"
+  enable: false
+  port: 9091
+  requestCommand:
+    is:
+      command: "is ~"
+      callers: [
+        "ChessBoard_Ch1",
+        "ChessBoard_Ch2",
+        "ChessBoard_Ch3"
+      ]
+      timeout: 3000
+      permission: "undefined_world.is"
+  sendCommand:
+    test:
+      command: "test ~"
+      server: "ChessBoard_Ch1"
+  servers:
+    ChessBoard_Ch1:
+      host: ""
+      port: 9092
 
 # 데이터 저장 시스템 커스텀 기능
 # 해당 콘피그 설정을 통하여 저장 시스템을 설정한다

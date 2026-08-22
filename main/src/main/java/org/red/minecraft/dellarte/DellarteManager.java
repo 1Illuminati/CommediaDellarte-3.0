@@ -92,6 +92,11 @@ public class DellarteManager implements IDellarteManager {
         this.storageManager.allDataLoad();
     }
 
+    public void removeOldPlayerData(UUID uuid) {
+        this.players.remove(uuid);
+        this.offlinePlayers.remove(uuid);
+    }
+
     @Override
     public @Nullable A_PlayerImpl getAPlayer(String name) {
         Player player = Bukkit.getPlayer(name);
@@ -115,6 +120,7 @@ public class DellarteManager implements IDellarteManager {
         }
 
         return players.computeIfAbsent(player.getUniqueId(), uuid -> {
+            offlinePlayers.remove(uuid);
             A_PlayerImpl aPlayer = new A_PlayerImpl(getAOfflinePlayer(player), player);
             CommediaDellartePlugin.sendDebugLog("Created Player name: " + player.getName() + " uuid: " + uuid);
             return aPlayer;

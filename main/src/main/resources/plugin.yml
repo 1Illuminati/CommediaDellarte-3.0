@@ -14,4 +14,7 @@ commands:
     description: Using for Vault
     aliases: [ae]
     permission: a.economy
-    usage: "/<command> <player> add/get/set"
+    usage: "/<command> <get|set|add> <player> [money]"
+  money:
+    description: Check or send your balance
+    usage: "/<command> [send <player> <money>]"

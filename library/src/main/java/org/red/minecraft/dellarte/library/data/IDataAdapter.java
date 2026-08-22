@@ -1,9 +1,6 @@
 package org.red.minecraft.dellarte.library.data;
 
-import org.bukkit.Keyed;
 import org.red.minecraft.dellarte.library.util.A_DataMap;
-import org.red.minecraft.dellarte.library.util.config.Config;
-import org.red.minecraft.dellarte.library.util.config.IConfigSchema;
 
 import java.util.Set;
 

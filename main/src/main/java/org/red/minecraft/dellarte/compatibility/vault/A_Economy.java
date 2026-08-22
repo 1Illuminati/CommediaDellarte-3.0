@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.red.minecraft.dellarte.CommediaDellartePlugin;
 import org.red.minecraft.dellarte.PluginConfig;
 import org.red.minecraft.dellarte.library.CommediaDellarte;
+import org.red.minecraft.dellarte.library.util.A_DataMap;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class A_Economy implements Economy {
 
     @Override
     public int fractionalDigits() {
-        return -1;
+        return PluginConfig.VAULT_FRACTIONAL.asIntValue();
     }
 
     @Override
@@ -113,97 +114,114 @@ public class A_Economy implements Economy {
 
     @Override
     public EconomyResponse withdrawPlayer(String playerName, double amount) {
-        return null;
+        Player player = Bukkit.getPlayer(playerName);
+        if (player == null) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Player not found: " + playerName);
+        return this.withdrawPlayer(player, amount);
     }
 
     @Override
     public EconomyResponse withdrawPlayer(OfflinePlayer player, double amount) {
-        return null;
+        if (amount < 0) return new EconomyResponse(0, this.getBalance(player), EconomyResponse.ResponseType.FAILURE, "Cannot withdraw a negative amount");
+        if (!this.has(player, amount)) return new EconomyResponse(0, this.getBalance(player), EconomyResponse.ResponseType.FAILURE, "Insufficient funds");
+
+        A_DataMap dataMap = CommediaDellarte.getAOfflinePlayer(player).getDataMap(CommediaDellartePlugin.instance);
+        dataMap.addDouble("vault_balance", -amount);
+        return new EconomyResponse(amount, dataMap.getDouble("vault_balance"), EconomyResponse.ResponseType.SUCCESS, null);
     }
 
     @Override
     public EconomyResponse withdrawPlayer(String playerName, String worldName, double amount) {
-        return null;
+        return this.withdrawPlayer(playerName, amount);
     }
 
     @Override
     public EconomyResponse withdrawPlayer(OfflinePlayer player, String worldName, double amount) {
-        return null;
+        return this.withdrawPlayer(player, amount);
     }
 
     @Override
     public EconomyResponse depositPlayer(String playerName, double amount) {
-        return null;
+        Player player = Bukkit.getPlayer(playerName);
+        if (player == null) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Player not found: " + playerName);
+        return this.depositPlayer(player, amount);
     }
 
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer player, double amount) {
-        return null;
+        if (amount < 0) return new EconomyResponse(0, this.getBalance(player), EconomyResponse.ResponseType.FAILURE, "Cannot deposit a negative amount");
+
+        A_DataMap dataMap = CommediaDellarte.getAOfflinePlayer(player).getDataMap(CommediaDellartePlugin.instance);
+        dataMap.addDouble("vault_balance", amount);
+        return new EconomyResponse(amount, dataMap.getDouble("vault_balance"), EconomyResponse.ResponseType.SUCCESS, null);
     }
 
     @Override
     public EconomyResponse depositPlayer(String playerName, String worldName, double amount) {
-        return null;
+        return this.depositPlayer(playerName, amount);
     }
 
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer player, String worldName, double amount) {
-        return null;
+        return this.depositPlayer(player, amount);
+    }
+
+    private EconomyResponse bankNotSupported() {
+        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "This economy does not support bank accounts");
     }
 
     @Override
     public EconomyResponse createBank(String name, String player) {
-        return null;
+        return this.bankNotSupported();
     }
 
     @Override
     public EconomyResponse createBank(String name, OfflinePlayer player) {
-        return null;
+        return this.bankNotSupported();
     }
 
     @Override
     public EconomyResponse deleteBank(String name) {
-        return null;
+        return this.bankNotSupported();
     }
 
     @Override
     public EconomyResponse bankBalance(String name) {
-        return null;
+        return this.bankNotSupported();
     }
 
     @Override
     public EconomyResponse bankHas(String name, double amount) {
-        return null;
+        return this.bankNotSupported();
     }
 
     @Override
     public EconomyResponse bankWithdraw(String name, double amount) {
-        return null;
+        return this.bankNotSupported();
     }
 
     @Override
     public EconomyResponse bankDeposit(String name, double amount) {
-        return null;
+        return this.bankNotSupported();
     }
 
     @Override
     public EconomyResponse isBankOwner(String name, String playerName) {
-        return null;
+        return this.bankNotSupported();
     }
 
     @Override
     public EconomyResponse isBankOwner(String name, OfflinePlayer player) {
-        return null;
+        return this.bankNotSupported();
     }
 
     @Override
     public EconomyResponse isBankMember(String name, String playerName) {
-        return null;
+        return this.bankNotSupported();
     }
 
     @Override
     public EconomyResponse isBankMember(String name, OfflinePlayer player) {
-        return null;
+        return this.bankNotSupported();
     }
 
     @Override
